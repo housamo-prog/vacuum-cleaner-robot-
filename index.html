@@ -1,848 +1,288 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>الدليل الشامل لمكانس الروبوت العالمية | المزايا، المواصفات والصيانة</title>
-  <!-- Google Fonts: Cairo & Tajawal -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <style>
-    :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --accent: #06b6d4;
-      --bg-main: #0f172a;
-      --bg-card: rgba(30, 41, 59, 0.7);
-      --bg-card-hover: rgba(51, 65, 85, 0.8);
-      --border-color: rgba(255, 255, 255, 0.1);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --radius: 16px;
-      --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دليل ومواصفات المكانس الذكية | Robot Vacuums Directory</title>
+    <style>
+        :root {
+            --primary-color: #1e293b;
+            --accent-color: #2563eb;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #334155;
+            --border-color: #e2e8f0;
+        }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Cairo', 'Tajawal', sans-serif;
-    }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
 
-    body {
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      line-height: 1.7;
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
-      background-attachment: fixed;
-      padding-bottom: 60px;
-    }
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
 
-    .container {
-      width: 92%;
-      max-width: 1280px;
-      margin: 0 auto;
-    }
+        header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.2rem;
+        }
 
-    /* Header & Hero */
-    header {
-      padding: 40px 0 20px;
-      text-align: center;
-      position: relative;
-    }
+        header p {
+            margin: 0;
+            opacity: 0.9;
+        }
 
-    .badge {
-      display: inline-block;
-      padding: 6px 16px;
-      background: rgba(37, 99, 235, 0.2);
-      border: 1px solid var(--primary);
-      color: var(--accent);
-      border-radius: 30px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      margin-bottom: 15px;
-    }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-    h1 {
-      font-size: 2.8rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #fff 0%, var(--text-muted) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 15px;
-    }
+        .brand-section {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
 
-    header p {
-      color: var(--text-muted);
-      font-size: 1.15rem;
-      max-width: 750px;
-      margin: 0 auto 30px;
-    }
+        .brand-title {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-    /* Quick Navigation / Tabs */
-    .nav-tabs {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 40px;
-    }
+        .series-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
 
-    .tab-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 12px 24px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      transition: var(--transition);
-      backdrop-filter: blur(10px);
-    }
+        .series-card {
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            padding: 18px;
+            border-right: 4px solid var(--accent-color);
+        }
 
-    .tab-btn:hover, .tab-btn.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
-      transform: translateY(-2px);
-    }
+        .series-card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
 
-    /* Sections Container */
-    .tab-content {
-      display: none;
-      animation: fadeIn 0.4s ease-in-out forwards;
-    }
+        .model-list {
+            list-style-type: none;
+            padding-left: 0;
+            padding-right: 0;
+            margin: 0;
+        }
 
-    .tab-content.active {
-      display: block;
-    }
+        .model-list li {
+            padding: 6px 0;
+            border-bottom: 1px border-bottom: 1px dashed #cbd5e1;
+            font-size: 0.95rem;
+        }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+        .model-list li:last-child {
+            border-bottom: none;
+        }
 
-    /* Controls Bar (Filter & Search) */
-    .controls-bar {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 30px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      align-items: center;
-      justify-content: space-between;
-      backdrop-filter: blur(10px);
-    }
+        .badge {
+            font-size: 0.75rem;
+            background-color: #dbeafe;
+            color: #1e40af;
+            padding: 2px 8px;
+            border-radius: 12px;
+            float: left;
+        }
 
-    .search-box {
-      flex: 1;
-      min-width: 250px;
-      position: relative;
-    }
-
-    .search-box input {
-      width: 100%;
-      padding: 12px 45px 12px 15px;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      color: #fff;
-      font-size: 0.95rem;
-      outline: none;
-      transition: var(--transition);
-    }
-
-    .search-box input:focus {
-      border-color: var(--primary);
-    }
-
-    .search-box i {
-      position: absolute;
-      right: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-    }
-
-    .filter-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .filter-group select {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 12px 16px;
-      border-radius: 10px;
-      outline: none;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-
-    /* Grid Layout for Products */
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 25px;
-    }
-
-    .product-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      overflow: hidden;
-      transition: var(--transition);
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      backdrop-filter: blur(10px);
-    }
-
-    .product-card:hover {
-      transform: translateY(-5px);
-      border-color: rgba(37, 99, 235, 0.5);
-      box-shadow: var(--shadow);
-    }
-
-    .card-img {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      background: #1e293b;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .card-body {
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-    }
-
-    .brand-tag {
-      font-size: 0.8rem;
-      color: var(--accent);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .card-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin: 5px 0 10px;
-    }
-
-    .specs-list {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      background: rgba(15, 23, 42, 0.4);
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      font-size: 0.85rem;
-    }
-
-    .spec-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text-muted);
-    }
-
-    .spec-item i {
-      color: var(--primary);
-    }
-
-    .spec-item span {
-      color: var(--text-main);
-      font-weight: 600;
-    }
-
-    .pros-cons {
-      font-size: 0.85rem;
-      margin-bottom: 15px;
-    }
-
-    .pros-cons div {
-      margin-bottom: 5px;
-      display: flex;
-      align-items: flex-start;
-      gap: 6px;
-    }
-
-    .pros-cons i.fa-check { color: var(--success); margin-top: 4px; }
-    .pros-cons i.fa-xmark { color: var(--danger); margin-top: 4px; }
-
-    .card-footer {
-      margin-top: auto;
-      padding-top: 15px;
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .price {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--success);
-    }
-
-    /* Tables Style */
-    .table-container {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      overflow-x: auto;
-      backdrop-filter: blur(10px);
-      margin-bottom: 30px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: right;
-      font-size: 0.95rem;
-    }
-
-    th, td {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    th {
-      background: rgba(15, 23, 42, 0.8);
-      color: var(--accent);
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    /* Cards Grid for Tips/Troubleshooting */
-    .info-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    .info-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 25px;
-      backdrop-filter: blur(10px);
-    }
-
-    .info-card h3 {
-      color: var(--accent);
-      font-size: 1.2rem;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .info-card ul {
-      list-style: none;
-    }
-
-    .info-card li {
-      position: relative;
-      padding-right: 20px;
-      margin-bottom: 10px;
-      color: var(--text-muted);
-      font-size: 0.95rem;
-    }
-
-    .info-card li::before {
-      content: "•";
-      color: var(--primary);
-      font-weight: bold;
-      font-size: 1.2rem;
-      position: absolute;
-      right: 0;
-      top: -2px;
-    }
-
-    .info-card li strong {
-      color: var(--text-main);
-    }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      margin-top: 50px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border-color);
-      color: var(--text-muted);
-      font-size: 0.9rem;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      h1 { font-size: 2rem; }
-      .tab-btn { padding: 10px 16px; font-size: 0.85rem; }
-      .controls-bar { flex-direction: column; align-items: stretch; }
-      .specs-list { grid-template-columns: 1fr; }
-    }
-  </style>
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="container">
-    <!-- Header Section -->
+<div class="container">
     <header>
-      <span class="badge"><i class="fa-solid =>-robot"></i> الموسوعة الشاملة</span>
-      <h1>دليل ومقارنة مكانس الروبوت العالمية</h1>
-      <p>تغطية شاملة لأحدث الموديلات، التصنيفات، المواصفات التقنية، جداول الصيانة وحلول الأعطال الشائعة.</p>
+        <h1>دليل المكانس الذكية الشامل</h1>
+        <p>موسوعة مبوبة لأهم الشركات والسلاسل والموديلات الخاصة بمكانس الروبوت</p>
     </header>
 
-    <!-- Navigation Tabs -->
-    <div class="nav-tabs">
-      <button class="tab-btn active" onclick="switchTab('catalog')">
-        <i class="fa-solid fa-boxes-stacked"></i> دليل المنتجات
-      </button>
-      <button class="tab-btn" onclick="switchTab('comparison')">
-        <i class="fa-solid fa-scale-balanced"></i> جدول المقارنة
-      </button>
-      <button class="tab-btn" onclick="switchTab('maintenance')">
-        <i class="fa-solid fa-screws-manta"></i> الصيانة وقطع الغيار
-      </button>
-      <button class="tab-btn" onclick="switchTab('troubleshooting')">
-        <i class="fa-solid fa-triangle-exclamation"></i> حلول الأعطال والـ Wi-Fi
-      </button>
-      <button class="tab-btn" onclick="switchTab('buying-tips')">
-        <i class="fa-solid fa-lightbulb"></i> نصائح الشراء
-      </button>
+    <!-- Roborock -->
+    <div class="brand-section">
+        <h2 class="brand-title">1. روبوروك (Roborock)</h2>
+        <div class="series-grid">
+            <div class="series-card">
+                <h3>سلسلة Saros / S Series (الفئة العليا)</h3>
+                <ul class="model-list">
+                    <li>Saros Z70 <span class="badge">الأحدث</span></li>
+                    <li>Saros 20 / 20 Flow / 20 Sonic</li>
+                    <li>Saros 10 / 10R Ultra-Slim</li>
+                    <li>S8 MaxV Ultra / S8 Pro Ultra</li>
+                    <li>S8 / S8+</li>
+                    <li>S7 Max Ultra / S7 MaxV / S7 Pro</li>
+                </ul>
+            </div>
+            <div class="series-card">
+                <h3>سلسلة Qrevo (الفئة المتطورة)</h3>
+                <ul class="model-list">
+                    <li>Qrevo Curv 2 Pro / CurvX</li>
+                    <li>Qrevo Edge 3 Pro / Edge 2</li>
+                    <li>Qrevo Master / Qrevo MaxV</li>
+                    <li>Qrevo S Pro / Qrevo Plus</li>
+                </ul>
+            </div>
+            <div class="series-card">
+                <h3>سلسلة Q Series (الفئة المتوسطة)</h3>
+                <ul class="model-list">
+                    <li>Roborock Q10 Max+ / Q10 Pro</li>
+                    <li>Roborock Q7 Max+ / Q7 Pro</li>
+                    <li>Roborock Q5 Pro+ / Q5 Max</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
-    <!-- TAB 1: CATALOG -->
-    <div id="catalog" class="tab-content active">
-      <div class="controls-bar">
-        <div class="search-box">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="ابحث باسم المكنسة أو الشركة...">
+    <!-- ECOVACS -->
+    <div class="brand-section">
+        <h2 class="brand-title">2. ايكوفاكس (ECOVACS - Deebot)</h2>
+        <div class="series-grid">
+            <div class="series-card">
+                <h3>سلسلة X Series (الفلاغشيب)</h3>
+                <ul class="model-list">
+                    <li>Deebot X12S / X12 / X11</li>
+                    <li>Deebot X8 MAX OMNI / X8 OMNI</li>
+                    <li>Deebot X5 OMNI / X2 OMNI</li>
+                    <li>Deebot X1 OMNI / X1 Turbo</li>
+                </ul>
+            </div>
+            <div class="series-card">
+                <h3>سلسلة T Series (الأكثر انتشاراً)</h3>
+                <ul class="model-list">
+                    <li>Deebot T90 OMNI / T80S / T80</li>
+                    <li>Deebot T50 MAX PRO / T50</li>
+                    <li>Deebot T30 Pro OMNI / T30C</li>
+                    <li>Deebot T20 OMNI / T10 OMNI</li>
+                </ul>
+            </div>
+            <div class="series-card">
+                <h3>سلسلة N / Mini Series (الاقتصادية والمدمجة)</h3>
+                <ul class="model-list">
+                    <li>Deebot N30 Pro / N20</li>
+                    <li>Deebot N10 Plus / N8 Pro</li>
+                    <li>Deebot Mini Black/Red</li>
+                </ul>
+            </div>
         </div>
-        <div class="filter-group">
-          <select id="categoryFilter" onchange="filterProducts()">
-            <option value="all">جميع الفئات</option>
-            <option value="flagship">الفئة العليا (Flagship)</option>
-            <option value="mid">الفئة المتوسطة (Mid-Range)</option>
-            <option value="budget">الفئة الاقتصادية (Budget)</option>
-          </select>
-          <select id="sortFilter" onchange="filterProducts()">
-            <option value="default">الترتيب الافتراضي</option>
-            <option value="price-low">السعر: من الأقل للأعلى</option>
-            <option value="price-high">السعر: من الأعلى للأقل</option>
-            <option value="suction">قوة الشفط (Pa)</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="products-grid" id="productsGrid">
-        <!-- Javascript dynamic render or fallback static items -->
-      </div>
     </div>
 
-    <!-- TAB 2: COMPARISON TABLE -->
-    <div id="comparison" class="tab-content">
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>الموديل</th>
-              <th>الفئة</th>
-              <th>قوة الشفط</th>
-              <th>نوع الملاحة</th>
-              <th>نظام المسح</th>
-              <th>تجفيف الممسحة</th>
-              <th>السعر التقريبي</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Roborock S8 MaxV Ultra</strong></td>
-              <td>العليا (Flagship)</td>
-              <td>10,000 Pa</td>
-              <td>LiDAR + AI Camera</td>
-              <td>اهتزازي + ذراع ممتدة</td>
-              <td>هواء ساخن (60°C)</td>
-              <td>1,500$</td>
-            </tr>
-            <tr>
-              <td><strong>Dreame X40 Ultra</strong></td>
-              <td>العليا (Flagship)</td>
-              <td>12,000 Pa</td>
-              <td>LiDAR + RGB AI</td>
-              <td>دوار + ذراع ممتدة</td>
-              <td>ماء وهواء ساخن (70°C)</td>
-              <td>1,450$</td>
-            </tr>
-            <tr>
-              <td><strong>Ecovacs Deebot X2 Omni</strong></td>
-              <td>العليا (Flagship)</td>
-              <td>8,000 Pa</td>
-              <td>Dual-laser LiDAR</td>
-              <td>دوار ذكي (تصميم مربع)</td>
-              <td>هواء ساخن</td>
-              <td>1,100$</td>
-            </tr>
-            <tr>
-              <td><strong>iRobot Roomba Combo j9+</strong></td>
-              <td>العليا (Flagship)</td>
-              <td>Power-Lift System</td>
-              <td>PrecisionVision Camera</td>
-              <td>ذراع آلي يرتفع كلياً</td>
-              <td>مسح جاف/رطب</td>
-              <td>1,300$</td>
-            </tr>
-            <tr>
-              <td><strong>Roborock Qrevo Master</strong></td>
-              <td>المتوسطة (Mid-Range)</td>
-              <td>10,000 Pa</td>
-              <td>LiDAR + Reactive AI</td>
-              <td>دوار مزدوج + ذراع ممتد</td>
-              <td>هواء ساخن</td>
-              <td>950$</td>
-            </tr>
-            <tr>
-              <td><strong>Eufy X10 Pro Omni</strong></td>
-              <td>المتوسطة (Mid-Range)</td>
-              <td>8,000 Pa</td>
-              <td>LiDAR + AI See</td>
-              <td>دوار ضاغط (1kg)</td>
-              <td>هواء دافئ</td>
-              <td>850$</td>
-            </tr>
-            <tr>
-              <td><strong>Xiaomi Robot Vacuum X20+</strong></td>
-              <td>الاقتصادية (Budget)</td>
-              <td>6,000 Pa</td>
-              <td>Laser LDS</td>
-              <td>دوار مزدوج</td>
-              <td>تهوئة طبيعية</td>
-              <td>500$</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- Dreame -->
+    <div class="brand-section">
+        <h2 class="brand-title">3. دريمي (Dreame)</h2>
+        <div class="series-grid">
+            <div class="series-card">
+                <h3>سلسلة X Series (القمة)</h3>
+                <ul class="model-list">
+                    <li>Dreame X40 Ultra / X40 Master</li>
+                    <li>Dreame X30 Ultra</li>
+                    <li>Dreame X20 Pro Ultra</li>
+                </ul>
+            </div>
+            <div class="series-card">
+                <h3>سلسلة L Series (الفئة الممتازة)</h3>
+                <ul class="model-list">
+                    <li>Dreame L30 Ultra</li>
+                    <li>Dreame L20 Ultra</li>
+                    <li>Dreame L10s Ultra Gen 2 / L10s Pro</li>
+                </ul>
+            </div>
+            <div class="series-card">
+                <h3>سلسلة D / F Series (الفئة الاقتصادية)</h3>
+                <ul class="model-list">
+                    <li>Dreame D10 Plus / D10s Pro</li>
+                    <li>Dreame D9 Max / D9</li>
+                    <li>Dreame F9 Pro</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
-    <!-- TAB 3: MAINTENANCE -->
-    <div id="maintenance" class="tab-content">
-      <h2 style="margin-bottom: 20px; color: var(--accent);">جدول الصيانة الدوري والعمر الافتراضي لقطع الغيار</h2>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>قطعة الغيار</th>
-              <th>العمر الافتراضي والتكرار</th>
-              <th>متوسط الأسعار العالمية</th>
-              <th>طريقة الصيانة الدورية</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>فلتر HEPA</strong></td>
-              <td>استبدال كل 3 - 6 أشهر</td>
-              <td>12$– 25$ (زوج)</td>
-              <td>تنظيف جاف/فض الغبار أسبوعياً (تجنب غسله بالماء إلا إذا كُتب عليه قابل للغسيل مع تجفيفه 24 ساعة).</td>
-            </tr>
-            <tr>
-              <td><strong>الفرشاة الرئيسية (Main Brush)</strong></td>
-              <td>استبدال كل 6 - 12 شهر</td>
-              <td>15$– 35$</td>
-              <td>فك الشعر والخيوط الملتفة حول الحواف أسبوعياً لتقليل الضغط على المحرك.</td>
-            </tr>
-            <tr>
-              <td><strong>الفرش الجانبية (Side Brushes)</strong></td>
-              <td>استبدال كل 3 - 6 أشهر</td>
-              <td>8$– 15$ (طقم)</td>
-              <td>إزالة الشعر المتجمع شهرياً والتأكد من عدم انثناء شعيراتها.</td>
-            </tr>
-            <tr>
-              <td><strong>وسائد الممسحة (Mop Pads)</strong></td>
-              <td>استبدال كل 1 - 3 أشهر</td>
-              <td>10$– 25$ (طقم)</td>
-              <td>غسيل دوري وتجفيف جيد لمنع تكون الروائح والبكتيريا.</td>
-            </tr>
-            <tr>
-              <td><strong>أكياس الغبار للمحطة</strong></td>
-              <td>تغيير عند الامتلاء (كل 60-90 يوم)</td>
-              <td>12$– 25$ (3-6 أكياس)</td>
-              <td>رمي الكيس فور امتلائه لتجنب ضعف الشفط العكسي بالمحطة.</td>
-            </tr>
-            <tr>
-              <td><strong>البطارية (Lithium Battery)</strong></td>
-              <td>استبدال كل 2 - 3 سنوات</td>
-              <td>40$– 90$</td>
-              <td>إبقاء المكنسة متصلة بشاحنها دائماً وعدم تركها تفرغ تماماً لـ 0%.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- iRobot Roomba -->
+    <div class="brand-section">
+        <h2 class="brand-title">4. أيروبوت رومبا (iRobot - Roomba)</h2>
+        <div class="series-grid">
+            <div class="series-card">
+                <h3>سلسلة Max & Combo (الجديدة والمتكاملة)</h3>
+                <ul class="model-list">
+                    <li>Roomba Max 875 Combo / 775 Combo</li>
+                    <li>Roomba Max 715 Vac + AutoEvac</li>
+                    <li>Roomba Plus 678 Combo / 575 Combo</li>
+                </ul>
+            </div>
+            <div class="series-card">
+                <h3>سلسلة j Series (التفادي الذكي للعقبات)</h3>
+                <ul class="model-list">
+                    <li>Roomba Combo j9+ / j9</li>
+                    <li>Roomba Combo j7+ / j7 / j5+</li>
+                </ul>
+            </div>
+            <div class="series-card">
+                <h3>سلسلة i & s Series (الاعتمادية)</h3>
+                <ul class="model-list">
+                    <li>Roomba s9+</li>
+                    <li>Roomba i7+ / i7 / i3+ / i1</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
-    <!-- TAB 4: TROUBLESHOOTING -->
-    <div id="troubleshooting" class="tab-content">
-      <div class="info-grid">
-        <div class="info-card">
-          <h3><i class="fa-solid fa-battery-slash"></i> أسباب عدم الشحن</h3>
-          <ul>
-            <li><strong>اتساخ نقاط التلامس:</strong> تراكم الغبار على نحاسات التلامس أسفل المكنسة والقاعدة. يُنظف بممسحة كحولية جافة.</li>
-            <li><strong>المحاذاة الخاطئة:</strong> وضع القاعدة على سجاد سميك يمنع المكنسة من الاستقرار بشكل مستوٍ.</li>
-            <li><strong>التفريغ العميق (0%):</strong> ترك البطارية فارغة تماماً لفترة. تتطلب الشحن اليدوي لـ 3 ساعات متواصلة.</li>
-          </ul>
+    <!-- Xiaomi -->
+    <div class="brand-section">
+        <h2 class="brand-title">5. شاومي (Xiaomi)</h2>
+        <div class="series-grid">
+            <div class="series-card">
+                <h3>سلسلة Robot Vacuum X (الفئة المتطورة)</h3>
+                <ul class="model-list">
+                    <li>Xiaomi Robot Vacuum X20+ / X20</li>
+                    <li>Xiaomi Robot Vacuum X10+ / X10</li>
+                </ul>
+            </div>
+            <div class="series-card">
+                <h3>سلسلة S / E Series (الفئة الاقتصادية)</h3>
+                <ul class="model-list">
+                    <li>Xiaomi Robot Vacuum S20+ / S10+</li>
+                    <li>Xiaomi Robot Vacuum S10 / S12</li>
+                    <li>Xiaomi Robot Vacuum E10 / E12</li>
+                </ul>
+            </div>
         </div>
-
-        <div class="info-card">
-          <h3><i class="fa-solid fa-wifi"></i> مشكلات اتصال الـ Wi-Fi</h3>
-          <ul>
-            <li><strong>تردد 5GHz:</strong> المكنسة لا تدعم شبكات 5GHz. يجب اختيار شبكة 2.4GHz من الراوتر حصراً.</li>
-            <li><strong>بيانات الجوال:</strong> يجب إيقاف (Mobile Data) في الهاتف أثناء ربط المكنسة لأول مرة.</li>
-            <li><strong>إعادة ضبط الشبكة:</strong> الضغط المطول على زري (Home + Power) لـ 3 ثوانٍ حتى إعادة البث.</li>
-          </ul>
-        </div>
-
-        <div class="info-card">
-          <h3><i class="fa-solid fa-arrows-spin"></i> الدوران الدائري العشوائي</h3>
-          <ul>
-            <li><strong>اتساخ مستشعرات السقوط:</strong> تراكم الغبار على العدسات السفلية يهم المكنسة بحافة دراجة.</li>
-            <li><strong>انحشار العجلات:</strong> التفاف شعر أو خيوط حول إحدى العجلات المباشرة يسبب بطأها وتدوير المكنسة.</li>
-            <li><strong>علوق المصد الأمامي:</strong> تعليق المصد بسبب الغبار يرسل إشارة اصطدام مستمرة.</li>
-          </ul>
-        </div>
-
-        <div class="info-card">
-          <h3><i class="fa-solid fa-map-location-dot"></i> فقدان الخريطة</h3>
-          <ul>
-            <li><strong>تحريك قاعدة الشحن:</strong> تغيير موضع القاعدة يسبب ضياع إحداثيات الإسناد.</li>
-            <li><strong>التحريك اليدوي:</strong> حمل المكنسة بيدك أثناء التنظيف يقطع تسلسل الملاحة المباشر.</li>
-            <li><strong>الاستعادة:</strong> استخدام خيار (Restore Backup Map) من إدارة الخرائط للتطبيق لاسترجاعها.</li>
-          </ul>
-        </div>
-      </div>
     </div>
 
-    <!-- TAB 5: BUYING TIPS -->
-    <div id="buying-tips" class="tab-content">
-      <div class="info-grid">
-        <div class="info-card">
-          <h3><i class="fa-solid fa-cart-shopping"></i> نصائح قبل الشراء</h3>
-          <ul>
-            <li><strong>ارتفاع الأثاث:</strong> قياس المسافة أسفل الكنب والأسرة (تحتاج مكانس LiDAR لارتفاع 10 سم على الأقل).</li>
-            <li><strong>نوع الأرضيات:</strong> للسجاد الكثيف اختر قوة شفط أعلى من 8,000Pa. وللسيراميك اختر مماسح دوارة.</li>
-            <li><strong>الحيوانات الأليفة:</strong> التأكد من وجود فرشاة مضادة لتشابك الشعر (Anti-Tangle Brush).</li>
-          </ul>
-        </div>
-
-        <div class="info-card">
-          <h3><i class="fa-solid fa-house-gear"></i> نصائح بعد الشراء</h3>
-          <ul>
-            <li><strong>التجهيز الأول:</strong> رفع الأسلاك والألعاب والأجسام الصغرى عند إنشاء الخريطة الأولى.</li>
-            <li><strong>المناطق المحظورة:</strong> تحديد (No-Go Zones) حول أوعية المياه للحفاظ على الأجهزة الكهربائية.</li>
-            <li><strong>الماء المفلتر:</strong> استخدام ماء نقي في خزان المسح لتجنب الانسدادات الكلسية داخل الأنابيب.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- Footer -->
     <footer>
-      <p>تم إعداد هذا الدليل الشامل لمكانس الروبوت العالمية بأعلى معايير الدقة والتوثيق.</p>
+        <p>تم إعداد هذا التبويب ليكون مرجعاً شاملاً لأبرز العلامات التجارية وموديلات المكانس الذكية.</p>
     </footer>
-  </div>
+</div>
 
-  <script>
-    // Data Array for Catalog Products
-    const products = [
-      {
-        id: 's8-maxv',
-        name: 'Roborock S8 MaxV Ultra',
-        brand: 'Roborock',
-        category: 'flagship',
-        price: 1500,
-        suction: 10000,
-        img: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=600&q=80',
-        pros: ['ذراع متمددة للأركان', 'كاميرا AI وتواصل مرئي', 'مساعد صوتي مدمج'],
-        cons: ['سعر مرتفع جداً', 'حجم المحطة كبير'],
-        color: 'أسود / أبيض'
-      },
-      {
-        id: 'x40-ultra',
-        name: 'Dreame X40 Ultra',
-        brand: 'Dreame',
-        category: 'flagship',
-        price: 1450,
-        suction: 12000,
-        img: 'https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=600&q=80',
-        pros: ['قوة شفط فائقة 12K', 'غسيل بالماء الساخن 70°C', 'رفع الممسحة والفرشاة'],
-        cons: ['التطبيق خياراته كثيرة'],
-        color: 'أبيض ذهبي / أسود'
-      },
-      {
-        id: 'x2-omni',
-        name: 'Ecovacs Deebot X2 Omni',
-        brand: 'Ecovacs',
-        category: 'flagship',
-        price: 1100,
-        suction: 8000,
-        img: 'https://images.unsplash.com/photo-1625842268584-8f3296236761?auto=format&fit=crop&w=600&q=80',
-        pros: ['تصميم مربع للزوايا', 'ارتفاع منخفض للأثاث', 'مساعد YIKO'],
-        cons: ['الملاحة المظلمة متوسطة'],
-        color: 'أسود / أبيض'
-      },
-      {
-        id: 'combo-j9',
-        name: 'iRobot Roomba Combo j9+',
-        brand: 'iRobot',
-        category: 'flagship',
-        price: 1300,
-        suction: 7000,
-        img: 'https://images.unsplash.com/photo-1518640467707-6811f4a6ab73?auto=format&fit=crop&w=600&q=80',
-        pros: ['ذراع ممسحة ترتفع للأعلى', 'محطة خشبي أنيقة', 'جودة تصنيع عالية'],
-        cons: ['أبطأ في المسح'],
-        color: 'أسود مع خشب'
-      },
-      {
-        id: 'qrevo-master',
-        name: 'Roborock Qrevo Master',
-        brand: 'Roborock',
-        category: 'mid',
-        price: 950,
-        suction: 10000,
-        img: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=600&q=80',
-        pros: ['مماسح دوارة مزدوجة', 'غسيل بالماء الساخن 60°C', 'سعر متوازن'],
-        cons: ['لا توجد كاميرا بث مباشر'],
-        color: 'أسود / أبيض'
-      },
-      {
-        id: 'x10-pro',
-        name: 'Eufy X10 Pro Omni',
-        brand: 'Eufy',
-        category: 'mid',
-        price: 850,
-        suction: 8000,
-        img: 'https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=600&q=80',
-        pros: ['ممسحة ضاغطة بقوة 1kg', 'كاميرا تفادي العوائق', 'قيمة ممتازة'],
-        cons: ['التجفيف بطيء نسبياً'],
-        color: 'أسود كربوني'
-      },
-      {
-        id: 'x20-plus',
-        name: 'Xiaomi Robot Vacuum X20+',
-        brand: 'Xiaomi',
-        category: 'budget',
-        price: 500,
-        suction: 6000,
-        img: 'https://images.unsplash.com/photo-1625842268584-8f3296236761?auto=format&fit=crop&w=600&q=80',
-        pros: ['أفضل صفقة سعر مقابل ميزات', 'محطة تفريغ وغسيل', 'ملاحة ليزر'],
-        cons: ['تجفيف بالهواء الطبيعي'],
-        color: 'أبيض ناصع'
-      }
-    ];
-
-    // Render Cards Dynamic Function
-    function renderProducts(items) {
-      const grid = document.getElementById('productsGrid');
-      grid.innerHTML = '';
-
-      if (items.length === 0) {
-        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">لا توجد نتائج تطابق بحثك.</p>';
-        return;
-      }
-
-      items.forEach(product => {
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        card.innerHTML = `
-          <img src="${product.img}" alt="${product.name}" class="card-img">
-          <div class="card-body">
-            <span class="brand-tag">${product.brand} • ${product.color}</span>
-            <h3 class="card-title">${product.name}</h3>
-            
-            <div class="specs-list">
-              <div class="spec-item"><i class="fa-solid fa-wind"></i> الشفط: <span>${product.suction} Pa</span></div>
-              <div class="spec-item"><i class="fa-solid fa-layer-group"></i> الفئة: <span>${product.category === 'flagship' ? 'العليا' : product.category === 'mid' ? 'المتوسطة' : 'الاقتصادية'}</span></div>
-            </div>
-
-            <div class="pros-cons">
-              ${product.pros.map(p => `<div><i class="fa-solid fa-check"></i> ${p}</div>`).join('')}
-              ${product.cons.map(c => `<div><i class="fa-solid fa-xmark"></i> ${c}</div>`).join('')}
-            </div>
-
-            <div class="card-footer">
-              <span class="price">$${product.price}</span>
-            </div>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    // Filter and Search Logic
-    function filterProducts() {
-      const searchValue = document.getElementById('searchInput').value.toLowerCase();
-      const categoryValue = document.getElementById('categoryFilter').value;
-      const sortValue = document.getElementById('sortFilter').value;
-
-      let filtered = products.filter(item => {
-        const matchesSearch = item.name.toLowerCase().includes(searchValue) || item.brand.toLowerCase().includes(searchValue);
-        const matchesCategory = categoryValue === 'all' || item.category === categoryValue;
-        return matchesSearch && matchesCategory;
-      });
-
-      if (sortValue === 'price-low') {
-        filtered.sort((a, b) => a.price - b.price);
-      } else if (sortValue === 'price-high') {
-        filtered.sort((a, b) => b.price - a.price);
-      } else if (sortValue === 'suction') {
-        filtered.sort((a, b) => b.suction - a.suction);
-      }
-
-      renderProducts(filtered);
-    }
-
-    // Switch Tabs Logic
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-      event.currentTarget.classList.add('active');
-      document.getElementById(tabId).classList.add('active');
-    }
-
-    // Initial Render
-    document.addEventListener('DOMContentLoaded', () => {
-      renderProducts(products);
-    });
-  </script>
 </body>
 </html>
