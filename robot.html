@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الدليل الشامل لمكانس الروبوت العالمية | المزايا، المواصفات والصيانة</title>
+  <!-- Google Fonts: Cairo & Tajawal -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --accent: #06b6d4;
+      --bg-main: #0f172a;
+      --bg-card: rgba(30, 41, 59, 0.7);
+      --bg-card-hover: rgba(51, 65, 85, 0.8);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 16px;
+      --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', 'Tajawal', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.7;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+      background-attachment: fixed;
+      padding-bottom: 60px;
+    }
+
+    .container {
+      width: 92%;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    /* Header & Hero */
+    header {
+      padding: 40px 0 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: rgba(37, 99, 235, 0.2);
+      border: 1px solid var(--primary);
+      color: var(--accent);
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 0%, var(--text-muted) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      max-width: 750px;
+      margin: 0 auto 30px;
+    }
+
+    /* Quick Navigation / Tabs */
+    .nav-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .tab-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 12px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
+    }
+
+    .tab-btn:hover, .tab-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* Sections Container */
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.4s ease-in-out forwards;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Controls Bar (Filter & Search) */
+    .controls-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(10px);
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 45px 12px 15px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-box input:focus {
+      border-color: var(--primary);
+    }
+
+    .search-box i {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-group select {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 12px 16px;
+      border-radius: 10px;
+      outline: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    /* Grid Layout for Products */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 25px;
+    }
+
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      backdrop-filter: blur(10px);
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(37, 99, 235, 0.5);
+      box-shadow: var(--shadow);
+    }
+
+    .card-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      background: #1e293b;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .brand-tag {
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .card-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: 5px 0 10px;
+    }
+
+    .specs-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.4);
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      font-size: 0.85rem;
+    }
+
+    .spec-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .spec-item i {
+      color: var(--primary);
+    }
+
+    .spec-item span {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .pros-cons {
+      font-size: 0.85rem;
+      margin-bottom: 15px;
+    }
+
+    .pros-cons div {
+      margin-bottom: 5px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .pros-cons i.fa-check { color: var(--success); margin-top: 4px; }
+    .pros-cons i.fa-xmark { color: var(--danger); margin-top: 4px; }
+
+    .card-footer {
+      margin-top: auto;
+      padding-top: 15px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .price {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--success);
+    }
+
+    /* Tables Style */
+    .table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      backdrop-filter: blur(10px);
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--accent);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Cards Grid for Tips/Troubleshooting */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 25px;
+      backdrop-filter: blur(10px);
+    }
+
+    .info-card h3 {
+      color: var(--accent);
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-card ul {
+      list-style: none;
+    }
+
+    .info-card li {
+      position: relative;
+      padding-right: 20px;
+      margin-bottom: 10px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .info-card li::before {
+      content: "•";
+      color: var(--primary);
+      font-weight: bold;
+      font-size: 1.2rem;
+      position: absolute;
+      right: 0;
+      top: -2px;
+    }
+
+    .info-card li strong {
+      color: var(--text-main);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      h1 { font-size: 2rem; }
+      .tab-btn { padding: 10px 16px; font-size: 0.85rem; }
+      .controls-bar { flex-direction: column; align-items: stretch; }
+      .specs-list { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header Section -->
+    <header>
+      <span class="badge"><i class="fa-solid =>-robot"></i> الموسوعة الشاملة</span>
+      <h1>دليل ومقارنة مكانس الروبوت العالمية</h1>
+      <p>تغطية شاملة لأحدث الموديلات، التصنيفات، المواصفات التقنية، جداول الصيانة وحلول الأعطال الشائعة.</p>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('catalog')">
+        <i class="fa-solid fa-boxes-stacked"></i> دليل المنتجات
+      </button>
+      <button class="tab-btn" onclick="switchTab('comparison')">
+        <i class="fa-solid fa-scale-balanced"></i> جدول المقارنة
+      </button>
+      <button class="tab-btn" onclick="switchTab('maintenance')">
+        <i class="fa-solid fa-screws-manta"></i> الصيانة وقطع الغيار
+      </button>
+      <button class="tab-btn" onclick="switchTab('troubleshooting')">
+        <i class="fa-solid fa-triangle-exclamation"></i> حلول الأعطال والـ Wi-Fi
+      </button>
+      <button class="tab-btn" onclick="switchTab('buying-tips')">
+        <i class="fa-solid fa-lightbulb"></i> نصائح الشراء
+      </button>
+    </div>
+
+    <!-- TAB 1: CATALOG -->
+    <div id="catalog" class="tab-content active">
+      <div class="controls-bar">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="ابحث باسم المكنسة أو الشركة...">
+        </div>
+        <div class="filter-group">
+          <select id="categoryFilter" onchange="filterProducts()">
+            <option value="all">جميع الفئات</option>
+            <option value="flagship">الفئة العليا (Flagship)</option>
+            <option value="mid">الفئة المتوسطة (Mid-Range)</option>
+            <option value="budget">الفئة الاقتصادية (Budget)</option>
+          </select>
+          <select id="sortFilter" onchange="filterProducts()">
+            <option value="default">الترتيب الافتراضي</option>
+            <option value="price-low">السعر: من الأقل للأعلى</option>
+            <option value="price-high">السعر: من الأعلى للأقل</option>
+            <option value="suction">قوة الشفط (Pa)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="products-grid" id="productsGrid">
+        <!-- Javascript dynamic render or fallback static items -->
+      </div>
+    </div>
+
+    <!-- TAB 2: COMPARISON TABLE -->
+    <div id="comparison" class="tab-content">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>الموديل</th>
+              <th>الفئة</th>
+              <th>قوة الشفط</th>
+              <th>نوع الملاحة</th>
+              <th>نظام المسح</th>
+              <th>تجفيف الممسحة</th>
+              <th>السعر التقريبي</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Roborock S8 MaxV Ultra</strong></td>
+              <td>العليا (Flagship)</td>
+              <td>10,000 Pa</td>
+              <td>LiDAR + AI Camera</td>
+              <td>اهتزازي + ذراع ممتدة</td>
+              <td>هواء ساخن (60°C)</td>
+              <td>1,500$</td>
+            </tr>
+            <tr>
+              <td><strong>Dreame X40 Ultra</strong></td>
+              <td>العليا (Flagship)</td>
+              <td>12,000 Pa</td>
+              <td>LiDAR + RGB AI</td>
+              <td>دوار + ذراع ممتدة</td>
+              <td>ماء وهواء ساخن (70°C)</td>
+              <td>1,450$</td>
+            </tr>
+            <tr>
+              <td><strong>Ecovacs Deebot X2 Omni</strong></td>
+              <td>العليا (Flagship)</td>
+              <td>8,000 Pa</td>
+              <td>Dual-laser LiDAR</td>
+              <td>دوار ذكي (تصميم مربع)</td>
+              <td>هواء ساخن</td>
+              <td>1,100$</td>
+            </tr>
+            <tr>
+              <td><strong>iRobot Roomba Combo j9+</strong></td>
+              <td>العليا (Flagship)</td>
+              <td>Power-Lift System</td>
+              <td>PrecisionVision Camera</td>
+              <td>ذراع آلي يرتفع كلياً</td>
+              <td>مسح جاف/رطب</td>
+              <td>1,300$</td>
+            </tr>
+            <tr>
+              <td><strong>Roborock Qrevo Master</strong></td>
+              <td>المتوسطة (Mid-Range)</td>
+              <td>10,000 Pa</td>
+              <td>LiDAR + Reactive AI</td>
+              <td>دوار مزدوج + ذراع ممتد</td>
+              <td>هواء ساخن</td>
+              <td>950$</td>
+            </tr>
+            <tr>
+              <td><strong>Eufy X10 Pro Omni</strong></td>
+              <td>المتوسطة (Mid-Range)</td>
+              <td>8,000 Pa</td>
+              <td>LiDAR + AI See</td>
+              <td>دوار ضاغط (1kg)</td>
+              <td>هواء دافئ</td>
+              <td>850$</td>
+            </tr>
+            <tr>
+              <td><strong>Xiaomi Robot Vacuum X20+</strong></td>
+              <td>الاقتصادية (Budget)</td>
+              <td>6,000 Pa</td>
+              <td>Laser LDS</td>
+              <td>دوار مزدوج</td>
+              <td>تهوئة طبيعية</td>
+              <td>500$</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: MAINTENANCE -->
+    <div id="maintenance" class="tab-content">
+      <h2 style="margin-bottom: 20px; color: var(--accent);">جدول الصيانة الدوري والعمر الافتراضي لقطع الغيار</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>قطعة الغيار</th>
+              <th>العمر الافتراضي والتكرار</th>
+              <th>متوسط الأسعار العالمية</th>
+              <th>طريقة الصيانة الدورية</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>فلتر HEPA</strong></td>
+              <td>استبدال كل 3 - 6 أشهر</td>
+              <td>12$– 25$ (زوج)</td>
+              <td>تنظيف جاف/فض الغبار أسبوعياً (تجنب غسله بالماء إلا إذا كُتب عليه قابل للغسيل مع تجفيفه 24 ساعة).</td>
+            </tr>
+            <tr>
+              <td><strong>الفرشاة الرئيسية (Main Brush)</strong></td>
+              <td>استبدال كل 6 - 12 شهر</td>
+              <td>15$– 35$</td>
+              <td>فك الشعر والخيوط الملتفة حول الحواف أسبوعياً لتقليل الضغط على المحرك.</td>
+            </tr>
+            <tr>
+              <td><strong>الفرش الجانبية (Side Brushes)</strong></td>
+              <td>استبدال كل 3 - 6 أشهر</td>
+              <td>8$– 15$ (طقم)</td>
+              <td>إزالة الشعر المتجمع شهرياً والتأكد من عدم انثناء شعيراتها.</td>
+            </tr>
+            <tr>
+              <td><strong>وسائد الممسحة (Mop Pads)</strong></td>
+              <td>استبدال كل 1 - 3 أشهر</td>
+              <td>10$– 25$ (طقم)</td>
+              <td>غسيل دوري وتجفيف جيد لمنع تكون الروائح والبكتيريا.</td>
+            </tr>
+            <tr>
+              <td><strong>أكياس الغبار للمحطة</strong></td>
+              <td>تغيير عند الامتلاء (كل 60-90 يوم)</td>
+              <td>12$– 25$ (3-6 أكياس)</td>
+              <td>رمي الكيس فور امتلائه لتجنب ضعف الشفط العكسي بالمحطة.</td>
+            </tr>
+            <tr>
+              <td><strong>البطارية (Lithium Battery)</strong></td>
+              <td>استبدال كل 2 - 3 سنوات</td>
+              <td>40$– 90$</td>
+              <td>إبقاء المكنسة متصلة بشاحنها دائماً وعدم تركها تفرغ تماماً لـ 0%.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 4: TROUBLESHOOTING -->
+    <div id="troubleshooting" class="tab-content">
+      <div class="info-grid">
+        <div class="info-card">
+          <h3><i class="fa-solid fa-battery-slash"></i> أسباب عدم الشحن</h3>
+          <ul>
+            <li><strong>اتساخ نقاط التلامس:</strong> تراكم الغبار على نحاسات التلامس أسفل المكنسة والقاعدة. يُنظف بممسحة كحولية جافة.</li>
+            <li><strong>المحاذاة الخاطئة:</strong> وضع القاعدة على سجاد سميك يمنع المكنسة من الاستقرار بشكل مستوٍ.</li>
+            <li><strong>التفريغ العميق (0%):</strong> ترك البطارية فارغة تماماً لفترة. تتطلب الشحن اليدوي لـ 3 ساعات متواصلة.</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h3><i class="fa-solid fa-wifi"></i> مشكلات اتصال الـ Wi-Fi</h3>
+          <ul>
+            <li><strong>تردد 5GHz:</strong> المكنسة لا تدعم شبكات 5GHz. يجب اختيار شبكة 2.4GHz من الراوتر حصراً.</li>
+            <li><strong>بيانات الجوال:</strong> يجب إيقاف (Mobile Data) في الهاتف أثناء ربط المكنسة لأول مرة.</li>
+            <li><strong>إعادة ضبط الشبكة:</strong> الضغط المطول على زري (Home + Power) لـ 3 ثوانٍ حتى إعادة البث.</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h3><i class="fa-solid fa-arrows-spin"></i> الدوران الدائري العشوائي</h3>
+          <ul>
+            <li><strong>اتساخ مستشعرات السقوط:</strong> تراكم الغبار على العدسات السفلية يهم المكنسة بحافة دراجة.</li>
+            <li><strong>انحشار العجلات:</strong> التفاف شعر أو خيوط حول إحدى العجلات المباشرة يسبب بطأها وتدوير المكنسة.</li>
+            <li><strong>علوق المصد الأمامي:</strong> تعليق المصد بسبب الغبار يرسل إشارة اصطدام مستمرة.</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h3><i class="fa-solid fa-map-location-dot"></i> فقدان الخريطة</h3>
+          <ul>
+            <li><strong>تحريك قاعدة الشحن:</strong> تغيير موضع القاعدة يسبب ضياع إحداثيات الإسناد.</li>
+            <li><strong>التحريك اليدوي:</strong> حمل المكنسة بيدك أثناء التنظيف يقطع تسلسل الملاحة المباشر.</li>
+            <li><strong>الاستعادة:</strong> استخدام خيار (Restore Backup Map) من إدارة الخرائط للتطبيق لاسترجاعها.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: BUYING TIPS -->
+    <div id="buying-tips" class="tab-content">
+      <div class="info-grid">
+        <div class="info-card">
+          <h3><i class="fa-solid fa-cart-shopping"></i> نصائح قبل الشراء</h3>
+          <ul>
+            <li><strong>ارتفاع الأثاث:</strong> قياس المسافة أسفل الكنب والأسرة (تحتاج مكانس LiDAR لارتفاع 10 سم على الأقل).</li>
+            <li><strong>نوع الأرضيات:</strong> للسجاد الكثيف اختر قوة شفط أعلى من 8,000Pa. وللسيراميك اختر مماسح دوارة.</li>
+            <li><strong>الحيوانات الأليفة:</strong> التأكد من وجود فرشاة مضادة لتشابك الشعر (Anti-Tangle Brush).</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h3><i class="fa-solid fa-house-gear"></i> نصائح بعد الشراء</h3>
+          <ul>
+            <li><strong>التجهيز الأول:</strong> رفع الأسلاك والألعاب والأجسام الصغرى عند إنشاء الخريطة الأولى.</li>
+            <li><strong>المناطق المحظورة:</strong> تحديد (No-Go Zones) حول أوعية المياه للحفاظ على الأجهزة الكهربائية.</li>
+            <li><strong>الماء المفلتر:</strong> استخدام ماء نقي في خزان المسح لتجنب الانسدادات الكلسية داخل الأنابيب.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>تم إعداد هذا الدليل الشامل لمكانس الروبوت العالمية بأعلى معايير الدقة والتوثيق.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Data Array for Catalog Products
+    const products = [
+      {
+        id: 's8-maxv',
+        name: 'Roborock S8 MaxV Ultra',
+        brand: 'Roborock',
+        category: 'flagship',
+        price: 1500,
+        suction: 10000,
+        img: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=600&q=80',
+        pros: ['ذراع متمددة للأركان', 'كاميرا AI وتواصل مرئي', 'مساعد صوتي مدمج'],
+        cons: ['سعر مرتفع جداً', 'حجم المحطة كبير'],
+        color: 'أسود / أبيض'
+      },
+      {
+        id: 'x40-ultra',
+        name: 'Dreame X40 Ultra',
+        brand: 'Dreame',
+        category: 'flagship',
+        price: 1450,
+        suction: 12000,
+        img: 'https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=600&q=80',
+        pros: ['قوة شفط فائقة 12K', 'غسيل بالماء الساخن 70°C', 'رفع الممسحة والفرشاة'],
+        cons: ['التطبيق خياراته كثيرة'],
+        color: 'أبيض ذهبي / أسود'
+      },
+      {
+        id: 'x2-omni',
+        name: 'Ecovacs Deebot X2 Omni',
+        brand: 'Ecovacs',
+        category: 'flagship',
+        price: 1100,
+        suction: 8000,
+        img: 'https://images.unsplash.com/photo-1625842268584-8f3296236761?auto=format&fit=crop&w=600&q=80',
+        pros: ['تصميم مربع للزوايا', 'ارتفاع منخفض للأثاث', 'مساعد YIKO'],
+        cons: ['الملاحة المظلمة متوسطة'],
+        color: 'أسود / أبيض'
+      },
+      {
+        id: 'combo-j9',
+        name: 'iRobot Roomba Combo j9+',
+        brand: 'iRobot',
+        category: 'flagship',
+        price: 1300,
+        suction: 7000,
+        img: 'https://images.unsplash.com/photo-1518640467707-6811f4a6ab73?auto=format&fit=crop&w=600&q=80',
+        pros: ['ذراع ممسحة ترتفع للأعلى', 'محطة خشبي أنيقة', 'جودة تصنيع عالية'],
+        cons: ['أبطأ في المسح'],
+        color: 'أسود مع خشب'
+      },
+      {
+        id: 'qrevo-master',
+        name: 'Roborock Qrevo Master',
+        brand: 'Roborock',
+        category: 'mid',
+        price: 950,
+        suction: 10000,
+        img: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=600&q=80',
+        pros: ['مماسح دوارة مزدوجة', 'غسيل بالماء الساخن 60°C', 'سعر متوازن'],
+        cons: ['لا توجد كاميرا بث مباشر'],
+        color: 'أسود / أبيض'
+      },
+      {
+        id: 'x10-pro',
+        name: 'Eufy X10 Pro Omni',
+        brand: 'Eufy',
+        category: 'mid',
+        price: 850,
+        suction: 8000,
+        img: 'https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=600&q=80',
+        pros: ['ممسحة ضاغطة بقوة 1kg', 'كاميرا تفادي العوائق', 'قيمة ممتازة'],
+        cons: ['التجفيف بطيء نسبياً'],
+        color: 'أسود كربوني'
+      },
+      {
+        id: 'x20-plus',
+        name: 'Xiaomi Robot Vacuum X20+',
+        brand: 'Xiaomi',
+        category: 'budget',
+        price: 500,
+        suction: 6000,
+        img: 'https://images.unsplash.com/photo-1625842268584-8f3296236761?auto=format&fit=crop&w=600&q=80',
+        pros: ['أفضل صفقة سعر مقابل ميزات', 'محطة تفريغ وغسيل', 'ملاحة ليزر'],
+        cons: ['تجفيف بالهواء الطبيعي'],
+        color: 'أبيض ناصع'
+      }
+    ];
+
+    // Render Cards Dynamic Function
+    function renderProducts(items) {
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = '';
+
+      if (items.length === 0) {
+        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">لا توجد نتائج تطابق بحثك.</p>';
+        return;
+      }
+
+      items.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <img src="${product.img}" alt="${product.name}" class="card-img">
+          <div class="card-body">
+            <span class="brand-tag">${product.brand} • ${product.color}</span>
+            <h3 class="card-title">${product.name}</h3>
+            
+            <div class="specs-list">
+              <div class="spec-item"><i class="fa-solid fa-wind"></i> الشفط: <span>${product.suction} Pa</span></div>
+              <div class="spec-item"><i class="fa-solid fa-layer-group"></i> الفئة: <span>${product.category === 'flagship' ? 'العليا' : product.category === 'mid' ? 'المتوسطة' : 'الاقتصادية'}</span></div>
+            </div>
+
+            <div class="pros-cons">
+              ${product.pros.map(p => `<div><i class="fa-solid fa-check"></i> ${p}</div>`).join('')}
+              ${product.cons.map(c => `<div><i class="fa-solid fa-xmark"></i> ${c}</div>`).join('')}
+            </div>
+
+            <div class="card-footer">
+              <span class="price">$${product.price}</span>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Filter and Search Logic
+    function filterProducts() {
+      const searchValue = document.getElementById('searchInput').value.toLowerCase();
+      const categoryValue = document.getElementById('categoryFilter').value;
+      const sortValue = document.getElementById('sortFilter').value;
+
+      let filtered = products.filter(item => {
+        const matchesSearch = item.name.toLowerCase().includes(searchValue) || item.brand.toLowerCase().includes(searchValue);
+        const matchesCategory = categoryValue === 'all' || item.category === categoryValue;
+        return matchesSearch && matchesCategory;
+      });
+
+      if (sortValue === 'price-low') {
+        filtered.sort((a, b) => a.price - b.price);
+      } else if (sortValue === 'price-high') {
+        filtered.sort((a, b) => b.price - a.price);
+      } else if (sortValue === 'suction') {
+        filtered.sort((a, b) => b.suction - a.suction);
+      }
+
+      renderProducts(filtered);
+    }
+
+    // Switch Tabs Logic
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      event.currentTarget.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Initial Render
+    document.addEventListener('DOMContentLoaded', () => {
+      renderProducts(products);
+    });
+  </script>
+</body>
+</html>
