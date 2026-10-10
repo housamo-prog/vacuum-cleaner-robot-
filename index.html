@@ -17,7 +17,7 @@
     --primary: #1a73e8; --primary-dark: #1557b0; --danger: #ea4335;
     --success: #34a853; --border: #f1f3f4; --input-bg: #f1f3f4;
     --gold: #fbbc04; --fuel: #ea8600; --pharmacy: #34a853;
-    --hospital: #ea4335; --grocery: #7c4dff;
+    --hospital: #ea4335; --grocery: #7c4dff; --stop: #ff6d00;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
@@ -35,7 +35,6 @@
     touch-action: manipulation; position: fixed;
   }
   #map { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 1; background: #e8eaed; }
-  body.dark #map { background: #121212; }
 
   .maplibregl-ctrl-bottom-left,
   .maplibregl-ctrl-bottom-right { display: none !important; }
@@ -61,9 +60,7 @@
     color: #fff;
     transition: transform 0.35s ease, opacity 0.35s;
   }
-  body.navigating #appHeader {
-    transform: translateY(-100%); opacity: 0; pointer-events: none;
-  }
+  body.navigating #appHeader { transform: translateY(-100%); opacity: 0; pointer-events: none; }
   #appHeader .logo {
     width: 42px; height: 42px; flex-shrink: 0;
     background: rgba(255,255,255,0.2); border-radius: 12px;
@@ -239,21 +236,6 @@
   #gpsStatus.active .dot { background: var(--success); }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-  /* ⭐ زر تبديل نوع الخريطة */
-  #mapStyleBtn {
-    position: fixed; right: 12px;
-    bottom: calc(150px + var(--safe-bottom));
-    z-index: 999;
-    background: var(--panel); border: none; cursor: pointer;
-    width: 48px; height: 48px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 3px 14px rgba(0,0,0,0.25);
-    transition: transform 0.2s;
-  }
-  #mapStyleBtn:active { transform: scale(0.9); }
-  #mapStyleBtn svg { width: 24px; height: 24px; fill: var(--text); }
-  #mapStyleBtn.active svg { fill: var(--primary); }
-
   #mapPopup {
     position: fixed; z-index: 2000;
     background: var(--panel); border-radius: 14px;
@@ -273,6 +255,7 @@
   .popup-item.start svg { fill: var(--success); }
   .popup-item.dest svg { fill: var(--danger); }
   .popup-item.save svg { fill: var(--gold); }
+  .popup-item.stop svg { fill: var(--stop); }
 
   #savedPanel {
     position: fixed; inset: 0; z-index: 1500;
@@ -312,27 +295,79 @@
   #savedList li .del-btn svg { width: 18px; height: 18px; fill: var(--danger); }
   #savedList .empty { text-align: center; color: var(--text-sub); padding: 40px 20px; font-size: 14px; }
 
+  /* شريط نقاط التوقف */
+  #waypointsBar {
+    position: fixed;
+    bottom: calc(88px + var(--safe-bottom));
+    left: 10px; right: 10px;
+    z-index: 1000;
+    background: var(--panel); border-radius: 14px;
+    padding: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    display: none;
+    transition: transform 0.3s, opacity 0.3s;
+    max-height: 40vh; overflow-y: auto;
+  }
+  #waypointsBar.show { display: block; }
+  body.navigating #waypointsBar { transform: translateY(250%); opacity: 0; pointer-events: none; }
+
+  #waypointsBar .wp-title {
+    font-size: 12px; font-weight: 600; color: var(--text-sub);
+    padding: 4px 8px 8px; display: flex; justify-content: space-between;
+    align-items: center;
+  }
+  #waypointsBar .wp-title button {
+    background: transparent; border: none; cursor: pointer;
+    font-size: 12px; color: var(--primary); font-weight: 600;
+    font-family: inherit;
+  }
+  .wp-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 10px;
+    font-size: 13px;
+    background: var(--input-bg);
+    margin-bottom: 6px;
+  }
+  .wp-item .wp-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--stop); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .wp-item .wp-name {
+    flex: 1; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+  }
+  .wp-item .wp-del {
+    background: transparent; border: none; cursor: pointer;
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wp-item .wp-del svg { width: 14px; height: 14px; fill: var(--danger); }
+
+  /* خيار نوع المسار — محدّث */
   #routeOptions {
-    position: fixed; bottom: calc(88px + var(--safe-bottom));
+    position: fixed; bottom: calc(20px + var(--safe-bottom));
     left: 50%; transform: translateX(-50%);
     z-index: 1000; background: var(--panel);
-    border-radius: 16px; padding: 8px;
+    border-radius: 16px; padding: 6px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    display: none; gap: 6px;
+    display: none; gap: 4px;
     transition: transform 0.3s, opacity 0.3s;
   }
   #routeOptions.show { display: flex; }
   body.navigating #routeOptions { transform: translate(-50%, 250%); opacity: 0; pointer-events: none; }
   .route-btn {
     background: transparent; border: none; cursor: pointer;
-    padding: 10px 14px; border-radius: 10px;
-    font-size: 13px; font-weight: 500; font-family: inherit;
+    padding: 8px 12px; border-radius: 10px;
+    font-size: 12px; font-weight: 500; font-family: inherit;
     color: var(--text-sub); display: flex; flex-direction: column;
-    align-items: center; gap: 3px; min-width: 78px;
+    align-items: center; gap: 2px; min-width: 72px;
   }
   .route-btn.active { background: var(--primary); color: #fff; }
   .route-btn.active svg { fill: #fff; }
-  .route-btn svg { width: 18px; height: 18px; fill: var(--text-sub); }
+  .route-btn svg { width: 16px; height: 16px; fill: var(--text-sub); }
   .route-btn .info { font-size: 10px; opacity: 0.85; }
 
   #navPanel {
@@ -480,7 +515,7 @@
   body.navigating #recenterBtn { bottom: calc(110px + var(--safe-bottom)); }
 
   #startBtn {
-    position: fixed; bottom: calc(150px + var(--safe-bottom));
+    position: fixed; bottom: calc(88px + var(--safe-bottom));
     left: 50%; transform: translateX(-50%);
     z-index: 1000; background: var(--primary); color: #fff; border: none;
     padding: 14px 28px 14px 22px; border-radius: 50px;
@@ -617,6 +652,18 @@
   .poi-marker.cafe { background: #6d4c41; }
   .poi-marker.hotel { background: #00838f; }
 
+  /* أيقونة نقطة التوقف */
+  .waypoint-marker {
+    width: 32px; height: 32px;
+    background: var(--stop); border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    border: 3px solid #fff;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 800; font-size: 14px;
+  }
+  .waypoint-marker span { transform: rotate(45deg); }
+
   ::-webkit-scrollbar { width: 0; height: 0; }
 </style>
 </head>
@@ -728,11 +775,6 @@
 
 <div id="gpsStatus"><span class="dot"></span><span id="gpsText">جاري الاتصال...</span></div>
 
-<!-- ⭐ زر تبديل نوع الخريطة -->
-<button id="mapStyleBtn" title="تبديل نوع الخريطة">
-  <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-</button>
-
 <div id="routeOptions">
   <button class="route-btn active" data-profile="fastest">
     <svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
@@ -744,11 +786,15 @@
     <span>الأقصر</span>
     <span class="info" id="infoShortest">—</span>
   </button>
-  <button class="route-btn" data-profile="traffic">
-    <svg viewBox="0 0 24 24"><path d="M6 15h12v2H6zm0-4h12v2H6zm0-4h12v2H6z"/></svg>
-    <span>تجنب الازدحام</span>
-    <span class="info" id="infoTraffic">—</span>
-  </button>
+</div>
+
+<!-- شريط نقاط التوقف -->
+<div id="waypointsBar">
+  <div class="wp-title">
+    <span>نقاط التوقف</span>
+    <button id="addWaypointBtn">+ إضافة نقطة</button>
+  </div>
+  <div id="waypointsList"></div>
 </div>
 
 <button id="startBtn">
@@ -805,9 +851,13 @@
     <svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
     <span>تحديد كنقطة انطلاق</span>
   </button>
+  <button class="popup-item stop" id="popupStop">
+    <svg viewBox="0 0 24 24"><path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C13.85 1.23 12.95 1 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31C6.97 3.26 6 5.01 6 7h12c0-1.99-.97-3.75-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/></svg>
+    <span>إضافة كنقطة توقف</span>
+  </button>
   <button class="popup-item dest" id="popupDest">
     <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-    <span>تحديد كوجهة</span>
+    <span>تحديد كوجهة نهائية</span>
   </button>
   <button class="popup-item save" id="popupSave">
     <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
@@ -868,13 +918,8 @@
 // ============================================================
 let noSleep = null, wakeLock = null;
 async function keepScreenOn() {
-  try {
-    if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); return; }
-  } catch (err) {}
-  try {
-    if (!noSleep && typeof NoSleep !== 'undefined') noSleep = new NoSleep();
-    if (noSleep) noSleep.enable();
-  } catch (err) {}
+  try { if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); return; } } catch (err) {}
+  try { if (!noSleep && typeof NoSleep !== 'undefined') noSleep = new NoSleep(); if (noSleep) noSleep.enable(); } catch (err) {}
 }
 function allowScreenOff() {
   try { if (wakeLock) { wakeLock.release(); wakeLock = null; } if (noSleep) noSleep.disable(); } catch(e) {}
@@ -884,9 +929,7 @@ document.addEventListener('visibilitychange', async () => {
 });
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-  });
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
 
 const offlineBadge = document.getElementById('offlineBadge');
@@ -899,90 +942,35 @@ window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
 
 // ============================================================
-// ⭐ أنماط الخريطة المتعددة
+// ⭐ نمط واحد فقط: OSM Standard
 // ============================================================
-const MAP_STYLES = {
-  // 1. OSM Raster — يعمل دائماً بلا مشاكل (افتراضي)
-  osm: {
-    version: 8,
-    name: 'OSM Raster',
-    sources: {
-      'osm-tiles': {
-        type: 'raster',
-        tiles: [
-          'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
-        ],
-        tileSize: 256,
-        maxzoom: 19,
-        attribution: '© OpenStreetMap'
-      }
-    },
-    layers: [
-      { id: 'osm-bg', type: 'background', paint: { 'background-color': '#f2efe9' } },
-      { id: 'osm-layer', type: 'raster', source: 'osm-tiles' }
-    ]
+const MAP_STYLE = {
+  version: 8,
+  name: 'OSM Standard',
+  sources: {
+    'osm-tiles': {
+      type: 'raster',
+      tiles: [
+        'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+      ],
+      tileSize: 256,
+      maxzoom: 19,
+      attribution: '© OpenStreetMap'
+    }
   },
-  
-  // 2. OSM Raster داكن
-  osmDark: {
-    version: 8,
-    name: 'OSM Dark',
-    sources: {
-      'osm-dark-tiles': {
-        type: 'raster',
-        tiles: [
-          'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-          'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-          'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-        ],
-        tileSize: 256,
-        maxzoom: 19,
-        attribution: '© OpenStreetMap © CARTO'
-      }
-    },
-    layers: [
-      { id: 'osm-bg', type: 'background', paint: { 'background-color': '#121212' } },
-      { id: 'osm-layer', type: 'raster', source: 'osm-dark-tiles' }
-    ]
-  },
-  
-  // 3. OSM Humanitarian (مفصّل جداً)
-  osmHumanitarian: {
-    version: 8,
-    name: 'OSM Humanitarian',
-    sources: {
-      'osm-hum-tiles': {
-        type: 'raster',
-        tiles: [
-          'https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-          'https://b.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'
-        ],
-        tileSize: 256,
-        maxzoom: 19,
-        attribution: '© OpenStreetMap Contributors, HOT'
-      }
-    },
-    layers: [
-      { id: 'osm-bg', type: 'background', paint: { 'background-color': '#f2efe9' } },
-      { id: 'osm-layer', type: 'raster', source: 'osm-hum-tiles' }
-    ]
-  }
+  layers: [
+    { id: 'osm-bg', type: 'background', paint: { 'background-color': '#f2efe9' } },
+    { id: 'osm-layer', type: 'raster', source: 'osm-tiles' }
+  ]
 };
 
-// ⭐ النمط الحالي
-let currentMapStyle = localStorage.getItem('kzdora_map_style') || 'osm';
-let isDarkMode = false;
-
-// ============================================================
-// إعداد الخريطة
-// ============================================================
 const DAMASCUS = [36.2765, 33.5138];
 
 const map = new maplibregl.Map({
   container: 'map',
-  style: MAP_STYLES[currentMapStyle],
+  style: MAP_STYLE,
   center: DAMASCUS,
   zoom: 13,
   pitch: 0,
@@ -991,15 +979,13 @@ const map = new maplibregl.Map({
   antialias: true
 });
 
-// تحذير عند فشل تحميل البلاطات
-map.on('error', (e) => {
-  console.warn('Map error:', e.error?.message || e);
-});
-
 // ============================================================
 // الحالة العامة
 // ============================================================
 let destMarker = null, startMarker = null;
+let waypointMarkers = [];
+let currentWaypoints = [];        // [{loc, name}]
+let pendingWaypointPick = false;  // هل ننتظر اختيار نقطة توقف؟
 let currentSteps = [];
 let currentStepIndex = 0;
 let navigationActive = false;
@@ -1011,7 +997,8 @@ let lastHeading = 0, gpsFirstFix = false;
 let lastPosition = null, lastPositionTime = null;
 let currentSpeed = 0;
 let currentRouteProfile = 'fastest';
-let currentRouteOptions = { fastest: null, shortest: null, traffic: null, all: null };
+let currentRouteData = null;      // المسار الحالي (للملاحة والتتبع)
+let currentRoutes = { fastest: null, shortest: null };
 let currentDestination = null;
 let currentTravelMode = 'driving';
 let recenterMode = 'follow';
@@ -1027,77 +1014,6 @@ const ROUTE_RECALC_COOLDOWN = 15000;
 const MIN_GPS_ACCURACY = 60;
 
 let savedPlaces = JSON.parse(localStorage.getItem('kzdora_saved') || '[]');
-let cachedRoutes = JSON.parse(localStorage.getItem('kzdora_cached_routes') || '{}');
-
-// ============================================================
-// الوضع الليلي
-// ============================================================
-const themeHeaderBtn = document.getElementById('themeHeaderBtn');
-const themeIconHeader = document.getElementById('themeIconHeader');
-
-function setDarkMode(isDark) {
-  isDarkMode = isDark;
-  document.body.classList.toggle('dark', isDark);
-  if (themeIconHeader) themeIconHeader.innerHTML = isDark ? ICONS.sun : ICONS.moon;
-  
-  // تبديل النمط
-  const newStyle = isDark ? 'osmDark' : 'osm';
-  if (currentMapStyle !== newStyle) {
-    currentMapStyle = newStyle;
-    localStorage.setItem('kzdora_map_style', currentMapStyle);
-    try { map.setStyle(MAP_STYLES[currentMapStyle]); } catch(e) {}
-    map.once('styledata', () => {
-      setTimeout(() => redrawRoutes(), 300);
-    });
-  }
-  localStorage.setItem('kzdora_dark', isDark ? '1' : '0');
-}
-
-function initTheme() {
-  const saved = localStorage.getItem('kzdora_dark');
-  if (saved !== null) setDarkMode(saved === '1');
-  else { const h = new Date().getHours(); setDarkMode(h < 6 || h >= 19); }
-}
-themeHeaderBtn.onclick = () => setDarkMode(!isDarkMode);
-
-// ============================================================
-// ⭐ زر تبديل نمط الخريطة
-// ============================================================
-const mapStyleBtn = document.getElementById('mapStyleBtn');
-const MAP_STYLE_CYCLE = ['osm', 'osmHumanitarian', 'osmDark'];
-
-mapStyleBtn.onclick = () => {
-  const idx = MAP_STYLE_CYCLE.indexOf(currentMapStyle);
-  const nextIdx = (idx + 1) % MAP_STYLE_CYCLE.length;
-  const nextStyle = MAP_STYLE_CYCLE[nextIdx];
-  
-  currentMapStyle = nextStyle;
-  localStorage.setItem('kzdora_map_style', currentMapStyle);
-  
-  // اضبط الوضع الليلي حسب النمط
-  if (nextStyle === 'osmDark') {
-    document.body.classList.add('dark');
-    isDarkMode = true;
-    localStorage.setItem('kzdora_dark', '1');
-    if (themeIconHeader) themeIconHeader.innerHTML = ICONS.sun;
-  } else if (nextStyle === 'osm') {
-    document.body.classList.remove('dark');
-    isDarkMode = false;
-    localStorage.setItem('kzdora_dark', '0');
-    if (themeIconHeader) themeIconHeader.innerHTML = ICONS.moon;
-  }
-  
-  try {
-    map.setStyle(MAP_STYLES[currentMapStyle]);
-    map.once('styledata', () => {
-      setTimeout(() => redrawRoutes(), 300);
-    });
-  } catch(e) { console.warn(e); }
-  
-  playBeep(1000, 80);
-  const names = { osm: 'قياسي', osmHumanitarian: 'مفصّل', osmDark: 'ليلي' };
-  showHint(`🗺️ نمط ${names[nextStyle]}`);
-};
 
 // ============================================================
 // أيقونات SVG
@@ -1235,6 +1151,60 @@ function formatEta(seconds) {
 }
 
 // ============================================================
+// ⭐ نقاط التوقف
+// ============================================================
+function updateWaypointsUI() {
+  const list = document.getElementById('waypointsList');
+  const bar = document.getElementById('waypointsBar');
+  list.innerHTML = '';
+  
+  if (currentWaypoints.length === 0) {
+    bar.classList.remove('show');
+    return;
+  }
+  
+  bar.classList.add('show');
+  currentWaypoints.forEach((wp, idx) => {
+    const div = document.createElement('div');
+    div.className = 'wp-item';
+    div.innerHTML = `
+      <div class="wp-num">${idx + 1}</div>
+      <div class="wp-name">${wp.name}</div>
+      <button class="wp-del" data-idx="${idx}">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>`;
+    div.querySelector('.wp-del').onclick = () => {
+      currentWaypoints.splice(idx, 1);
+      updateWaypointsUI();
+      redrawWaypointMarkers();
+      if (currentDestination) setDestination(currentDestination, null, true);
+    };
+    list.appendChild(div);
+  });
+}
+
+function redrawWaypointMarkers() {
+  waypointMarkers.forEach(m => m.remove());
+  waypointMarkers = [];
+  
+  currentWaypoints.forEach((wp, idx) => {
+    const el = document.createElement('div');
+    el.className = 'waypoint-marker';
+    el.innerHTML = `<span>${idx + 1}</span>`;
+    const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+      .setLngLat([wp.loc[1], wp.loc[0]])
+      .addTo(map);
+    waypointMarkers.push(marker);
+  });
+}
+
+document.getElementById('addWaypointBtn').onclick = () => {
+  pendingWaypointPick = true;
+  showHint('📍 اضغط على الخريطة لإضافة نقطة توقف');
+  speak('اضغط على الخريطة لإضافة نقطة توقف');
+};
+
+// ============================================================
 // POI
 // ============================================================
 const CAT_LABELS = {
@@ -1321,7 +1291,14 @@ function displayPoiResults(results, category) {
     el.className = `poi-marker ${category}`;
     el.innerHTML = iconSvg;
     el.style.cursor = 'pointer';
-    el.onclick = (e) => { e.stopPropagation(); setDestination([r.lat, r.lng], r.name); };
+    el.onclick = (e) => {
+      e.stopPropagation();
+      if (pendingWaypointPick) {
+        addWaypoint([r.lat, r.lng], r.name);
+      } else {
+        setDestination([r.lat, r.lng], r.name);
+      }
+    };
     const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
       .setLngLat([r.lng, r.lat])
       .addTo(map);
@@ -1361,9 +1338,21 @@ function renderResultsList(results, category) {
       </div>
       <div class="dist-badge">${distText}</div>
       <button class="save-btn"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
-    div.querySelector('.text').onclick = () => { resultsBox.classList.remove('show'); setDestination([place.lat, place.lng], place.name); };
-    div.querySelector('.dist-badge').onclick = (e) => { e.stopPropagation(); resultsBox.classList.remove('show'); setDestination([place.lat, place.lng], place.name); };
-    div.querySelector('.save-btn').onclick = (e) => { e.stopPropagation(); openNameDialog([place.lat, place.lng], place.name); };
+    div.querySelector('.text').onclick = () => {
+      resultsBox.classList.remove('show');
+      if (pendingWaypointPick) addWaypoint([place.lat, place.lng], place.name);
+      else setDestination([place.lat, place.lng], place.name);
+    };
+    div.querySelector('.dist-badge').onclick = (e) => {
+      e.stopPropagation();
+      resultsBox.classList.remove('show');
+      if (pendingWaypointPick) addWaypoint([place.lat, place.lng], place.name);
+      else setDestination([place.lat, place.lng], place.name);
+    };
+    div.querySelector('.save-btn').onclick = (e) => {
+      e.stopPropagation();
+      openNameDialog([place.lat, place.lng], place.name);
+    };
     resultsList.appendChild(div);
   });
   resultsBox.classList.add('show');
@@ -1405,7 +1394,7 @@ let pressStartPoint = null;
 function showMapPopup(latlng, x, y) {
   popupLatLng = latlng;
   mapPopup.style.left = Math.min(Math.max(10, x - 100), window.innerWidth - 220) + 'px';
-  mapPopup.style.top = Math.min(Math.max(100, y), window.innerHeight - 220) + 'px';
+  mapPopup.style.top = Math.min(Math.max(100, y), window.innerHeight - 260) + 'px';
   mapPopup.classList.add('show');
 }
 function hideMapPopup() { mapPopup.classList.remove('show'); }
@@ -1439,11 +1428,21 @@ map.on('dragstart', handlePressEnd);
 map.on('movestart', handlePressEnd);
 map.on('zoomstart', handlePressEnd);
 
+// ⭐ النقر العادي على الخريطة
 map.on('click', (e) => {
+  // تجاهل النقر على العلامات
   if (e.originalEvent && e.originalEvent.target) {
     const t = e.originalEvent.target;
-    if (t.closest && (t.closest('.poi-marker') || t.closest('.maplibregl-marker'))) return;
+    if (t.closest && (t.closest('.poi-marker') || t.closest('.maplibregl-marker') || t.closest('.waypoint-marker'))) return;
   }
+  
+  // ⭐ إذا كنا في وضع اختيار نقطة توقف
+  if (pendingWaypointPick) {
+    addWaypoint([e.lngLat.lat, e.lngLat.lng], null);
+    pendingWaypointPick = false;
+    return;
+  }
+  
   hideMapPopup();
 });
 
@@ -1453,9 +1452,48 @@ map.on('contextmenu', e => {
   showMapPopup({ lat: e.lngLat.lat, lng: e.lngLat.lng }, e.point.x, e.point.y);
 });
 
-document.getElementById('popupStart').onclick = () => { if (popupLatLng) setManualStart([popupLatLng.lat, popupLatLng.lng]); hideMapPopup(); };
-document.getElementById('popupDest').onclick = () => { if (popupLatLng) setDestination([popupLatLng.lat, popupLatLng.lng]); hideMapPopup(); };
-document.getElementById('popupSave').onclick = () => { if (popupLatLng) openNameDialog([popupLatLng.lat, popupLatLng.lng]); hideMapPopup(); };
+document.getElementById('popupStart').onclick = () => {
+  if (popupLatLng) setManualStart([popupLatLng.lat, popupLatLng.lng]);
+  hideMapPopup();
+};
+
+document.getElementById('popupStop').onclick = () => {
+  if (popupLatLng) {
+    // إذا كان هناك وجهة، أضف نقطة توقف قبلها
+    addWaypoint([popupLatLng.lat, popupLatLng.lng], null);
+  }
+  hideMapPopup();
+};
+
+document.getElementById('popupDest').onclick = () => {
+  if (popupLatLng) {
+    // إذا كان هناك وجهة سابقة، اجعلها نقطة توقف والجديدة وجهة نهائية
+    if (currentDestination) {
+      addWaypoint([currentDestination[0], currentDestination[1]], 'الوجهة السابقة');
+    }
+    setDestination([popupLatLng.lat, popupLatLng.lng]);
+  }
+  hideMapPopup();
+};
+
+document.getElementById('popupSave').onclick = () => {
+  if (popupLatLng) openNameDialog([popupLatLng.lat, popupLatLng.lng]);
+  hideMapPopup();
+};
+
+// ⭐ إضافة نقطة توقف
+function addWaypoint(loc, name) {
+  currentWaypoints.push({ loc, name: name || `نقطة ${currentWaypoints.length + 1}` });
+  updateWaypointsUI();
+  redrawWaypointMarkers();
+  showHint(`✅ تم إضافة نقطة التوقف ${currentWaypoints.length}`);
+  speak(`تم إضافة نقطة التوقف ${currentWaypoints.length}`);
+  
+  // أعد حساب المسار إن كانت هناك وجهة
+  if (currentDestination) {
+    setDestination(currentDestination, null, true);
+  }
+}
 
 // ============================================================
 // نقطة الانطلاق
@@ -1508,7 +1546,12 @@ async function searchPlaces(query) {
         <div class="pin">${ICONS.arrive}</div>
         <div class="text"><div class="title">${title}</div><div class="sub">${sub}</div></div>
         <button class="save-btn ${isSaved?'saved':''}"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
-      div.querySelector('.text').onclick = () => { resultsBox.classList.remove('show'); searchInput.value = title; setDestination(loc, title); };
+      div.querySelector('.text').onclick = () => {
+        resultsBox.classList.remove('show');
+        searchInput.value = title;
+        if (pendingWaypointPick) addWaypoint(loc, title);
+        else setDestination(loc, title);
+      };
       div.querySelector('.save-btn').onclick = (ev) => {
         ev.stopPropagation();
         const btn = ev.currentTarget;
@@ -1638,11 +1681,10 @@ function startGpsTracking() {
 }
 
 function checkOffRoute(loc) {
-  if (!navigationActive || !currentRouteOptions[currentRouteProfile]) return;
+  if (!navigationActive || !currentRouteData) return;
   if (Date.now() - lastRouteRecalcTime < ROUTE_RECALC_COOLDOWN) return;
 
-  const route = currentRouteOptions[currentRouteProfile];
-  const coords = route.geometry.coordinates;
+  const coords = currentRouteData.geometry.coordinates;
   let minDist = Infinity;
   for (let i = 0; i < coords.length; i += 3) {
     const d = haversine(loc[0], loc[1], coords[i][1], coords[i][0]);
@@ -1750,7 +1792,7 @@ function getDynamicZoom(speedMs) {
 }
 
 // ============================================================
-// تعيين الوجهة
+// ⭐ تعيين الوجهة + حساب المسار مع دعم نقاط التوقف
 // ============================================================
 function setDestination(loc, name, isRecalc = false) {
   currentDestination = loc;
@@ -1769,103 +1811,315 @@ function setDestination(loc, name, isRecalc = false) {
     return;
   }
 
-  if (!isRecalc) showLoading('جاري حساب المسارات...');
+  if (!isRecalc) showLoading('جاري حساب المسار...');
   if (!isRecalc) {
     document.getElementById('routeOptions').classList.remove('show');
     document.getElementById('startBtn').classList.remove('show');
   }
 
-  const profile = currentTravelMode === 'foot' ? 'foot' : 'driving';
-  const coordsStr = `${start[1]},${start[0]};${loc[1]},${loc[0]}`;
-  const url = `https://router.project-osrm.org/route/v1/${profile}/${coordsStr}?overview=full&geometries=geojson&steps=true&alternatives=true`;
+  // ⭐ بناء قائمة الإحداثيات مع نقاط التوقف
+  // OSRM format: lng,lat;lng,lat;lng,lat
+  const allPoints = [start];
+  currentWaypoints.forEach(wp => allPoints.push(wp.loc));
+  allPoints.push(loc);
+  
+  const coordsStr = allPoints.map(p => `${p[1]},${p[0]}`).join(';');
 
+  // ⭐ استخدام Valhalla أولاً (يدعم المشي والمسارات البديلة) ثم OSRM كاحتياطي
+  if (currentTravelMode === 'foot') {
+    fetchValhallaRoute(allPoints, 'pedestrian', isRecalc);
+  } else {
+    // للسيارة: OSRM يدعم Waypoints بشكل جيد
+    fetchOSRMRoute(coordsStr, isRecalc);
+  }
+}
+
+// ⭐ OSRM — للسيارة (يدعم نقاط التوقف)
+function fetchOSRMRoute(coordsStr, isRecalc) {
+  const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson&steps=true`;
+  
   fetch(url)
     .then(r => r.json())
     .then(data => {
       if (!isRecalc) hideLoading();
       if (!data.routes || !data.routes.length) { if (!isRecalc) alert('تعذر حساب المسار'); return; }
-
-      const cacheKey = `${start[0].toFixed(4)},${start[1].toFixed(4)}_${loc[0].toFixed(4)},${loc[1].toFixed(4)}`;
-      cachedRoutes[cacheKey] = { routes: data.routes.slice(0, 3), ts: Date.now() };
-      try { localStorage.setItem('kzdora_cached_routes', JSON.stringify(cachedRoutes)); } catch(e) {}
-
-      const routes = data.routes;
-      const fastest = [...routes].sort((a,b) => a.duration - b.duration)[0];
-      const shortest = [...routes].sort((a,b) => a.distance - b.distance)[0];
-      const traffic = [...routes].sort((a,b) => (b.distance/b.duration) - (a.distance/a.duration))[0];
-
-      currentRouteOptions = { fastest, shortest, traffic, all: routes };
-      document.getElementById('infoFastest').textContent = `${(fastest.distance/1000).toFixed(1)}كم · ${Math.round(fastest.duration/60)}د`;
-      document.getElementById('infoShortest').textContent = `${(shortest.distance/1000).toFixed(1)}كم · ${Math.round(shortest.duration/60)}د`;
-      document.getElementById('infoTraffic').textContent = `${(traffic.distance/1000).toFixed(1)}كم · ${Math.round(traffic.duration/60)}د`;
-
-      selectRoute('fastest');
+      
+      const route = data.routes[0];
+      currentRouteData = route;
+      currentRoutes = { fastest: route, shortest: null };
+      
+      // حساب الإجمالي
+      const totalDist = route.distance / 1000;
+      const totalTime = Math.round(route.duration / 60);
+      
+      document.getElementById('infoFastest').textContent = `${totalDist.toFixed(1)}كم · ${totalTime}د`;
+      document.getElementById('infoShortest').textContent = '—';
+      
+      drawRoute(route);
+      
+      // احفظ الخطوات
+      const allSteps = [];
+      route.legs.forEach(leg => {
+        leg.steps.forEach(s => {
+          allSteps.push({
+            type: mapManeuver(s.maneuver.type, s.maneuver.modifier),
+            text: translateInstruction(s),
+            distance: s.distance,
+            duration: s.duration,
+            location: s.maneuver.location
+          });
+        });
+      });
+      currentSteps = allSteps;
+      currentStepIndex = 0;
+      lastSpokenStep = -1;
+      
       if (!isRecalc) {
         document.getElementById('routeOptions').classList.add('show');
         document.getElementById('startBtn').classList.add('show');
-        const modeText = currentTravelMode === 'foot' ? 'مشياً' : 'بالسيارة';
-        speak(`تم حساب المسار ${modeText}`);
+        const wpText = currentWaypoints.length ? ` مع ${currentWaypoints.length} نقطة توقف` : '';
+        speak(`تم حساب المسار${wpText}. ${totalDist.toFixed(1)} كيلومتر، ${totalTime} دقيقة`);
       } else {
         currentStepIndex = 0;
         lastSpokenStep = -1;
         updateNavigationUI();
         speak('تم إعادة حساب المسار');
       }
+      
+      map.fitBounds([[route.bounds[0], route.bounds[1]], [route.bounds[2], route.bounds[3]]], { padding: 60, duration: 800 });
     })
     .catch(err => { if (!isRecalc) { hideLoading(); alert('تعذر حساب المسار'); } });
 }
 
-function selectRoute(profile) {
-  currentRouteProfile = profile;
-  const route = currentRouteOptions[profile];
-  if (!route) return;
-  document.querySelectorAll('.route-btn').forEach(b => b.classList.toggle('active', b.dataset.profile === profile));
-
-  redrawRoutes();
-
-  if (!navigationActive) {
-    const coords = route.geometry.coordinates;
-    const bounds = coords.reduce((b, c) => b.extend(c), new maplibregl.LngLatBounds(coords[0], coords[0]));
-    map.fitBounds(bounds, { padding: 60, duration: 800 });
-  }
-
-  const leg = route.legs[0];
-  currentSteps = leg.steps.map(s => ({
-    type: mapManeuver(s.maneuver.type, s.maneuver.modifier),
-    text: translateInstruction(s),
-    distance: s.distance,
-    duration: s.duration,
-    location: s.maneuver.location
-  }));
-  currentStepIndex = 0;
-  lastSpokenStep = -1;
+// ⭐ Valhalla — للمشي (يدعم pedestrian بشكل صحيح)
+function fetchValhallaRoute(points, costing, isRecalc) {
+  const locations = points.map(p => ({ lat: p[0], lon: p[1] }));
+  const body = {
+    locations: locations,
+    costing: costing,
+    units: 'kilometers',
+    language: 'ar-SA',
+    directions_options: { units: 'kilometers', language: 'ar-SA' }
+  };
+  
+  fetch('https://valhalla1.openstreetmap.de/route', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (!isRecalc) hideLoading();
+      if (!data.trip || !data.trip.legs || !data.trip.legs.length) {
+        // فشل Valhalla → استخدم OSRM foot (قد لا يكون دقيقاً 100%)
+        fallbackOSRMRoute(points, isRecalc);
+        return;
+      }
+      
+      // حول مسار Valhalla إلى تنسيق موحد
+      const coords = [];
+      data.trip.legs.forEach(leg => {
+        const shape = decodePolyline(leg.shape, 6);
+        shape.forEach(c => coords.push(c));
+      });
+      
+      const route = {
+        geometry: { type: 'LineString', coordinates: coords },
+        distance: data.trip.summary.length * 1000,
+        duration: data.trip.summary.time,
+        legs: data.trip.legs.map(leg => ({
+          steps: leg.maneuvers.map(m => ({
+            maneuver: {
+              type: mapValhallaManeuver(m.type),
+              modifier: mapValhallaModifier(m.type, m.instruction),
+              location: [m.begin_shape_index] // موقع وهمي
+            },
+            name: m.street_names ? m.street_names[0] : '',
+            distance: m.length * 1000,
+            duration: m.time,
+            instruction: m.instruction
+          }))
+        }))
+      };
+      
+      // حساب bounds
+      let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
+      coords.forEach(c => {
+        if (c[0] < minLng) minLng = c[0];
+        if (c[1] < minLat) minLat = c[1];
+        if (c[0] > maxLng) maxLng = c[0];
+        if (c[1] > maxLat) maxLat = c[1];
+      });
+      route.bounds = [minLng, minLat, maxLng, maxLat];
+      
+      currentRouteData = route;
+      currentRoutes = { fastest: route, shortest: null };
+      
+      const totalDist = route.distance / 1000;
+      const totalTime = Math.round(route.duration / 60);
+      
+      document.getElementById('infoFastest').textContent = `${totalDist.toFixed(1)}كم · ${totalTime}د`;
+      document.getElementById('infoShortest').textContent = '—';
+      
+      drawRoute(route);
+      
+      // خطوات المشي من Valhalla
+      const steps = data.trip.legs.flatMap(leg => 
+        leg.maneuvers.map(m => ({
+          type: mapValhallaManeuverType(m.type),
+          text: m.instruction || 'تابع',
+          distance: m.length * 1000,
+          duration: m.time,
+          location: [coords[Math.min(m.begin_shape_index, coords.length-1)][1], coords[Math.min(m.begin_shape_index, coords.length-1)][0]]
+        }))
+      );
+      currentSteps = steps;
+      currentStepIndex = 0;
+      lastSpokenStep = -1;
+      
+      if (!isRecalc) {
+        document.getElementById('routeOptions').classList.add('show');
+        document.getElementById('startBtn').classList.add('show');
+        speak(`تم حساب مسار المشي. ${totalDist.toFixed(1)} كيلومتر، ${totalTime} دقيقة`);
+      } else {
+        currentStepIndex = 0;
+        lastSpokenStep = -1;
+        updateNavigationUI();
+        speak('تم إعادة حساب المسار');
+      }
+      
+      map.fitBounds([[route.bounds[0], route.bounds[1]], [route.bounds[2], route.bounds[3]]], { padding: 60, duration: 800 });
+    })
+    .catch(err => {
+      console.warn('Valhalla failed:', err);
+      fallbackOSRMRoute(points, isRecalc);
+    });
 }
 
-function redrawRoutes() {
-  ['route-line-outline', 'route-line', 'alt-line'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
-  ['route-line', 'alt-line'].forEach(id => { if (map.getSource(id)) map.removeSource(id); });
+function fallbackOSRMRoute(points, isRecalc) {
+  const coordsStr = points.map(p => `${p[1]},${p[0]}`).join(';');
+  const url = `https://router.project-osrm.org/route/v1/foot/${coordsStr}?overview=full&geometries=geojson&steps=true`;
+  
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+      if (!isRecalc) hideLoading();
+      if (!data.routes || !data.routes.length) { if (!isRecalc) alert('تعذر حساب مسار المشي'); return; }
+      
+      const route = data.routes[0];
+      currentRouteData = route;
+      currentRoutes = { fastest: route, shortest: null };
+      
+      const totalDist = route.distance / 1000;
+      const totalTime = Math.round(route.duration / 60);
+      
+      document.getElementById('infoFastest').textContent = `${totalDist.toFixed(1)}كم · ${totalTime}د`;
+      document.getElementById('infoShortest').textContent = '—';
+      
+      drawRoute(route);
+      
+      const allSteps = [];
+      route.legs.forEach(leg => {
+        leg.steps.forEach(s => {
+          allSteps.push({
+            type: mapManeuver(s.maneuver.type, s.maneuver.modifier),
+            text: translateInstruction(s),
+            distance: s.distance,
+            duration: s.duration,
+            location: s.maneuver.location
+          });
+        });
+      });
+      currentSteps = allSteps;
+      currentStepIndex = 0;
+      lastSpokenStep = -1;
+      
+      if (!isRecalc) {
+        document.getElementById('routeOptions').classList.add('show');
+        document.getElementById('startBtn').classList.add('show');
+        speak(`تم حساب مسار المشي`);
+      } else {
+        currentStepIndex = 0;
+        lastSpokenStep = -1;
+        updateNavigationUI();
+        speak('تم إعادة حساب المسار');
+      }
+      
+      map.fitBounds([[route.bounds[0], route.bounds[1]], [route.bounds[2], route.bounds[3]]], { padding: 60, duration: 800 });
+    })
+    .catch(err => { if (!isRecalc) { hideLoading(); alert('تعذر حساب المسار'); } });
+}
 
-  const route = currentRouteOptions[currentRouteProfile];
-  if (!route) return;
+// ⭐ فك تشفير polyline لـ Valhalla
+function decodePolyline(encoded, precision = 6) {
+  const factor = Math.pow(10, precision);
+  const coords = [];
+  let lat = 0, lng = 0, index = 0;
+  while (index < encoded.length) {
+    let b, shift = 0, result = 0;
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    lat += ((result & 1) ? ~(result >> 1) : (result >> 1));
+    
+    shift = 0; result = 0;
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    lng += ((result & 1) ? ~(result >> 1) : (result >> 1));
+    
+    coords.push([lng / factor, lat / factor]);
+  }
+  return coords;
+}
 
-  const altFeatures = [];
-  ['fastest','shortest','traffic'].forEach(p => {
-    if (p === currentRouteProfile) return;
-    const r = currentRouteOptions[p];
-    if (!r) return;
-    altFeatures.push({ type: 'Feature', geometry: r.geometry, properties: {} });
-  });
+function mapValhallaManeuver(type) {
+  const map = {
+    0: 'Straight', 1: 'Depart', 2: 'Straight', 3: 'Straight',
+    4: 'Depart', 5: 'Depart', 6: 'Depart',
+    7: 'Straight', 8: 'Straight',
+    9: 'SlightRight', 10: 'TurnRight', 11: 'SharpRight',
+    12: 'TurnLeft', 13: 'SlightLeft',
+    14: 'SharpLeft', 15: 'SlightRight',
+    16: 'TurnRight', 17: 'SharpRight',
+    18: 'SlightLeft', 19: 'TurnLeft',
+    20: 'SharpLeft', 21: 'SlightRight',
+    22: 'TurnRight', 23: 'SharpRight',
+    24: 'SlightLeft', 25: 'TurnLeft', 26: 'SharpLeft',
+    27: 'Roundabout', 28: 'Roundabout',
+    37: 'Arrive'
+  };
+  return map[type] || 'Straight';
+}
+
+function mapValhallaManeuverType(type) {
+  const m = mapValhallaManeuver(type);
+  const typeMap = {
+    'Straight': 'Straight', 'Depart': 'Depart', 'TurnLeft': 'TurnLeft',
+    'TurnRight': 'TurnRight', 'SlightLeft': 'SlightLeft', 'SlightRight': 'SlightRight',
+    'SharpLeft': 'SharpLeft', 'SharpRight': 'SharpRight',
+    'Roundabout': 'Roundabout', 'Arrive': 'Arrive'
+  };
+  return typeMap[m] || 'Straight';
+}
+
+function mapValhallaModifier(type, instruction) {
+  if (!instruction) return '';
+  if (instruction.includes('يمين')) return 'right';
+  if (instruction.includes('يسار')) return 'left';
+  return 'straight';
+}
+
+// ⭐ رسم المسار على الخريطة
+function drawRoute(route) {
+  ['route-line-outline', 'route-line'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+  ['route-line'].forEach(id => { if (map.getSource(id)) map.removeSource(id); });
 
   try {
-    if (altFeatures.length) {
-      map.addSource('alt-line', { type: 'geojson', data: { type: 'FeatureCollection', features: altFeatures } });
-      map.addLayer({
-        id: 'alt-line', type: 'line', source: 'alt-line',
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#9aa0a6', 'line-width': 5, 'line-opacity': 0.35, 'line-dasharray': [2, 2] }
-      });
-    }
-
     map.addSource('route-line', { type: 'geojson', data: { type: 'Feature', geometry: route.geometry, properties: {} } });
     map.addLayer({
       id: 'route-line-outline', type: 'line', source: 'route-line',
@@ -1939,6 +2193,7 @@ document.getElementById('startBtn').onclick = async () => {
 
   document.getElementById('startBtn').classList.remove('show');
   document.getElementById('routeOptions').classList.remove('show');
+  document.getElementById('waypointsBar').classList.remove('show');
   document.getElementById('navPanel').classList.remove('show');
   document.getElementById('navTopBar').classList.add('show');
   document.getElementById('navBottomBar').classList.add('show');
@@ -1980,18 +2235,23 @@ function stopNavigation() {
   document.getElementById('travelModeBar').classList.add('show');
 
   if (vehicleMarker) { vehicleMarker.remove(); vehicleMarker = null; }
-  ['route-line-outline', 'route-line', 'alt-line'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
-  ['route-line', 'alt-line'].forEach(id => { if (map.getSource(id)) map.removeSource(id); });
+  ['route-line-outline', 'route-line'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+  ['route-line'].forEach(id => { if (map.getSource(id)) map.removeSource(id); });
   if (destMarker) { destMarker.remove(); destMarker = null; }
   if (startMarker) { startMarker.remove(); startMarker = null; }
+  waypointMarkers.forEach(m => m.remove());
+  waypointMarkers = [];
 
   currentSteps = [];
-  currentRouteOptions = { fastest: null, shortest: null, traffic: null, all: null };
+  currentRouteData = null;
+  currentRoutes = { fastest: null, shortest: null };
   currentDestination = null;
+  currentWaypoints = [];
   manualStart = null;
   lastRouteRecalcTime = 0;
   offRouteCounter = 0;
 
+  document.getElementById('waypointsBar').classList.remove('show');
   map.easeTo({ pitch: 0, bearing: 0, duration: 800 });
 
   if (userLocation) {
@@ -2024,29 +2284,40 @@ function checkProgress(loc) {
   if (!currentSteps.length) return;
   let nearestIdx = 0, minDist = Infinity;
   currentSteps.forEach((s, i) => {
-    const d = haversine(loc[0], loc[1], s.location[1], s.location[0]);
+    if (!s.location) return;
+    const lat = s.location[1] !== undefined ? s.location[1] : s.location.lat;
+    const lng = s.location[0] !== undefined ? s.location[0] : s.location.lng;
+    const d = haversine(loc[0], loc[1], lat, lng);
     if (d < minDist) { minDist = d; nearestIdx = i; }
   });
   if (nearestIdx !== currentStepIndex) { currentStepIndex = nearestIdx; updateNavigationUI(); }
   if (nearestIdx < currentSteps.length - 1) {
     const nextStep = currentSteps[nearestIdx + 1];
-    const distToNext = haversine(loc[0], loc[1], nextStep.location[1], nextStep.location[0]);
-    const warningDist = currentTravelMode === 'foot' ? 0.05 : (distToNext > 1 ? 0.5 : 0.15);
-    if (distToNext < warningDist && lastSpokenStep !== nearestIdx + 1) {
-      lastSpokenStep = nearestIdx + 1;
-      playBeep(880, 150);
-      setTimeout(() => {
-        const distText = distToNext > 1 ? `${distToNext.toFixed(1)} كيلومتر` : `${Math.round(distToNext * 1000)} متر`;
-        speak(`بعد ${distText}: ${nextStep.text}`);
-      }, 200);
+    if (nextStep.location) {
+      const lat = nextStep.location[1] !== undefined ? nextStep.location[1] : nextStep.location.lat;
+      const lng = nextStep.location[0] !== undefined ? nextStep.location[0] : nextStep.location.lng;
+      const distToNext = haversine(loc[0], loc[1], lat, lng);
+      const warningDist = currentTravelMode === 'foot' ? 0.05 : (distToNext > 1 ? 0.5 : 0.15);
+      if (distToNext < warningDist && lastSpokenStep !== nearestIdx + 1) {
+        lastSpokenStep = nearestIdx + 1;
+        playBeep(880, 150);
+        setTimeout(() => {
+          const distText = distToNext > 1 ? `${distToNext.toFixed(1)} كيلومتر` : `${Math.round(distToNext * 1000)} متر`;
+          speak(`بعد ${distText}: ${nextStep.text}`);
+        }, 200);
+      }
     }
   }
   const last = currentSteps[currentSteps.length - 1];
-  const distToDest = haversine(loc[0], loc[1], last.location[1], last.location[0]);
-  if (distToDest < 0.03) {
-    playBeep(1500, 400);
-    setTimeout(() => speak('لقد وصلت إلى وجهتك'), 300);
-    setTimeout(() => stopNavigation(), 4000);
+  if (last.location) {
+    const lat = last.location[1] !== undefined ? last.location[1] : last.location.lat;
+    const lng = last.location[0] !== undefined ? last.location[0] : last.location.lng;
+    const distToDest = haversine(loc[0], loc[1], lat, lng);
+    if (distToDest < 0.03) {
+      playBeep(1500, 400);
+      setTimeout(() => speak('لقد وصلت إلى وجهتك'), 300);
+      setTimeout(() => stopNavigation(), 4000);
+    }
   }
   updateTripInfo(loc);
 }
@@ -2062,13 +2333,7 @@ function updateNavigationUI() {
 function updateTripInfo(loc) {
   if (!currentSteps.length) return;
   let remainingDist = 0, remainingTime = 0;
-  const currentStep = currentSteps[currentStepIndex];
-  if (currentStep) {
-    const d = haversine(loc[0], loc[1], currentStep.location[1], currentStep.location[0]);
-    remainingDist += Math.min(d * 1000, currentStep.distance);
-    remainingTime += currentStep.duration * (d*1000 / Math.max(currentStep.distance,1));
-  }
-  for (let i = currentStepIndex + 1; i < currentSteps.length; i++) {
+  for (let i = currentStepIndex; i < currentSteps.length; i++) {
     remainingDist += currentSteps[i].distance;
     remainingTime += currentSteps[i].duration;
   }
@@ -2077,12 +2342,20 @@ function updateTripInfo(loc) {
 }
 
 function getIcon(type) {
-  const m = { 'Straight': ICONS.straight, 'TurnLeft': ICONS.turnLeft, 'TurnRight': ICONS.turnRight, 'SlightLeft': ICONS.slightLeft, 'SlightRight': ICONS.slightRight, 'SharpLeft': ICONS.sharpLeft, 'SharpRight': ICONS.sharpRight, 'Roundabout': ICONS.roundabout, 'Arrive': ICONS.arrive, 'Depart': ICONS.depart, 'WaypointReached': ICONS.waypoint };
+  const m = { 'Straight': ICONS.straight, 'TurnLeft': ICONS.turnLeft, 'TurnRight': ICONS.turnRight, 'SlightLeft': ICONS.slightLeft, 'SlightRight': ICONS.slightRight, 'SharpLeft': ICONS.sharpLeft, 'SharpRight': ICONS.sharpRight, 'Roundabout': ICONS.roundabout, 'Arrive': ICONS.arrive, 'Depart': ICONS.depart };
   return m[type] || ICONS.straight;
 }
 
 document.querySelectorAll('.route-btn').forEach(btn => {
-  btn.onclick = () => { selectRoute(btn.dataset.profile); playBeep(1000, 100); };
+  btn.onclick = () => {
+    const profile = btn.dataset.profile;
+    document.querySelectorAll('.route-btn').forEach(b => b.classList.toggle('active', b.dataset.profile === profile));
+    if (currentRoutes[profile]) {
+      currentRouteData = currentRoutes[profile];
+      drawRoute(currentRouteData);
+      playBeep(1000, 100);
+    }
+  };
 });
 
 document.getElementById('locBtn').onclick = () => {
@@ -2115,7 +2388,7 @@ document.getElementById('exitConfirm').onclick = () => {
     document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;padding:20px;background:linear-gradient(135deg,#1a73e8,#0d47a1);color:#fff;flex-direction:column;gap:16px;"><div style="font-size:60px;">👋</div><h2>شكراً لاستخدامك كزدورة</h2></div>';
   }, 200);
 };
-window.addEventListener('popstate', (e) => {
+window.addEventListener('popstate', () => {
   if (!exitTriggered) {
     history.pushState(null, null, location.href);
     exitDialog.classList.add('show');
@@ -2130,7 +2403,6 @@ history.pushState(null, null, location.href);
 window.addEventListener('load', async () => {
   document.getElementById('travelModeBar').classList.add('show');
   document.getElementById('recenterBtn').classList.add('show');
-  document.getElementById('mapStyleBtn').classList.add('active');
 
   await keepScreenOn();
 
