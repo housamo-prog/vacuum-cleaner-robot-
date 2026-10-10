@@ -180,6 +180,7 @@
   }
   #resultsClose svg { width: 16px; height: 16px; fill: var(--text); }
 
+  /* ⭐ شريط نوع الرحلة — الأسفل */
   #travelModeBar {
     position: fixed;
     bottom: calc(20px + var(--safe-bottom));
@@ -298,9 +299,10 @@
   #savedList li .del-btn svg { width: 18px; height: 18px; fill: var(--danger); }
   #savedList .empty { text-align: center; color: var(--text-sub); padding: 40px 20px; font-size: 14px; }
 
+  /* ⭐ نقاط التوقف — فوق خيارات المسار */
   #waypointsBar {
     position: fixed;
-    bottom: calc(88px + var(--safe-bottom));
+    bottom: calc(160px + var(--safe-bottom));
     left: 10px; right: 10px;
     z-index: 1000;
     background: var(--panel); border-radius: 14px;
@@ -308,7 +310,7 @@
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     display: none;
     transition: transform 0.3s, opacity 0.3s;
-    max-height: 40vh; overflow-y: auto;
+    max-height: 30vh; overflow-y: auto;
   }
   #waypointsBar.show { display: block; }
   body.navigating #waypointsBar { transform: translateY(250%); opacity: 0; pointer-events: none; }
@@ -348,8 +350,9 @@
   }
   .wp-item .wp-del svg { width: 14px; height: 14px; fill: var(--danger); }
 
+  /* ⭐ خيارات المسار — فوق شريط نوع الرحلة */
   #routeOptions {
-    position: fixed; bottom: calc(20px + var(--safe-bottom));
+    position: fixed; bottom: calc(88px + var(--safe-bottom));
     left: 50%; transform: translateX(-50%);
     z-index: 1000; background: var(--panel);
     border-radius: 16px; padding: 6px;
@@ -361,15 +364,32 @@
   body.navigating #routeOptions { transform: translate(-50%, 250%); opacity: 0; pointer-events: none; }
   .route-btn {
     background: transparent; border: none; cursor: pointer;
-    padding: 8px 12px; border-radius: 10px;
+    padding: 8px 14px; border-radius: 10px;
     font-size: 12px; font-weight: 500; font-family: inherit;
     color: var(--text-sub); display: flex; flex-direction: column;
-    align-items: center; gap: 2px; min-width: 72px;
+    align-items: center; gap: 2px; min-width: 82px;
   }
   .route-btn.active { background: var(--primary); color: #fff; }
   .route-btn.active svg { fill: #fff; }
   .route-btn svg { width: 16px; height: 16px; fill: var(--text-sub); }
   .route-btn .info { font-size: 10px; opacity: 0.85; }
+
+  /* ⭐ زر بدء التوجيه — الأعلى في المكدس السفلي */
+  #startBtn {
+    position: fixed; bottom: calc(160px + var(--safe-bottom));
+    left: 50%; transform: translateX(-50%);
+    z-index: 1001; background: var(--primary); color: #fff; border: none;
+    padding: 14px 28px 14px 22px; border-radius: 50px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(26,115,232,0.4);
+    display: none; font-family: inherit;
+    align-items: center; gap: 8px;
+    transition: transform 0.3s, opacity 0.3s;
+    white-space: nowrap;
+  }
+  #startBtn.show { display: flex; }
+  body.navigating #startBtn { transform: translate(-50%, 250%); opacity: 0; pointer-events: none; }
+  #startBtn svg { width: 20px; height: 20px; fill: #fff; }
 
   #navPanel {
     position: fixed; bottom: 0; left: 0; right: 0;
@@ -501,10 +521,11 @@
   #navStopFloat.show { display: flex; }
   #navStopFloat svg { width: 20px; height: 20px; fill: #fff; }
 
+  /* ⭐ زر إعادة التمركز — أسفل يمين */
   #recenterBtn {
     position: fixed; right: 12px;
-    bottom: calc(90px + var(--safe-bottom));
-    z-index: 1200;
+    bottom: calc(20px + var(--safe-bottom));
+    z-index: 999;
     background: #fff; color: #1a73e8;
     border: none; cursor: pointer;
     width: 52px; height: 52px; border-radius: 50%;
@@ -513,22 +534,7 @@
   }
   #recenterBtn.show { display: flex; }
   #recenterBtn svg { width: 26px; height: 26px; fill: #1a73e8; }
-  body.navigating #recenterBtn { bottom: calc(110px + var(--safe-bottom)); }
-
-  #startBtn {
-    position: fixed; bottom: calc(88px + var(--safe-bottom));
-    left: 50%; transform: translateX(-50%);
-    z-index: 1000; background: var(--primary); color: #fff; border: none;
-    padding: 14px 28px 14px 22px; border-radius: 50px;
-    font-size: 16px; font-weight: 600; cursor: pointer;
-    box-shadow: 0 6px 20px rgba(26,115,232,0.4);
-    display: none; font-family: inherit;
-    align-items: center; gap: 8px;
-    transition: transform 0.3s, opacity 0.3s;
-  }
-  #startBtn.show { display: flex; }
-  body.navigating #startBtn { transform: translate(-50%, 250%); opacity: 0; pointer-events: none; }
-  #startBtn svg { width: 20px; height: 20px; fill: #fff; }
+  body.navigating #recenterBtn { bottom: calc(20px + var(--safe-bottom)); }
 
   #loading {
     position: fixed; top: 50%; left: 50%;
@@ -573,7 +579,7 @@
   }
 
   #mapHint {
-    position: fixed; bottom: calc(180px + var(--safe-bottom));
+    position: fixed; bottom: calc(230px + var(--safe-bottom));
     left: 50%; transform: translateX(-50%);
     z-index: 998; background: rgba(32,33,36,0.9); color: #fff;
     padding: 8px 14px; border-radius: 20px;
@@ -857,7 +863,7 @@
     <span>تحديد كنقطة انطلاق</span>
   </button>
   <button class="popup-item stop" id="popupStop">
-    <svg viewBox="0 0 24 24"><path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C13.85 1.23 12.95 1 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31C6.97 3.26 6 5.01 6 7h12c0-1.99-.97-3.75-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10z"/></svg>
     <span>إضافة كنقطة توقف</span>
   </button>
   <button class="popup-item dest" id="popupDest">
@@ -961,7 +967,7 @@ window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
 
 // ============================================================
-// نمط خريطة موحّد: OSM Standard
+// نمط الخريطة: OSM Standard
 // ============================================================
 const MAP_STYLE = {
   version: 8,
@@ -999,7 +1005,7 @@ const map = new maplibregl.Map({
 });
 
 // ============================================================
-// الحالة العامة — لا تُحفظ في localStorage (تجربة موحدة)
+// الحالة العامة
 // ============================================================
 let destMarker = null, startMarker = null;
 let waypointMarkers = [];
@@ -1033,7 +1039,6 @@ const OFF_ROUTE_COUNT = 3;
 const ROUTE_RECALC_COOLDOWN = 15000;
 const MIN_GPS_ACCURACY = 60;
 
-// فقط الأماكن المفضلة تُحفظ
 let savedPlaces = JSON.parse(localStorage.getItem('kzdora_saved') || '[]');
 
 // ============================================================
@@ -1172,7 +1177,7 @@ function formatEta(seconds) {
 }
 
 // ============================================================
-// ⭐ قراءة الحالة من URL (تجربة موحدة لكل مستخدم)
+// قراءة الحالة من URL
 // ============================================================
 function readStateFromURL() {
   const hash = location.hash.replace(/^#kzdora\??/, '');
@@ -1183,19 +1188,16 @@ function readStateFromURL() {
   const dark = params.get('dark');
   const wps = params.get('wps');
 
-  // الوضع الليلي
   if (dark === '1') setDarkMode(true);
   else if (dark === '0') setDarkMode(false);
   else { const h = new Date().getHours(); setDarkMode(h < 6 || h >= 19); }
 
-  // نوع الرحلة
   if (mode === 'foot' || mode === 'driving') {
     currentTravelMode = mode;
     document.querySelectorAll('.mode-btn').forEach(b =>
       b.classList.toggle('active', b.dataset.mode === mode));
   }
 
-  // نقاط التوقف
   if (wps) {
     wps.split('|').forEach((wp, i) => {
       const parts = wp.split(',').map(Number);
@@ -1207,7 +1209,6 @@ function readStateFromURL() {
     redrawWaypointMarkers();
   }
 
-  // الوجهة (تُطبّق بعد GPS)
   if (dest) {
     const parts = dest.split(',').map(Number);
     if (!isNaN(parts[0]) && !isNaN(parts[1])) {
@@ -1216,7 +1217,6 @@ function readStateFromURL() {
   }
 }
 
-// ⭐ تحديث URL عند أي تغيير
 function updateURL() {
   const params = new URLSearchParams();
 
@@ -1519,13 +1519,11 @@ map.on('click', (e) => {
     const t = e.originalEvent.target;
     if (t.closest && (t.closest('.poi-marker') || t.closest('.maplibregl-marker') || t.closest('.waypoint-marker'))) return;
   }
-
   if (pendingWaypointPick) {
     addWaypoint([e.lngLat.lat, e.lngLat.lng], null);
     pendingWaypointPick = false;
     return;
   }
-
   hideMapPopup();
 });
 
@@ -1539,12 +1537,10 @@ document.getElementById('popupStart').onclick = () => {
   if (popupLatLng) setManualStart([popupLatLng.lat, popupLatLng.lng]);
   hideMapPopup();
 };
-
 document.getElementById('popupStop').onclick = () => {
   if (popupLatLng) addWaypoint([popupLatLng.lat, popupLatLng.lng], null);
   hideMapPopup();
 };
-
 document.getElementById('popupDest').onclick = () => {
   if (popupLatLng) {
     if (currentDestination) {
@@ -1554,7 +1550,6 @@ document.getElementById('popupDest').onclick = () => {
   }
   hideMapPopup();
 };
-
 document.getElementById('popupSave').onclick = () => {
   if (popupLatLng) openNameDialog([popupLatLng.lat, popupLatLng.lng]);
   hideMapPopup();
@@ -1567,10 +1562,7 @@ function addWaypoint(loc, name) {
   updateURL();
   showHint(`✅ تم إضافة نقطة التوقف ${currentWaypoints.length}`);
   speak(`تم إضافة نقطة التوقف ${currentWaypoints.length}`);
-
-  if (currentDestination) {
-    setDestination(currentDestination, null, true);
-  }
+  if (currentDestination) setDestination(currentDestination, null, true);
 }
 
 // ============================================================
@@ -1658,7 +1650,7 @@ document.addEventListener('click', e => {
 });
 
 // ============================================================
-// حفظ الأماكن — الوحيد الذي يُحفظ في localStorage
+// حفظ الأماكن
 // ============================================================
 const nameDialog = document.getElementById('nameDialog');
 const nameInput = document.getElementById('nameInput');
@@ -1963,12 +1955,7 @@ function fetchOSRMRoute(coordsStr, isRecalc) {
 
 function fetchValhallaRoute(points, costing, isRecalc) {
   const locations = points.map(p => ({ lat: p[0], lon: p[1] }));
-  const body = {
-    locations: locations,
-    costing: costing,
-    units: 'kilometers',
-    language: 'ar-SA'
-  };
+  const body = { locations, costing, units: 'kilometers', language: 'ar-SA' };
 
   fetch('https://valhalla1.openstreetmap.de/route', {
     method: 'POST',
@@ -1978,10 +1965,7 @@ function fetchValhallaRoute(points, costing, isRecalc) {
     .then(r => r.json())
     .then(data => {
       if (!isRecalc) hideLoading();
-      if (!data.trip || !data.trip.legs || !data.trip.legs.length) {
-        fallbackOSRMRoute(points, isRecalc);
-        return;
-      }
+      if (!data.trip || !data.trip.legs || !data.trip.legs.length) { fallbackOSRMRoute(points, isRecalc); return; }
 
       const coords = [];
       data.trip.legs.forEach(leg => {
@@ -2015,7 +1999,6 @@ function fetchValhallaRoute(points, costing, isRecalc) {
 
       drawRoute(route);
 
-      // خطوات من Valhalla
       const steps = [];
       data.trip.legs.forEach(leg => {
         leg.maneuvers.forEach(m => {
@@ -2114,21 +2097,11 @@ function decodePolyline(encoded, precision = 6) {
   let lat = 0, lng = 0, index = 0;
   while (index < encoded.length) {
     let b, shift = 0, result = 0;
-    do {
-      b = encoded.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
+    do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
     lat += ((result & 1) ? ~(result >> 1) : (result >> 1));
-
     shift = 0; result = 0;
-    do {
-      b = encoded.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
+    do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
     lng += ((result & 1) ? ~(result >> 1) : (result >> 1));
-
     coords.push([lng / factor, lat / factor]);
   }
   return coords;
@@ -2223,7 +2196,6 @@ function setDarkMode(isDark) {
   document.body.classList.toggle('dark', isDark);
   if (themeIconHeader) themeIconHeader.innerHTML = isDark ? ICONS.sun : ICONS.moon;
 
-  // تبديل طبقة البلاطات
   try {
     if (map.getLayer('osm-layer')) map.removeLayer('osm-layer');
     if (map.getSource('osm-tiles')) map.removeSource('osm-tiles');
@@ -2247,7 +2219,6 @@ function setDarkMode(isDark) {
     });
     map.addLayer({ id: 'osm-layer', type: 'raster', source: 'osm-tiles' });
 
-    // أعد رسم المسار فوق الطبقة
     if (currentRouteData) setTimeout(() => drawRoute(currentRouteData), 100);
   } catch(e) { console.warn(e); }
 }
@@ -2306,7 +2277,6 @@ document.getElementById('startBtn').onclick = async () => {
   });
 };
 
-// ⭐ نافذة تأكيد إنهاء التوجيه المخصصة
 const stopConfirmDialog = document.getElementById('stopConfirmDialog');
 document.getElementById('stopConfirmCancel').onclick = () => {
   stopConfirmDialog.classList.remove('show');
@@ -2348,10 +2318,8 @@ function stopNavigation() {
   document.getElementById('waypointsBar').classList.remove('show');
   document.getElementById('routeOptions').classList.remove('show');
 
-  // ⭐ إعادة URL للحالة النظيفة (بدون وجهة)
   updateURL();
 
-  // ⭐ إعادة الخريطة للوضع المسطح
   recenterMode = 'follow';
   map.easeTo({
     pitch: 0,
@@ -2377,13 +2345,7 @@ function stopNavigation() {
           .addTo(map);
       }
     } else {
-      map.flyTo({
-        center: DAMASCUS,
-        zoom: 13,
-        pitch: 0,
-        bearing: 0,
-        duration: 800
-      });
+      map.flyTo({ center: DAMASCUS, zoom: 13, pitch: 0, bearing: 0, duration: 800 });
     }
   }, 850);
 
@@ -2533,7 +2495,6 @@ window.addEventListener('load', async () => {
 
   await keepScreenOn();
 
-  // ⭐ اقرأ الحالة من URL
   readStateFromURL();
 
   setTimeout(() => {
