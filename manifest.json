@@ -1,0 +1,27 @@
+{
+  "name": "كزدورة — ملاحة وخرائط",
+  "short_name": "كزدورة",
+  "description": "تطبيق ملاحة وخرائط عربي للعمل في سوريا",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a73e8",
+  "theme_color": "#1a73e8",
+  "lang": "ar",
+  "dir": "rtl",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjM4IiBmaWxsPSIjMWE3M2U4Ii8+PHBhdGggZD0iTTk2IDI2TDM4IDE2Mmw1LjcgNS43TDk2IDE0MGw1Mi4zIDI3LjcgNS43LTUuN3oiIGZpbGw9IiNmZmYiLz48L3N2Zz4=",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEwMCIgZmlsbD0iIzFhNzNlOCIvPjxwYXRoIGQ9Ik0yNTYgNzBMMTAyIDQzMGwxNS4yIDE1LjJMMjU2IDM3M2wxMzguOCA3Mi4yIDE1LjItMTUuMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
