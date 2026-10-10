@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1a73e8">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ملاحة الشام">
+<meta name="format-detection" content="telephone=no">
 <title>ملاحة الشام — دليل الملاحة والخرائط</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -17,6 +20,8 @@
     --success: #34a853; --border: #f1f3f4; --input-bg: #f1f3f4;
     --gold: #fbbc04; --fuel: #ea8600; --pharmacy: #34a853;
     --hospital: #ea4335; --grocery: #7c4dff;
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
   }
   body.dark {
     --bg: #121212; --panel: #1e1e1e; --text: #e8eaed; --text-sub: #9aa0a6;
@@ -27,17 +32,20 @@
   html, body {
     height: 100%; font-family: -apple-system, 'Segoe UI', Tahoma, Arial, sans-serif;
     overflow: hidden; background: var(--bg); color: var(--text);
+    overscroll-behavior: none;
+    -webkit-user-select: none; user-select: none;
+    touch-action: manipulation;
   }
   #map { position: absolute; inset: 0; z-index: 1; }
   body.navigating #map { filter: saturate(1.08) contrast(1.03); }
 
   /* ============================================================
-     الهيدر الاحترافي
+     الهيدر
      ============================================================ */
   #appHeader {
     position: absolute; top: 0; left: 0; right: 0;
     z-index: 1050;
-    padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+    padding: calc(10px + var(--safe-top)) 14px 10px;
     background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
     display: flex; align-items: center; gap: 10px;
     box-shadow: 0 2px 14px rgba(0,0,0,0.25);
@@ -45,9 +53,7 @@
     transition: transform 0.35s ease, opacity 0.35s;
   }
   body.navigating #appHeader {
-    transform: translateY(-100%);
-    opacity: 0;
-    pointer-events: none;
+    transform: translateY(-100%); opacity: 0; pointer-events: none;
   }
   #appHeader .logo {
     width: 38px; height: 38px; flex-shrink: 0;
@@ -80,7 +86,7 @@
      شريط البحث
      ============================================================ */
   #searchBar {
-    position: absolute; top: calc(66px + env(safe-area-inset-top)); left: 10px; right: 10px;
+    position: absolute; top: calc(66px + var(--safe-top)); left: 10px; right: 10px;
     z-index: 1000; display: flex; gap: 6px; align-items: center;
     background: var(--panel); border-radius: 14px; padding: 6px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
@@ -103,12 +109,11 @@
   .icon-btn svg { width: 22px; height: 22px; fill: var(--primary); }
 
   /* ============================================================
-     شريط الفئات (POI Categories)
+     شريط الفئات
      ============================================================ */
   #categoryBar {
-    position: absolute; top: calc(124px + env(safe-area-inset-top));
-    left: 0; right: 0;
-    z-index: 999;
+    position: absolute; top: calc(124px + var(--safe-top));
+    left: 0; right: 0; z-index: 999;
     overflow-x: auto; overflow-y: hidden;
     padding: 6px 10px 10px;
     display: flex; gap: 8px;
@@ -154,7 +159,7 @@
      نتائج البحث
      ============================================================ */
   #results {
-    position: absolute; top: calc(178px + env(safe-area-inset-top)); left: 10px; right: 10px;
+    position: absolute; top: calc(178px + var(--safe-top)); left: 10px; right: 10px;
     z-index: 1000; background: var(--panel); border-radius: 14px;
     max-height: 55vh; overflow-y: auto; display: none;
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
@@ -204,37 +209,44 @@
   #resultsClose svg { width: 16px; height: 16px; fill: var(--text); }
 
   /* ============================================================
-     شريط نوع الرحلة
+     شريط نوع الرحلة — أسفل الشاشة (Bottom Sheet)
      ============================================================ */
   #travelModeBar {
-    position: absolute; top: calc(66px + env(safe-area-inset-top)); left: 50%;
-    transform: translateX(-50%);
-    z-index: 999; background: var(--panel);
-    border-radius: 14px; padding: 4px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    position: absolute;
+    bottom: calc(20px + var(--safe-bottom));
+    left: 50%; transform: translateX(-50%);
+    z-index: 1000;
+    background: var(--panel);
+    border-radius: 28px; padding: 6px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.15);
     display: none; gap: 4px;
-    transition: transform 0.3s, opacity 0.3s;
+    transition: transform 0.35s, opacity 0.35s;
   }
   #travelModeBar.show { display: flex; }
   body.navigating #travelModeBar {
-    transform: translate(-50%, -250%); opacity: 0; pointer-events: none;
+    transform: translate(-50%, 250%); opacity: 0; pointer-events: none;
   }
   .mode-btn {
     background: transparent; border: none; cursor: pointer;
-    padding: 8px 16px; border-radius: 10px;
-    display: flex; flex-direction: column; align-items: center; gap: 2px;
-    font-family: inherit; font-size: 11px; color: var(--text-sub);
-    min-width: 60px;
+    padding: 10px 20px; border-radius: 22px;
+    display: flex; align-items: center; gap: 8px;
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    color: var(--text-sub);
+    transition: all 0.25s;
+    white-space: nowrap;
   }
-  .mode-btn.active { background: var(--primary); color: #fff; }
-  .mode-btn svg { width: 22px; height: 22px; fill: var(--text-sub); }
-  .mode-btn.active svg { fill: #fff; }
+  .mode-btn.active {
+    background: var(--primary); color: #fff;
+    box-shadow: 0 3px 12px rgba(26,115,232,0.4);
+  }
+  .mode-btn svg { width: 20px; height: 20px; fill: currentColor; }
+  .mode-btn span { display: inline; }
 
   /* ============================================================
      عداد السرعة
      ============================================================ */
   #speedometer {
-    position: absolute; top: calc(180px + env(safe-area-inset-top)); left: 10px;
+    position: absolute; top: calc(180px + var(--safe-top)); left: 10px;
     z-index: 999; background: var(--panel);
     padding: 8px 14px; border-radius: 14px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
@@ -255,7 +267,7 @@
   #speedUnit { font-size: 11px; color: var(--text-sub); line-height: 1.2; }
 
   #gpsStatus {
-    position: absolute; top: calc(180px + env(safe-area-inset-top)); right: 10px;
+    position: absolute; top: calc(180px + var(--safe-top)); right: 10px;
     z-index: 999; background: var(--panel);
     padding: 8px 12px; border-radius: 20px;
     font-size: 11px; color: var(--text-sub); display: none;
@@ -341,8 +353,11 @@
     padding: 40px 20px; font-size: 14px;
   }
 
+  /* ============================================================
+     خيارات المسار (أسفل)
+     ============================================================ */
   #routeOptions {
-    position: absolute; bottom: calc(20px + env(safe-area-inset-bottom));
+    position: absolute; bottom: calc(88px + var(--safe-bottom));
     left: 50%; transform: translateX(-50%);
     z-index: 1000; background: var(--panel);
     border-radius: 16px; padding: 8px;
@@ -352,7 +367,7 @@
   }
   #routeOptions.show { display: flex; }
   body.navigating #routeOptions {
-    transform: translate(-50%, 200%); opacity: 0; pointer-events: none;
+    transform: translate(-50%, 250%); opacity: 0; pointer-events: none;
   }
   .route-btn {
     background: transparent; border: none; cursor: pointer;
@@ -371,7 +386,7 @@
     z-index: 1000; background: var(--panel);
     border-radius: 20px 20px 0 0;
     box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
-    padding: 16px 18px calc(20px + env(safe-area-inset-bottom));
+    padding: 16px 18px calc(20px + var(--safe-bottom));
     display: none; max-height: 45vh; overflow-y: auto;
   }
   #navPanel.show { display: block; animation: slideUp 0.3s ease-out; }
@@ -412,11 +427,11 @@
   #steps .dist { color: var(--text-sub); font-size: 12px; margin-top: 3px; font-weight: 400; }
 
   /* ============================================================
-     وضع الملاحة Sygic
+     وضع الملاحة
      ============================================================ */
   #navTopBar {
     position: absolute; top: 0; left: 0; right: 0;
-    z-index: 1100; padding: calc(14px + env(safe-area-inset-top)) 14px 14px;
+    z-index: 1100; padding: calc(14px + var(--safe-top)) 14px 14px;
     background: linear-gradient(180deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 70%, transparent 100%);
     display: none; align-items: center; gap: 16px;
     color: #fff;
@@ -443,7 +458,7 @@
   }
   #navBottomBar {
     position: absolute; bottom: 0; left: 0; right: 0;
-    z-index: 1100; padding: 14px 18px calc(18px + env(safe-area-inset-bottom));
+    z-index: 1100; padding: 14px 18px calc(18px + var(--safe-bottom));
     background: linear-gradient(0deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 70%, transparent 100%);
     display: none; align-items: center; gap: 16px; color: #fff;
   }
@@ -475,7 +490,7 @@
   }
 
   #navStopFloat {
-    position: absolute; top: calc(14px + env(safe-area-inset-top)); left: 14px;
+    position: absolute; top: calc(14px + var(--safe-top)); left: 14px;
     z-index: 1200;
     background: rgba(234,67,53,0.95); color: #fff;
     border: none; cursor: pointer;
@@ -487,7 +502,7 @@
   #navStopFloat svg { width: 20px; height: 20px; fill: #fff; }
 
   #recenterBtn {
-    position: absolute; bottom: calc(20px + env(safe-area-inset-bottom)); right: 10px;
+    position: absolute; bottom: calc(88px + var(--safe-bottom)); right: 10px;
     z-index: 998;
     background: var(--panel); border: none; cursor: pointer;
     width: 46px; height: 46px; border-radius: 50%;
@@ -499,7 +514,7 @@
   body.navigating #recenterBtn { display: none !important; }
 
   #startBtn {
-    position: absolute; bottom: calc(80px + env(safe-area-inset-bottom));
+    position: absolute; bottom: calc(150px + var(--safe-bottom));
     left: 50%; transform: translateX(-50%);
     z-index: 1000; background: var(--primary); color: #fff; border: none;
     padding: 14px 28px 14px 22px; border-radius: 50px;
@@ -511,7 +526,7 @@
   }
   #startBtn.show { display: flex; }
   body.navigating #startBtn {
-    transform: translate(-50%, 200%); opacity: 0; pointer-events: none;
+    transform: translate(-50%, 250%); opacity: 0; pointer-events: none;
   }
   #startBtn svg { width: 20px; height: 20px; fill: #fff; }
 
@@ -566,16 +581,29 @@
     box-shadow: 0 3px 12px rgba(0,0,0,0.2);
   }
   .side-btn svg { width: 22px; height: 22px; fill: var(--text); }
-  #themeBtn { bottom: calc(20px + env(safe-area-inset-bottom)); right: 10px; }
-  #savedBtn { bottom: calc(80px + env(safe-area-inset-bottom)); right: 10px; }
-  #savedBtn svg { fill: var(--gold); }
+  #themeBtn { bottom: calc(88px + var(--safe-bottom)); right: 10px; display: none !important; }
+  #savedBtn { bottom: calc(88px + var(--safe-bottom)); right: 10px; display: none !important; }
+
+  /* زر إضافي: مثبّت أعلى اليمين للوضع الليلي */
+  #themeFloatBtn {
+    position: absolute;
+    top: calc(66px + var(--safe-top)); left: 10px;
+    z-index: 1050;
+    background: var(--panel); border: none; cursor: pointer;
+    width: 44px; height: 44px; border-radius: 50%;
+    display: none; align-items: center; justify-content: center;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+  }
+  #themeFloatBtn.show { display: flex; }
+  #themeFloatBtn svg { width: 20px; height: 20px; fill: var(--text); }
 
   #mapHint {
-    position: absolute; bottom: calc(140px + env(safe-area-inset-bottom));
+    position: absolute; bottom: calc(180px + var(--safe-bottom));
     left: 50%; transform: translateX(-50%);
     z-index: 998; background: rgba(32,33,36,0.9); color: #fff;
     padding: 8px 14px; border-radius: 20px;
     font-size: 12px; display: none; white-space: nowrap;
+    pointer-events: none;
   }
   #mapHint.show { display: block; animation: fadeInOut 3s ease-in-out; }
   @keyframes fadeInOut {
@@ -610,6 +638,38 @@
   #nameCancel { background: var(--input-bg); color: var(--text); }
   #nameSave { background: var(--primary); color: #fff; }
 
+  /* نافذة تأكيد الخروج */
+  #exitDialog {
+    position: absolute; inset: 0; z-index: 4100;
+    background: rgba(0,0,0,0.6);
+    display: none; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  #exitDialog.show { display: flex; }
+  #exitBox {
+    background: var(--panel); border-radius: 18px;
+    padding: 24px; width: 100%; max-width: 320px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  }
+  #exitBox .icon {
+    width: 60px; height: 60px; margin: 0 auto 14px;
+    background: #fce8e6; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  body.dark #exitBox .icon { background: #4a1e1c; }
+  #exitBox .icon svg { width: 30px; height: 30px; fill: var(--danger); }
+  #exitBox h3 { font-size: 17px; margin-bottom: 8px; }
+  #exitBox p { font-size: 13px; color: var(--text-sub); margin-bottom: 20px; line-height: 1.5; }
+  #exitBox .actions { display: flex; gap: 10px; }
+  #exitBox button {
+    flex: 1; padding: 12px; border-radius: 12px;
+    border: none; cursor: pointer; font-family: inherit;
+    font-size: 14px; font-weight: 600;
+  }
+  #exitCancel { background: var(--input-bg); color: var(--text); }
+  #exitConfirm { background: var(--danger); color: #fff; }
+
   body.navigating .leaflet-control-attribution { display: none; }
   .leaflet-control-attribution { font-size: 10px; }
 
@@ -637,6 +697,9 @@
   .poi-marker.mosque { background: #5d4037; }
   .poi-marker.cafe { background: #6d4c41; }
   .poi-marker.hotel { background: #00838f; }
+
+  /* إخفاء شريط التمرير */
+  ::-webkit-scrollbar { width: 0; height: 0; }
 </style>
 </head>
 <body>
@@ -724,6 +787,7 @@
   <div id="resultsList"></div>
 </div>
 
+<!-- شريط نوع الرحلة أسفل الشاشة -->
 <div id="travelModeBar">
   <button class="mode-btn active" data-mode="driving">
     <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
@@ -841,24 +905,82 @@
   </div>
 </div>
 
+<!-- نافذة تأكيد الخروج -->
+<div id="exitDialog">
+  <div id="exitBox">
+    <div class="icon">
+      <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+    </div>
+    <h3>تأكيد الخروج</h3>
+    <p>هل تريد فعلاً إغلاق تطبيق ملاحة الشام؟</p>
+    <div class="actions">
+      <button id="exitCancel">البقاء</button>
+      <button id="exitConfirm">خروج</button>
+    </div>
+  </div>
+</div>
+
 <button id="recenterBtn" title="إعادة التمركز">
   <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
-</button>
-
-<button id="themeBtn" class="side-btn" title="تبديل الوضع الليلي">
-  <svg id="themeIcon" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
-</button>
-
-<button id="savedBtn" class="side-btn" title="الأماكن المحفوظة">
-  <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
 </button>
 
 <div id="mapHint"></div>
 <div id="loading"><div class="spinner"></div><span id="loadingText">جاري المعالجة...</span></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- NoSleep.js لمنع إطفاء الشاشة -->
+<script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
 
 <script>
+// ============================================================
+// منع إطفاء الشاشة
+// ============================================================
+let noSleep = null;
+let wakeLock = null;
+
+async function keepScreenOn() {
+  // حاول استخدام Wake Lock API الحديثة
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => {
+        console.log('Wake Lock released');
+      });
+      console.log('Wake Lock active');
+      return;
+    }
+  } catch (err) {
+    console.warn('Wake Lock failed:', err);
+  }
+
+  // البديل: NoSleep.js
+  try {
+    if (!noSleep && typeof NoSleep !== 'undefined') {
+      noSleep = new NoSleep();
+    }
+    if (noSleep) {
+      noSleep.enable();
+      console.log('NoSleep enabled');
+    }
+  } catch (err) {
+    console.warn('NoSleep failed:', err);
+  }
+}
+
+function allowScreenOff() {
+  try {
+    if (wakeLock) { wakeLock.release(); wakeLock = null; }
+    if (noSleep) { noSleep.disable(); }
+  } catch(e) {}
+}
+
+// أعد التفعيل عند العودة للتطبيق
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible' && wakeLock === null) {
+    await keepScreenOn();
+  }
+});
+
 // ============================================================
 // أيقونات SVG
 // ============================================================
@@ -974,6 +1096,10 @@ let activeCategory = null;
 let poiMarkers = [];
 const SPEED_LIMIT = 120;
 
+// منع إعادة حساب المسار المتكرر
+let lastRouteRecalcTime = 0;
+const ROUTE_RECALC_COOLDOWN = 5000; // 5 ثوانٍ
+
 let savedPlaces = JSON.parse(localStorage.getItem('syria_nav_saved') || '[]');
 
 // ============================================================
@@ -986,8 +1112,8 @@ const themeIconHeader = document.getElementById('themeIconHeader');
 
 function setDarkMode(isDark) {
   document.body.classList.toggle('dark', isDark);
-  themeIcon.innerHTML = isDark ? ICONS.sun : ICONS.moon;
-  themeIconHeader.innerHTML = isDark ? ICONS.sun : ICONS.moon;
+  if (themeIcon) themeIcon.innerHTML = isDark ? ICONS.sun : ICONS.moon;
+  if (themeIconHeader) themeIconHeader.innerHTML = isDark ? ICONS.sun : ICONS.moon;
   if (isDark) {
     if (map.hasLayer(streetLayer)) map.removeLayer(streetLayer);
     darkLayer.addTo(map);
@@ -1003,7 +1129,7 @@ function initTheme() {
   else { const h = new Date().getHours(); setDarkMode(h < 6 || h >= 19); }
 }
 initTheme();
-themeBtn.onclick = () => setDarkMode(!document.body.classList.contains('dark'));
+if (themeBtn) themeBtn.onclick = () => setDarkMode(!document.body.classList.contains('dark'));
 themeHeaderBtn.onclick = () => setDarkMode(!document.body.classList.contains('dark'));
 
 // ============================================================
@@ -1083,7 +1209,7 @@ function formatEta(seconds) {
 }
 
 // ============================================================
-// نظام POI
+// POI
 // ============================================================
 const OSM_TAGS = {
   fuel:       '["amenity"="fuel"]',
@@ -1448,9 +1574,6 @@ function persistSaved() {
 
 const savedPanel = document.getElementById('savedPanel');
 const savedList = document.getElementById('savedList');
-document.getElementById('savedBtn').onclick = () => {
-  renderSavedList(); savedPanel.classList.add('show');
-};
 document.getElementById('savedHeaderBtn').onclick = () => {
   renderSavedList(); savedPanel.classList.add('show');
 };
@@ -1491,7 +1614,7 @@ function renderSavedList() {
 }
 
 // ============================================================
-// GPS + عداد السرعة
+// GPS
 // ============================================================
 const gpsStatus = document.getElementById('gpsStatus');
 const gpsText = document.getElementById('gpsText');
@@ -1523,6 +1646,8 @@ function startGpsTracking() {
       if (navigationActive) {
         updateVehiclePosition(loc, heading, pos.coords.speed || currentSpeed/3.6);
         checkProgress(loc);
+        // حساب المسار الجديد تلقائياً عند الانحراف
+        checkOffRoute(loc);
       }
       gpsStatus.classList.add('active');
       gpsText.textContent = `GPS · ${Math.round(accuracy)}م`;
@@ -1533,6 +1658,37 @@ function startGpsTracking() {
     },
     { enableHighAccuracy: true, maximumAge: 1000, timeout: 20000 }
   );
+}
+
+// ============================================================
+// كشف الانحراف عن المسار وإعادة حسابه
+// ============================================================
+function checkOffRoute(loc) {
+  if (!routeLine || !navigationActive) return;
+  if (Date.now() - lastRouteRecalcTime < ROUTE_RECALC_COOLDOWN) return;
+
+  // احسب أقرب مسافة بين الموقع والمسار
+  const coords = routeLine.getLatLngs();
+  let minDist = Infinity;
+  for (let i = 0; i < coords.length; i++) {
+    const d = haversine(loc[0], loc[1], coords[i].lat, coords[i].lng);
+    if (d < minDist) minDist = d;
+  }
+
+  // إذا كنا أبعد من 50 متر عن المسار → أعد الحساب
+  if (minDist > 0.05) {
+    lastRouteRecalcTime = Date.now();
+    showHint('🔄 إعادة حساب المسار...');
+    playBeep(700, 200);
+    speak('تم تغيير المسار، جاري إعادة الحساب', true);
+
+    // أعد حساب المسار من الموقع الحالي إلى الوجهة
+    if (currentDestination && !manualStart) {
+      // استخدم الموقع الحالي كبداية
+      userLocation = loc;
+      setDestination(currentDestination, null, true);
+    }
+  }
 }
 
 function updateSpeed(pos) {
@@ -1653,7 +1809,7 @@ function offsetLatLng(loc, bearingDeg, pixels) {
 // ============================================================
 // تعيين الوجهة
 // ============================================================
-function setDestination(loc, name) {
+function setDestination(loc, name, isRecalc = false) {
   currentDestination = loc;
   if (destMarker) map.removeLayer(destMarker);
   destMarker = L.marker(loc, {
@@ -1664,18 +1820,23 @@ function setDestination(loc, name) {
     })
   }).addTo(map);
 
-  localStorage.setItem('syria_nav_last_dest', JSON.stringify({ loc, name: name || '' }));
+  if (!isRecalc) {
+    localStorage.setItem('syria_nav_last_dest', JSON.stringify({ loc, name: name || '' }));
+  }
 
-  const start = manualStart || userLocation;
+  // ⭐ استخدم موقع المستخدم الحالي دائماً كنقطة انطلاق (بعد بدء الملاحة)
+  const start = (navigationActive && userLocation) ? userLocation : (manualStart || userLocation);
   if (!start) {
     speak('يرجى تحديد موقع الانطلاق. اضغط مطولاً على الخريطة');
     showHint('📍 اضغط مطولاً على الخريطة لتحديد موقع الانطلاق');
     return;
   }
 
-  showLoading('جاري حساب المسارات...');
-  document.getElementById('routeOptions').classList.remove('show');
-  document.getElementById('startBtn').classList.remove('show');
+  if (!isRecalc) showLoading('جاري حساب المسارات...');
+  if (!isRecalc) {
+    document.getElementById('routeOptions').classList.remove('show');
+    document.getElementById('startBtn').classList.remove('show');
+  }
 
   const profile = currentTravelMode === 'foot' ? 'foot' : 'driving';
   const coordsStr = `${start[1]},${start[0]};${loc[1]},${loc[0]}`;
@@ -1684,9 +1845,9 @@ function setDestination(loc, name) {
   fetch(url)
     .then(r => r.json())
     .then(data => {
-      hideLoading();
+      if (!isRecalc) hideLoading();
       if (!data.routes || !data.routes.length) {
-        alert('تعذر حساب المسار');
+        if (!isRecalc) alert('تعذر حساب المسار');
         return;
       }
       const routes = data.routes;
@@ -1704,15 +1865,25 @@ function setDestination(loc, name) {
         `${(traffic.distance/1000).toFixed(1)}كم · ${Math.round(traffic.duration/60)}د`;
 
       selectRoute('fastest');
-      document.getElementById('routeOptions').classList.add('show');
-      document.getElementById('startBtn').classList.add('show');
+      if (!isRecalc) {
+        document.getElementById('routeOptions').classList.add('show');
+        document.getElementById('startBtn').classList.add('show');
 
-      const modeText = currentTravelMode === 'foot' ? 'مشياً' : 'بالسيارة';
-      speak(`تم حساب المسار ${modeText}. الأسرع ${(fastest.distance/1000).toFixed(1)} كيلومتر، ${Math.round(fastest.duration/60)} دقيقة`);
+        const modeText = currentTravelMode === 'foot' ? 'مشياً' : 'بالسيارة';
+        speak(`تم حساب المسار ${modeText}. الأسرع ${(fastest.distance/1000).toFixed(1)} كيلومتر، ${Math.round(fastest.duration/60)} دقيقة`);
+      } else {
+        // في وضع إعادة الحساب، أظهر التوجيهات الجديدة مباشرة
+        currentStepIndex = 0;
+        lastSpokenStep = -1;
+        updateNavigationUI();
+        speak('تم إعادة حساب المسار، اتبع التعليمات الجديدة');
+      }
     })
     .catch(err => {
-      hideLoading();
-      alert('تعذر حساب المسار. تحقق من الاتصال.');
+      if (!isRecalc) {
+        hideLoading();
+        alert('تعذر حساب المسار. تحقق من الاتصال.');
+      }
       console.error(err);
     });
 }
@@ -1743,7 +1914,7 @@ function selectRoute(profile) {
     color: '#1a73e8', weight: 8, opacity: 0.9,
     lineCap: 'round', lineJoin: 'round'
   }).addTo(map);
-  map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+  if (!navigationActive) map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
 
   const leg = route.legs[0];
   currentSteps = leg.steps.map(s => ({
@@ -1804,8 +1975,18 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
 // ============================================================
 // بدء التوجيه
 // ============================================================
-document.getElementById('startBtn').onclick = () => {
+document.getElementById('startBtn').onclick = async () => {
   if (!currentSteps.length) return;
+
+  // ⭐ تفعيل منع إطفاء الشاشة
+  await keepScreenOn();
+
+  // ⭐ تركيز على موقع المستخدم قبل البدء
+  if (userLocation) {
+    map.setView(userLocation, 17, { animate: true });
+    await new Promise(r => setTimeout(r, 400));
+  }
+
   navigationActive = true;
   recenterMode = 'follow';
   currentStepIndex = 0;
@@ -1825,6 +2006,7 @@ document.getElementById('startBtn').onclick = () => {
   playBeep(880, 120);
   setTimeout(() => speak('بدء التوجيه. ' + (currentSteps[0]?.text || '')), 200);
 
+  // ابدأ الكاميرا في وضع التتبع
   if (userLocation) {
     const targetZoom = 17;
     const targetCenter = offsetLatLng(userLocation, lastHeading + 180, map.getSize().y * 0.35);
@@ -1844,6 +2026,9 @@ function stopNavigation() {
   synth.cancel();
   document.body.classList.remove('navigating');
 
+  // ⭐ السماح بإطفاء الشاشة عند الإنهاء
+  allowScreenOff();
+
   document.getElementById('navTopBar').classList.remove('show');
   document.getElementById('navBottomBar').classList.remove('show');
   document.getElementById('navStopFloat').classList.remove('show');
@@ -1861,6 +2046,7 @@ function stopNavigation() {
   currentRouteOptions = { fastest: null, shortest: null, traffic: null, all: null };
   currentDestination = null;
   manualStart = null;
+  lastRouteRecalcTime = 0;
 
   if (userLocation) {
     map.setView(userLocation, 16, { animate: true, duration: 0.8 });
@@ -1988,11 +2174,46 @@ document.getElementById('locBtn').onclick = () => {
 };
 
 // ============================================================
+// تأكيد الخروج
+// ============================================================
+const exitDialog = document.getElementById('exitDialog');
+let exitTriggered = false;
+
+document.getElementById('exitCancel').onclick = () => {
+  exitDialog.classList.remove('show');
+  exitTriggered = false;
+};
+document.getElementById('exitConfirm').onclick = () => {
+  exitDialog.classList.remove('show');
+  // حاول إغلاق النافذة
+  window.close();
+  // إن لم تعمل، أظهر رسالة
+  setTimeout(() => {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;padding:20px;background:#1a73e8;color:#fff;flex-direction:column;gap:16px;"><div style="font-size:60px;">👋</div><h2>شكراً لاستخدامك ملاحة الشام</h2><p style="opacity:0.9;">يمكنك إغلاق التبويب الآن</p></div>';
+  }, 200);
+};
+
+// اعتراض زر الرجوع في المتصفح
+window.addEventListener('popstate', (e) => {
+  if (!exitTriggered) {
+    history.pushState(null, null, location.href);
+    exitDialog.classList.add('show');
+    exitTriggered = true;
+  }
+});
+
+// ابدأ بتخزين حالة في الهيستوري
+history.pushState(null, null, location.href);
+
+// ============================================================
 // بدء التطبيق
 // ============================================================
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   document.getElementById('travelModeBar').classList.add('show');
   document.getElementById('recenterBtn').classList.add('show');
+
+  // ⭐ محاولة تفعيل منع الإطفاء فور فتح التطبيق
+  await keepScreenOn();
 
   setTimeout(() => {
     if (navigator.geolocation) {
