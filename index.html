@@ -283,4 +283,162 @@
                 </div>
 
                 <!-- التقارير وحسب النظام الموحد السوري -->
-                <div x-show="currentTab === 'reports'" class
+                <div x-show="currentTab === 'reports'" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border">
+                            <h3 class="text-md font-bold text-slate-800 mb-4 border-b pb-2">ميزان المراجعة وفق المجموعات الأربع</h3>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between py-1 border-b">
+                                    <span class="text-gray-600">1. إجمالي الموجودات (الأصول)</span>
+                                    <span class="font-bold" x-text="calculateTotalType('1 الموجودات')"></span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b">
+                                    <span class="text-gray-600">2. إجمالي الخصوم (الالتزامات)</span>
+                                    <span class="font-bold" x-text="calculateTotalType('2 الخصوم')"></span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b">
+                                    <span class="text-gray-600">3. إجمالي الاستخدامات (المصروفات)</span>
+                                    <span class="font-bold text-rose-600" x-text="calculateTotalType('3 الاستخدامات')"></span>
+                                </div>
+                                <div class="flex justify-between py-1">
+                                    <span class="text-gray-600">4. إجمالي الموارد (الإيرادات)</span>
+                                    <span class="font-bold text-emerald-600" x-text="calculateTotalType('4 الموارد')"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border">
+                            <h3 class="text-md font-bold text-slate-800 mb-4 border-b pb-2">نتيجة النشاط (الموارد - الاستخدامات)</h3>
+                            <div class="p-4 bg-slate-50 rounded-lg text-center space-y-2">
+                                <p class="text-sm text-gray-500">الفائض / العجز المقدر</p>
+                                <p class="text-2xl font-bold text-blue-600" x-text="calculateTotalType('4 الموارد') - calculateTotalType('3 الاستخدامات')"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div x-show="currentTab === 'backup'" class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm max-w-xl">
+                        <h2 class="text-lg font-bold mb-2">إدارة البيانات والنسخ الاحتياطي</h2>
+                        <p class="text-sm text-gray-500 mb-6">يمكنك تصدير بيانات النظام بالكامل أو استعادتها للحفاظ عليها برمزيتها المحاسبية.</p>
+                        
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <button @click="exportData" class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg text-sm hover:bg-blue-700 transition">📥 تصدير البيانات (JSON)</button>
+                            <button @click="clearData" class="bg-rose-100 text-rose-700 px-4 py-2.5 rounded-lg text-sm hover:bg-rose-200 transition">⚠️ إعلاء التصفير</button>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function accountingApp() {
+            return {
+                currentTab: 'dashboard',
+                // شجرة دليل الحسابات الموحد السوري (المرسوم 287)
+                accounts: JSON.parse(localStorage.getItem('acc_syria_accounts')) || [
+                    { code: '111', name: 'أراضي', type: '1 الموجودات', balance: 0 },
+                    { code: '112', name: 'مباني وإنشاءات', type: '1 الموجودات', balance: 0 },
+                    { code: '113', name: 'آلات ومعدات', type: '1 الموجودات', balance: 0 },
+                    { code: '131', name: 'خامات ومواد أصلية', type: '1 الموجودات', balance: 0 },
+                    { code: '133', name: 'إنتاج تام', type: '1 الموجودات', balance: 0 },
+                    { code: '171', name: 'مدينون مختلفون', type: '1 الموجودات', balance: 0 },
+                    { code: '181', name: 'الصندوق', type: '1 الموجودات', balance: 100000 },
+                    { code: '182', name: 'المصارف / حساب جاري', type: '1 الموجودات', balance: 250000 },
+                    { code: '211', name: 'رأس المال المدفوع', type: '2 الخصوم', balance: 350000 },
+                    { code: '261', name: 'موردون', type: '2 الخصوم', balance: 0 },
+                    { code: '311', name: 'الأجور والمرتبات', type: '3 الاستخدامات', balance: 0 },
+                    { code: '321', name: 'خامات رئيسية ومواد', type: '3 الاستخدامات', balance: 0 },
+                    { code: '337', name: 'الإنارة والمياه', type: '3 الاستخدامات', balance: 0 },
+                    { code: '411', name: 'صافي مبيعات الإنتاج التام', type: '4 الموارد', balance: 0 }
+                ],
+                journalEntries: JSON.parse(localStorage.getItem('acc_syria_entries')) || [],
+                inventory: JSON.parse(localStorage.getItem('acc_syria_inventory')) || [],
+                invoices: JSON.parse(localStorage.getItem('acc_syria_invoices')) || [],
+
+                newAcc: { code: '', name: '', type: '1 الموجودات', balance: 0 },
+                newEntry: { date: new Date().toISOString().split('T')[0], desc: '', debitAcc: '', creditAcc: '', amount: 0 },
+                newItem: { name: '', qty: 0, cost: 0 },
+                newInv: { client: '', item: '', total: 0 },
+
+                getTabTitle() {
+                    const titles = {
+                        'dashboard': 'لوحة المؤشرات للنظام الموحد',
+                        'accounts': 'دليل الحسابات (النظام المحاسبي الموحد السوري)',
+                        'journal': 'دفتر اليومية العامة',
+                        'inventory': 'إدارة المخزون والمواد (حـ/ 13)',
+                        'invoices': 'سجل المبيعات والحسابات المدينة',
+                        'reports': 'القوائم المالية والنتائج الموحدة',
+                        'backup': 'النسخ الاحتياطي والأمان'
+                    };
+                    return titles[this.currentTab] || '';
+                },
+
+                addAccount() {
+                    this.accounts.push({...this.newAcc});
+                    this.save();
+                    this.newAcc = { code: '', name: '', type: '1 الموجودات', balance: 0 };
+                    alert('تم إضافة الحساب إلى الدليل الموحد بنجاح');
+                },
+
+                addJournalEntry() {
+                    this.journalEntries.push({ id: Date.now(), ...this.newEntry });
+                    this.save();
+                    this.newEntry.desc = '';
+                    this.newEntry.amount = 0;
+                    alert('تم ترحيل القيد المحاسبي بنجاح');
+                },
+
+                addItem() {
+                    this.inventory.push({...this.newItem});
+                    this.save();
+                    this.newItem = { name: '', qty: 0, cost: 0 };
+                    alert('تم إضافة الصنف للمخزن بنجاح');
+                },
+
+                addInvoice() {
+                    this.invoices.push({ id: Date.now(), ...this.newInv });
+                    this.save();
+                    this.newInv = { client: '', item: '', total: 0 };
+                    alert('تم حفظ الفاتورة بنجاح');
+                },
+
+                calculateTotalType(type) {
+                    return this.accounts.filter(a => a.type === type).reduce((sum, a) => sum + Number(a.balance || 0), 0);
+                },
+
+                exportData() {
+                    const data = {
+                        accounts: this.accounts,
+                        entries: this.journalEntries,
+                        inventory: this.inventory,
+                        invoices: this.invoices
+                    };
+                    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'syrian_accounting_backup.json';
+                    a.click();
+                },
+
+                clearData() {
+                    if(confirm('هل تريد تصفير قاعدة البيانات وإعادة ضبط دليل الحسابات؟')) {
+                        localStorage.clear();
+                        location.reload();
+                    }
+                },
+
+                save() {
+                    localStorage.setItem('acc_syria_accounts', JSON.stringify(this.accounts));
+                    localStorage.setItem('acc_syria_entries', JSON.stringify(this.journalEntries));
+                    localStorage.setItem('acc_syria_inventory', JSON.stringify(this.inventory));
+                    localStorage.setItem('acc_syria_invoices', JSON.stringify(this.invoices));
+                }
+            }
+        }
+    </script>
+</body>
+</html>
