@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام المحاسبي الشامل والمتقدم</title>
+    <title>النظام المحاسبي الموحد - سوريا</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.5/cdn.min.js" defer></script>
     <style>
@@ -18,48 +18,44 @@
         <!-- الشريط الجانبي للهواتف والشاشات -->
         <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl z-20">
             <div class="p-4 md:p-5 text-lg md:text-xl font-bold text-white border-b border-slate-800 flex items-center justify-between">
-                <span>البرنامج المحاسبي</span>
-                <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Pro v2.0</span>
+                <span>النظام المحاسبي</span>
+                <span class="text-xs bg-emerald-600 text-white px-2 py-1 rounded">الموحد السوري</span>
             </div>
             
             <nav class="flex md:flex-col p-2 md:p-4 space-x-1 md:space-x-0 md:space-y-1.5 overflow-x-auto md:overflow-y-auto text-xs md:text-sm whitespace-nowrap">
-                <button @click="currentTab = 'dashboard'" :class="currentTab === 'dashboard' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">📊 <span class="hidden md:inline">لوحة المؤشرات</span></button>
-                <button @click="currentTab = 'accounts'" :class="currentTab === 'accounts' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">🌳 <span class="hidden md:inline">شجرة الحسابات</span></button>
-                <button @click="currentTab = 'journal'" :class="currentTab === 'journal' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">📝 <span class="hidden md:inline">قيود اليومية</span></button>
-                <button @click="currentTab = 'inventory'" :class="currentTab === 'inventory' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">📦 <span class="hidden md:inline">المستودعات</span></button>
-                <button @click="currentTab = 'invoices'" :class="currentTab === 'invoices' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">🧾 <span class="hidden md:inline">الفواتير والمبيعات</span></button>
-                <button @click="currentTab = 'reports'" :class="currentTab === 'reports' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">📈 <span class="hidden md:inline">التقارير المالية</span></button>
-                <button @click="currentTab = 'backup'" :class="currentTab === 'backup' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">🛡️ <span class="hidden md:inline">الحماية والنسخ</span></button>
+                <button @click="currentTab = 'dashboard'" :class="currentTab === 'dashboard' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">📊 <span>لوحة المؤشرات</span></button>
+                <button @click="currentTab = 'accounts'" :class="currentTab === 'accounts' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">🌳 <span>دليل الحسابات (الموحد)</span></button>
+                <button @click="currentTab = 'journal'" :class="currentTab === 'journal' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">📝 <span>قيود اليومية</span></button>
+                <button @click="currentTab = 'inventory'" :class="currentTab === 'inventory' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">📦 <span>المخزون والمستودعات</span></button>
+                <button @click="currentTab = 'invoices'" :class="currentTab === 'invoices' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">🧾 <span>الفواتير والمبيعات</span></button>
+                <button @click="currentTab = 'reports'" :class="currentTab === 'reports' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">📈 <span>التقارير الموحدة</span></button>
+                <button @click="currentTab = 'backup'" :class="currentTab === 'backup' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">🛡️ <span>النسخ والحماية</span></button>
             </nav>
         </aside>
 
         <!-- المحتوى الرئيسي -->
         <div class="flex-1 flex flex-col overflow-y-auto">
             
-            <!-- الشريط العلوي -->
             <header class="bg-white shadow-sm px-6 py-4 flex justify-between items-center border-b">
                 <h1 class="text-lg md:text-xl font-bold text-slate-800" x-text="getTabTitle()"></h1>
-                <div class="flex items-center gap-4">
-                    <span class="text-xs md:text-sm bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-medium">● النظام يعمل بكفاءة</span>
-                </div>
+                <span class="text-xs md:text-sm bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-medium">مُطابق لدليل الحسابات الموحد</span>
             </header>
 
-            <!-- مساحة العمل التفاعلية -->
             <main class="p-4 md:p-6">
 
                 <!-- 1. لوحة المؤشرات -->
                 <div x-show="currentTab === 'dashboard'" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
                         <div class="bg-white p-5 rounded-xl shadow-sm border-r-4 border-blue-500">
-                            <h3 class="text-gray-500 text-sm">إجمالي الحسابات</h3>
+                            <h3 class="text-gray-500 text-sm">حسابات الدليل الموحد</h3>
                             <p class="text-3xl font-bold mt-2 text-slate-800" x-text="accounts.length"></p>
                         </div>
                         <div class="bg-white p-5 rounded-xl shadow-sm border-r-4 border-emerald-500">
-                            <h3 class="text-gray-500 text-sm">عدد قيود اليومية</h3>
+                            <h3 class="text-gray-500 text-sm">قيود اليومية المسجلة</h3>
                             <p class="text-3xl font-bold mt-2 text-slate-800" x-text="journalEntries.length"></p>
                         </div>
                         <div class="bg-white p-5 rounded-xl shadow-sm border-r-4 border-amber-500">
-                            <h3 class="text-gray-500 text-sm">إجمالي الأصناف بالمخزن</h3>
+                            <h3 class="text-gray-500 text-sm">أصناف المخزون (13)</h3>
                             <p class="text-3xl font-bold mt-2 text-slate-800" x-text="inventory.length"></p>
                         </div>
                         <div class="bg-white p-5 rounded-xl shadow-sm border-r-4 border-indigo-500">
@@ -69,27 +65,26 @@
                     </div>
                 </div>
 
-                <!-- 2. شجرة الحسابات -->
+                <!-- 2. دليل الحسابات الموحد -->
                 <div x-show="currentTab === 'accounts'" class="space-y-6">
                     <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
-                        <h2 class="text-lg font-bold mb-4">إضافة حساب جديد لشجرة الحسابات</h2>
+                        <h2 class="text-lg font-bold mb-4">إضافة حساب فرعي جديد وفق دليل الحسابات الموحد</h2>
                         <form @submit.prevent="addAccount" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">رقم الحساب</label>
-                                <input type="text" x-model="newAcc.code" required class="w-full border rounded-lg p-2 text-sm">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">رمز الحساب</label>
+                                <input type="text" x-model="newAcc.code" placeholder="مثال: 1811" required class="w-full border rounded-lg p-2 text-sm">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">اسم الحساب</label>
                                 <input type="text" x-model="newAcc.name" required class="w-full border rounded-lg p-2 text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">نوع الحساب</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">المجموعة الرئيسية</label>
                                 <select x-model="newAcc.type" class="w-full border rounded-lg p-2 text-sm">
-                                    <option value="أصول">أصول</option>
-                                    <option value="خصوم">خصوم</option>
-                                    <option value="حقوق ملكية">حقوق ملكية</option>
-                                    <option value="إيرادات">إيرادات</option>
-                                    <option value="مصروفات">مصروفات</option>
+                                    <option value="1 الموجودات">1 الموجودات (الأصول)</option>
+                                    <option value="2 الخصوم">2 الخصوم (الالتزامات)</option>
+                                    <option value="3 الاستخدامات">3 الاستخدامات (المصروفات)</option>
+                                    <option value="4 الموارد">4 الموارد (الإيرادات)</option>
                                 </select>
                             </div>
                             <div class="flex items-end">
@@ -102,16 +97,16 @@
                         <table class="w-full text-right border-collapse text-sm">
                             <thead class="bg-slate-50 border-b">
                                 <tr>
-                                    <th class="p-4">رقم الحساب</th>
+                                    <th class="p-4">رمز الحساب</th>
                                     <th class="p-4">اسم الحساب</th>
-                                    <th class="p-4">التصنيف</th>
+                                    <th class="p-4">المجموعة الأساسية</th>
                                     <th class="p-4">الرصيد الافتتاحي</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y">
                                 <template x-for="acc in accounts" :key="acc.code">
                                     <tr>
-                                        <td class="p-4 font-mono" x-text="acc.code"></td>
+                                        <td class="p-4 font-mono font-bold text-blue-600" x-text="acc.code"></td>
                                         <td class="p-4 font-semibold" x-text="acc.name"></td>
                                         <td class="p-4"><span class="bg-gray-100 px-2 py-1 rounded text-xs" x-text="acc.type"></span></td>
                                         <td class="p-4" x-text="acc.balance || 0"></td>
@@ -125,7 +120,7 @@
                 <!-- 3. قيود اليومية -->
                 <div x-show="currentTab === 'journal'" class="space-y-6">
                     <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
-                        <h2 class="text-lg font-bold mb-4">تسجيل قيد يومية مزدوج (مدين / دائن)</h2>
+                        <h2 class="text-lg font-bold mb-4">تسجيل قيد يومية من واقع الحسابات الموحدة</h2>
                         <form @submit.prevent="addJournalEntry" class="space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -133,25 +128,25 @@
                                     <input type="date" x-model="newEntry.date" required class="w-full border rounded-lg p-2 text-sm">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-700 mb-1">البيان / الوصف</label>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">شرح القيد / البيان</label>
                                     <input type="text" x-model="newEntry.desc" required class="w-full border rounded-lg p-2 text-sm">
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-700 mb-1">الحساب المدين</label>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">من حـ/ (مدين)</label>
                                     <select x-model="newEntry.debitAcc" class="w-full border rounded-lg p-2 text-sm">
                                         <template x-for="acc in accounts" :key="acc.code">
-                                            <option :value="acc.name" x-text="acc.name"></option>
+                                            <option :value="acc.code + ' - ' + acc.name" x-text="acc.code + ' - ' + acc.name"></option>
                                         </template>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-700 mb-1">الحساب الدائن</label>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">إلى حـ/ (دائن)</label>
                                     <select x-model="newEntry.creditAcc" class="w-full border rounded-lg p-2 text-sm">
                                         <template x-for="acc in accounts" :key="acc.code">
-                                            <option :value="acc.name" x-text="acc.name"></option>
+                                            <option :value="acc.code + ' - ' + acc.name" x-text="acc.code + ' - ' + acc.name"></option>
                                         </template>
                                     </select>
                                 </div>
@@ -160,7 +155,7 @@
                                     <input type="number" step="0.01" x-model="newEntry.amount" required class="w-full border rounded-lg p-2 text-sm">
                                 </div>
                             </div>
-                            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-700 transition">ترحيل القيد المحاسبي</button>
+                            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-700 transition">ترحيل القيد</button>
                         </form>
                     </div>
 
@@ -170,8 +165,8 @@
                                 <tr>
                                     <th class="p-4">التاريخ</th>
                                     <th class="p-4">البيان</th>
-                                    <th class="p-4">المدين</th>
-                                    <th class="p-4">الدائن</th>
+                                    <th class="p-4">الجانب المدين</th>
+                                    <th class="p-4">الجانب الدائن</th>
                                     <th class="p-4">المبلغ</th>
                                 </tr>
                             </thead>
@@ -190,25 +185,25 @@
                     </div>
                 </div>
 
-                <!-- 4. إدارة المستودعات -->
+                <!-- باقي الأقسام تباعاً -->
                 <div x-show="currentTab === 'inventory'" class="space-y-6">
                     <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
-                        <h2 class="text-lg font-bold mb-4">إضافة صنف جديد للمستودع</h2>
+                        <h2 class="text-lg font-bold mb-4">إضافة منتج إلى حساب المخزون (13)</h2>
                         <form @submit.prevent="addItem" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">اسم الصنف</label>
                                 <input type="text" x-model="newItem.name" required class="w-full border rounded-lg p-2 text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">الكمية المتاحة</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">الكمية</label>
                                 <input type="number" x-model="newItem.qty" required class="w-full border rounded-lg p-2 text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">سعر التكلفة</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">التكلفة الفردية</label>
                                 <input type="number" step="0.01" x-model="newItem.cost" required class="w-full border rounded-lg p-2 text-sm">
                             </div>
                             <div class="flex items-end">
-                                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700 transition">حفظ الصنف</button>
+                                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700 transition">حفظ بالمخزن</button>
                             </div>
                         </form>
                     </div>
@@ -219,8 +214,8 @@
                                 <tr>
                                     <th class="p-4">الصنف</th>
                                     <th class="p-4">الكمية</th>
-                                    <th class="p-4">سعر التكلفة</th>
-                                    <th class="p-4">إجمالي قيمة المخزون</th>
+                                    <th class="p-4">تكلفة الوحدة</th>
+                                    <th class="p-4">إجمالي التكلفة</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y">
@@ -237,17 +232,16 @@
                     </div>
                 </div>
 
-                <!-- 5. الفواتير -->
                 <div x-show="currentTab === 'invoices'" class="space-y-6">
                     <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
-                        <h2 class="text-lg font-bold mb-4">إصدار فاتورة مبيعات جديدة</h2>
+                        <h2 class="text-lg font-bold mb-4">إصدار فاتورة (تؤثر على 41 إيرادات النشاط و 171 مدينون)</h2>
                         <form @submit.prevent="addInvoice" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">اسم العميل</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">اسم العميل / الجهة</label>
                                 <input type="text" x-model="newInv.client" required class="w-full border rounded-lg p-2 text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">اختر الصنف</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">اختر الصنف المباع</label>
                                 <select x-model="newInv.item" class="w-full border rounded-lg p-2 text-sm">
                                     <template x-for="item in inventory" :key="item.name">
                                         <option :value="item.name" x-text="item.name"></option>
@@ -255,11 +249,11 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">إجمالي الفاتورة</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">المبلغ الإجمالي</label>
                                 <input type="number" step="0.01" x-model="newInv.total" required class="w-full border rounded-lg p-2 text-sm">
                             </div>
                             <div class="flex items-end">
-                                <button type="submit" class="w-full bg-emerald-600 text-white py-2 rounded-lg text-sm hover:bg-emerald-700 transition">حفظ وإصدار الفاتورة</button>
+                                <button type="submit" class="w-full bg-emerald-600 text-white py-2 rounded-lg text-sm hover:bg-emerald-700 transition">إصدار الفاتورة</button>
                             </div>
                         </form>
                     </div>
@@ -270,8 +264,8 @@
                                 <tr>
                                     <th class="p-4">رقم الفاتورة</th>
                                     <th class="p-4">العميل</th>
-                                    <th class="p-4">الصنف</th>
-                                    <th class="p-4">القيمة الإجمالية</th>
+                                    <th class="p-4">المادة</th>
+                                    <th class="p-4">إجمالي القيمة</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y">
@@ -288,157 +282,5 @@
                     </div>
                 </div>
 
-                <!-- 6. التقارير المالية -->
-                <div x-show="currentTab === 'reports'" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white p-6 rounded-xl shadow-sm border">
-                            <h3 class="text-md font-bold text-slate-800 mb-4 border-b pb-2">ميزان المراجعة والأرصدة</h3>
-                            <div class="space-y-2 text-sm">
-                                <div class="flex justify-between py-1 border-b">
-                                    <span class="text-gray-600">إجمالي الأصول</span>
-                                    <span class="font-bold" x-text="calculateTotalType('أصول')"></span>
-                                </div>
-                                <div class="flex justify-between py-1 border-b">
-                                    <span class="text-gray-600">إجمالي الخصوم</span>
-                                    <span class="font-bold" x-text="calculateTotalType('خصوم')"></span>
-                                </div>
-                                <div class="flex justify-between py-1 border-b">
-                                    <span class="text-gray-600">إجمالي الإيرادات</span>
-                                    <span class="font-bold text-emerald-600" x-text="calculateTotalType('إيرادات')"></span>
-                                </div>
-                                <div class="flex justify-between py-1">
-                                    <span class="text-gray-600">إجمالي المصروفات</span>
-                                    <span class="font-bold text-rose-600" x-text="calculateTotalType('مصروفات')"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-xl shadow-sm border">
-                            <h3 class="text-md font-bold text-slate-800 mb-4 border-b pb-2">ملخص الأداء المالي</h3>
-                            <div class="p-4 bg-slate-50 rounded-lg text-center space-y-2">
-                                <p class="text-sm text-gray-500">صافي الربح التقديري (الإيرادات - المصروفات)</p>
-                                <p class="text-2xl font-bold text-blue-600" x-text="calculateTotalType('إيرادات') - calculateTotalType('مصروفات')"></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 7. الحماية والنسخ الاحتياطي -->
-                <div x-show="currentTab === 'backup'" class="space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm max-w-xl">
-                        <h2 class="text-lg font-bold mb-2">إدارة البيانات والنسخ الاحتياطي</h2>
-                        <p class="text-sm text-gray-500 mb-6">يمكنك تصدير قاعدة بياناتك بالكامل لحفظها على جهازك، أو استعادتها بأي وقت.</p>
-                        
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <button @click="exportData" class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg text-sm hover:bg-blue-700 transition">📥 تصدير البيانات (JSON)</button>
-                            <button @click="clearData" class="bg-rose-100 text-rose-700 px-4 py-2.5 rounded-lg text-sm hover:bg-rose-200 transition">⚠️ تصفير النظام</button>
-                        </div>
-                    </div>
-                </div>
-
-            </main>
-        </div>
-    </div>
-
-    <script>
-        function accountingApp() {
-            return {
-                currentTab: 'dashboard',
-                accounts: JSON.parse(localStorage.getItem('acc_accounts')) || [
-                    { code: '101', name: 'الصندوق النقدي', type: 'أصول', balance: 50000 },
-                    { code: '102', name: 'البنك', type: 'أصول', balance: 120000 },
-                    { code: '201', name: 'الموردين', type: 'خصوم', balance: 15000 },
-                    { code: '301', name: 'رأس المال', type: 'حقوق ملكية', balance: 155000 },
-                    { code: '401', name: 'المبيعات', type: 'إيرادات', balance: 0 },
-                    { code: '501', name: 'المصروفات العامة', type: 'مصروفات', balance: 0 }
-                ],
-                journalEntries: JSON.parse(localStorage.getItem('acc_entries')) || [],
-                inventory: JSON.parse(localStorage.getItem('acc_inventory')) || [
-                    { name: 'صنف افتراضي 1', qty: 100, cost: 25 }
-                ],
-                invoices: JSON.parse(localStorage.getItem('acc_invoices')) || [],
-
-                newAcc: { code: '', name: '', type: 'أصول', balance: 0 },
-                newEntry: { date: new Date().toISOString().split('T')[0], desc: '', debitAcc: '', creditAcc: '', amount: 0 },
-                newItem: { name: '', qty: 0, cost: 0 },
-                newInv: { client: '', item: '', total: 0 },
-
-                getTabTitle() {
-                    const titles = {
-                        'dashboard': 'لوحة المؤشرات العامة',
-                        'accounts': 'شجرة الحسابات المحاسبية',
-                        'journal': 'قيود اليومية المزدوجة',
-                        'inventory': 'إدارة المستودعات والأصناف',
-                        'invoices': 'الفواتير والمبيعات',
-                        'reports': 'التقارير المالية الختامية',
-                        'backup': 'الأمان والنسخ الاحتياطي'
-                    };
-                    return titles[this.currentTab] || '';
-                },
-
-                addAccount() {
-                    this.accounts.push({...this.newAcc});
-                    this.save();
-                    this.newAcc = { code: '', name: '', type: 'أصول', balance: 0 };
-                    alert('تم إضافة الحساب بنجاح');
-                },
-
-                addJournalEntry() {
-                    this.journalEntries.push({ id: Date.now(), ...this.newEntry });
-                    this.save();
-                    this.newEntry.desc = '';
-                    this.newEntry.amount = 0;
-                    alert('تم ترحيل القيد المحاسبي بنجاح');
-                },
-
-                addItem() {
-                    this.inventory.push({...this.newItem});
-                    this.save();
-                    this.newItem = { name: '', qty: 0, cost: 0 };
-                    alert('تم حفظ الصنف بنجاح');
-                },
-
-                addInvoice() {
-                    this.invoices.push({ id: Date.now(), ...this.newInv });
-                    this.save();
-                    this.newInv = { client: '', item: '', total: 0 };
-                    alert('تم إصدار الفاتورة بنجاح');
-                },
-
-                calculateTotalType(type) {
-                    return this.accounts.filter(a => a.type === type).reduce((sum, a) => sum + Number(a.balance || 0), 0);
-                },
-
-                exportData() {
-                    const data = {
-                        accounts: this.accounts,
-                        entries: this.journalEntries,
-                        inventory: this.inventory,
-                        invoices: this.invoices
-                    };
-                    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'accounting_backup.json';
-                    a.click();
-                },
-
-                clearData() {
-                    if(confirm('هل أنت متأكد من تصفير كافة بيانات النظام؟')) {
-                        localStorage.clear();
-                        location.reload();
-                    }
-                },
-
-                save() {
-                    localStorage.setItem('acc_accounts', JSON.stringify(this.accounts));
-                    localStorage.setItem('acc_entries', JSON.stringify(this.journalEntries));
-                    localStorage.setItem('acc_inventory', JSON.stringify(this.inventory));
-                    localStorage.setItem('acc_invoices', JSON.stringify(this.invoices));
-                }
-            }
-        }
-    </script>
-</body>
-</html>
+                <!-- التقارير وحسب النظام الموحد السوري -->
+                <div x-show="currentTab === 'reports'" class
