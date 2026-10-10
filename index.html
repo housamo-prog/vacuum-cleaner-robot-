@@ -8,10 +8,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ملاحة الشام">
-<meta name="format-detection" content="telephone=no">
 <title>ملاحة الشام — دليل الملاحة والخرائط</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<!-- leaflet-rotate للدوران الحقيقي -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate.css" />
 
 <style>
   :root {
@@ -36,8 +37,38 @@
     -webkit-user-select: none; user-select: none;
     touch-action: manipulation;
   }
-  #map { position: absolute; inset: 0; z-index: 1; }
-  body.navigating #map { filter: saturate(1.08) contrast(1.03); }
+
+  /* ============================================================
+     الخريطة مع منظور ثلاثي الأبعاد
+     ============================================================ */
+  #map {
+    position: absolute; inset: 0; z-index: 1;
+    transition: filter 0.4s;
+  }
+  body.navigating #map { filter: saturate(1.1) contrast(1.06) brightness(1.02); }
+
+  /* منظور ثلاثي الأبعاد أثناء الملاحة — نمط مائل مثل Sygic */
+  body.navigating #map .leaflet-map-pane {
+    transform-style: preserve-3d;
+  }
+  body.navigating #map .leaflet-tile-pane {
+    transform: perspective(600px) rotateX(45deg) scale(1.8) translateY(-8%) !important;
+    transform-origin: 50% 100%;
+    transition: transform 0.6s ease-out;
+    will-change: transform;
+  }
+  /* إخفاء حواف البلاطات أثناء التحويل */
+  body.navigating #map .leaflet-tile {
+    outline: 1px solid transparent;
+    backface-visibility: hidden;
+  }
+
+  /* الأشرطة والأزرار لا تتأثر بالمنظور */
+  body.navigating #map .leaflet-overlay-pane,
+  body.navigating #map .leaflet-marker-pane,
+  body.navigating #map .leaflet-popup-pane {
+    transform: none !important;
+  }
 
   /* ============================================================
      الهيدر
@@ -64,22 +95,14 @@
   }
   #appHeader .logo svg { width: 24px; height: 24px; fill: #fff; }
   #appHeader .title-block { flex: 1; min-width: 0; }
-  #appHeader .title {
-    font-size: 17px; font-weight: 700; line-height: 1.2;
-    letter-spacing: 0.2px;
-  }
-  #appHeader .subtitle {
-    font-size: 11px; opacity: 0.85; margin-top: 2px;
-    font-weight: 400;
-  }
+  #appHeader .title { font-size: 17px; font-weight: 700; line-height: 1.2; }
+  #appHeader .subtitle { font-size: 11px; opacity: 0.85; margin-top: 2px; }
   #appHeader .actions { display: flex; gap: 6px; }
   #appHeader .header-btn {
     width: 36px; height: 36px; border-radius: 50%;
     background: rgba(255,255,255,0.15); border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    transition: background 0.2s;
   }
-  #appHeader .header-btn:hover { background: rgba(255,255,255,0.28); }
   #appHeader .header-btn svg { width: 18px; height: 18px; fill: #fff; }
 
   /* ============================================================
@@ -133,11 +156,9 @@
     font-family: inherit; font-size: 13px; font-weight: 500;
     color: var(--text);
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-    transition: all 0.2s;
     white-space: nowrap;
     border: 1.5px solid transparent;
   }
-  .cat-btn:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.18); }
   .cat-btn.active {
     background: var(--primary); color: #fff;
     box-shadow: 0 3px 14px rgba(26,115,232,0.4);
@@ -170,25 +191,17 @@
     cursor: pointer; font-size: 14px; color: var(--text);
     display: flex; gap: 12px; align-items: center;
   }
-  .result-item:last-child { border-bottom: none; }
   .result-item:hover, .result-item:active { background: var(--input-bg); }
   .result-item .pin svg { width: 22px; height: 22px; flex-shrink: 0; }
   .result-item .text { flex: 1; line-height: 1.4; min-width: 0; }
-  .result-item .title {
-    font-weight: 500;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
+  .result-item .title { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .result-item .sub { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
   .result-item .dist-badge {
     background: var(--input-bg); color: var(--primary);
     padding: 4px 9px; border-radius: 12px;
-    font-size: 11px; font-weight: 600;
-    flex-shrink: 0;
+    font-size: 11px; font-weight: 600; flex-shrink: 0;
   }
-  .result-item .save-btn {
-    background: transparent; border: none; cursor: pointer;
-    padding: 8px; border-radius: 8px; flex-shrink: 0;
-  }
+  .result-item .save-btn { background: transparent; border: none; cursor: pointer; padding: 8px; flex-shrink: 0; }
   .result-item .save-btn svg { width: 18px; height: 18px; fill: var(--text-sub); }
   .result-item .save-btn.saved svg { fill: var(--gold); }
 
@@ -209,7 +222,7 @@
   #resultsClose svg { width: 16px; height: 16px; fill: var(--text); }
 
   /* ============================================================
-     شريط نوع الرحلة — أسفل الشاشة (Bottom Sheet)
+     شريط نوع الرحلة — أسفل
      ============================================================ */
   #travelModeBar {
     position: absolute;
@@ -232,7 +245,6 @@
     display: flex; align-items: center; gap: 8px;
     font-family: inherit; font-size: 14px; font-weight: 600;
     color: var(--text-sub);
-    transition: all 0.25s;
     white-space: nowrap;
   }
   .mode-btn.active {
@@ -240,7 +252,6 @@
     box-shadow: 0 3px 12px rgba(26,115,232,0.4);
   }
   .mode-btn svg { width: 20px; height: 20px; fill: currentColor; }
-  .mode-btn span { display: inline; }
 
   /* ============================================================
      عداد السرعة
@@ -295,7 +306,7 @@
     box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     padding: 6px; display: none; min-width: 200px;
   }
-  #mapPopup.show { display: block; animation: popIn 0.15s ease-out; }
+  #mapPopup.show { display: block; }
   @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
   .popup-item {
     background: transparent; border: none; cursor: pointer;
@@ -344,17 +355,12 @@
   #savedList li .info { flex: 1; }
   #savedList li .name { font-weight: 500; font-size: 14px; }
   #savedList li .coords { font-size: 11px; color: var(--text-sub); margin-top: 3px; }
-  #savedList li .del-btn {
-    background: transparent; border: none; cursor: pointer; padding: 8px;
-  }
+  #savedList li .del-btn { background: transparent; border: none; cursor: pointer; padding: 8px; }
   #savedList li .del-btn svg { width: 18px; height: 18px; fill: var(--danger); }
-  #savedList .empty {
-    text-align: center; color: var(--text-sub);
-    padding: 40px 20px; font-size: 14px;
-  }
+  #savedList .empty { text-align: center; color: var(--text-sub); padding: 40px 20px; font-size: 14px; }
 
   /* ============================================================
-     خيارات المسار (أسفل)
+     خيارات المسار
      ============================================================ */
   #routeOptions {
     position: absolute; bottom: calc(88px + var(--safe-bottom));
@@ -389,7 +395,7 @@
     padding: 16px 18px calc(20px + var(--safe-bottom));
     display: none; max-height: 45vh; overflow-y: auto;
   }
-  #navPanel.show { display: block; animation: slideUp 0.3s ease-out; }
+  #navPanel.show { display: block; }
   #navHeader {
     display: flex; justify-content: space-between;
     align-items: center; margin-bottom: 14px;
@@ -427,7 +433,7 @@
   #steps .dist { color: var(--text-sub); font-size: 12px; margin-top: 3px; font-weight: 400; }
 
   /* ============================================================
-     وضع الملاحة
+     وضع الملاحة — Sygic Style
      ============================================================ */
   #navTopBar {
     position: absolute; top: 0; left: 0; right: 0;
@@ -481,13 +487,8 @@
     box-shadow: 0 3px 12px rgba(0,0,0,0.3);
   }
   #navBottomBar .speed-badge.over { background: var(--danger); color: #fff; }
-  #navBottomBar .speed-badge .val {
-    font-size: 26px; font-weight: 800; line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-  #navBottomBar .speed-badge .lbl {
-    font-size: 10px; opacity: 0.8; margin-top: 2px;
-  }
+  #navBottomBar .speed-badge .val { font-size: 26px; font-weight: 800; line-height: 1; }
+  #navBottomBar .speed-badge .lbl { font-size: 10px; opacity: 0.8; margin-top: 2px; }
 
   #navStopFloat {
     position: absolute; top: calc(14px + var(--safe-top)); left: 14px;
@@ -511,7 +512,10 @@
   }
   #recenterBtn.show { display: flex; }
   #recenterBtn svg { width: 22px; height: 22px; fill: var(--text); }
-  body.navigating #recenterBtn { display: none !important; }
+  body.navigating #recenterBtn {
+    display: none;
+  }
+  body.navigating #recenterBtn.show { display: flex; }
 
   #startBtn {
     position: absolute; bottom: calc(150px + var(--safe-bottom));
@@ -562,15 +566,53 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   }
 
+  /* ============================================================
+     أيقونة السيارة — محسّنة مع ظل ثلاثي الأبعاد
+     ============================================================ */
   .vehicle-marker {
-    width: 56px; height: 56px;
+    width: 64px; height: 64px;
     display: flex; align-items: center; justify-content: center;
     transform-origin: center center;
     will-change: transform;
+    position: relative;
   }
   .vehicle-marker svg {
     width: 100%; height: 100%;
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.45)) drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+  /* هالة ضوئية أسفل السيارة */
+  .vehicle-marker::before {
+    content: '';
+    position: absolute;
+    bottom: 2px; left: 50%; transform: translateX(-50%);
+    width: 44px; height: 14px;
+    background: radial-gradient(ellipse, rgba(26,115,232,0.55) 0%, rgba(26,115,232,0.15) 50%, transparent 75%);
+    border-radius: 50%;
+    z-index: -1;
+    animation: carGlow 2s ease-in-out infinite;
+  }
+  @keyframes carGlow {
+    0%, 100% { opacity: 0.8; transform: translateX(-50%) scale(1); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.15); }
+  }
+  /* السهم الأمامي الذي يشير لاتجاه السير */
+  .vehicle-marker::after {
+    content: '';
+    position: absolute;
+    top: -6px; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 12px solid rgba(26,115,232,0.9);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    animation: arrowPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes arrowPulse {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-4px); }
+  }
+  body.dark .vehicle-marker::after {
+    border-bottom-color: rgba(138,180,248,0.9);
   }
 
   .side-btn {
@@ -581,21 +623,6 @@
     box-shadow: 0 3px 12px rgba(0,0,0,0.2);
   }
   .side-btn svg { width: 22px; height: 22px; fill: var(--text); }
-  #themeBtn { bottom: calc(88px + var(--safe-bottom)); right: 10px; display: none !important; }
-  #savedBtn { bottom: calc(88px + var(--safe-bottom)); right: 10px; display: none !important; }
-
-  /* زر إضافي: مثبّت أعلى اليمين للوضع الليلي */
-  #themeFloatBtn {
-    position: absolute;
-    top: calc(66px + var(--safe-top)); left: 10px;
-    z-index: 1050;
-    background: var(--panel); border: none; cursor: pointer;
-    width: 44px; height: 44px; border-radius: 50%;
-    display: none; align-items: center; justify-content: center;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.2);
-  }
-  #themeFloatBtn.show { display: flex; }
-  #themeFloatBtn svg { width: 20px; height: 20px; fill: var(--text); }
 
   #mapHint {
     position: absolute; bottom: calc(180px + var(--safe-bottom));
@@ -638,7 +665,6 @@
   #nameCancel { background: var(--input-bg); color: var(--text); }
   #nameSave { background: var(--primary); color: #fff; }
 
-  /* نافذة تأكيد الخروج */
   #exitDialog {
     position: absolute; inset: 0; z-index: 4100;
     background: rgba(0,0,0,0.6);
@@ -698,7 +724,6 @@
   .poi-marker.cafe { background: #6d4c41; }
   .poi-marker.hotel { background: #00838f; }
 
-  /* إخفاء شريط التمرير */
   ::-webkit-scrollbar { width: 0; height: 0; }
 </style>
 </head>
@@ -787,7 +812,6 @@
   <div id="resultsList"></div>
 </div>
 
-<!-- شريط نوع الرحلة أسفل الشاشة -->
 <div id="travelModeBar">
   <button class="mode-btn active" data-mode="driving">
     <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
@@ -905,7 +929,6 @@
   </div>
 </div>
 
-<!-- نافذة تأكيد الخروج -->
 <div id="exitDialog">
   <div id="exitBox">
     <div class="icon">
@@ -928,7 +951,7 @@
 <div id="loading"><div class="spinner"></div><span id="loadingText">جاري المعالجة...</span></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<!-- NoSleep.js لمنع إطفاء الشاشة -->
+<script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
 
 <script>
@@ -939,42 +962,24 @@ let noSleep = null;
 let wakeLock = null;
 
 async function keepScreenOn() {
-  // حاول استخدام Wake Lock API الحديثة
   try {
     if ('wakeLock' in navigator) {
       wakeLock = await navigator.wakeLock.request('screen');
-      wakeLock.addEventListener('release', () => {
-        console.log('Wake Lock released');
-      });
-      console.log('Wake Lock active');
+      wakeLock.addEventListener('release', () => {});
       return;
     }
-  } catch (err) {
-    console.warn('Wake Lock failed:', err);
-  }
-
-  // البديل: NoSleep.js
+  } catch (err) {}
   try {
-    if (!noSleep && typeof NoSleep !== 'undefined') {
-      noSleep = new NoSleep();
-    }
-    if (noSleep) {
-      noSleep.enable();
-      console.log('NoSleep enabled');
-    }
-  } catch (err) {
-    console.warn('NoSleep failed:', err);
-  }
+    if (!noSleep && typeof NoSleep !== 'undefined') noSleep = new NoSleep();
+    if (noSleep) noSleep.enable();
+  } catch (err) {}
 }
-
 function allowScreenOff() {
   try {
     if (wakeLock) { wakeLock.release(); wakeLock = null; }
-    if (noSleep) { noSleep.disable(); }
+    if (noSleep) noSleep.disable();
   } catch(e) {}
 }
-
-// أعد التفعيل عند العودة للتطبيق
 document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState === 'visible' && wakeLock === null) {
     await keepScreenOn();
@@ -1013,6 +1018,7 @@ const POI_ICONS_MAP = {
   hotel:      '<svg viewBox="0 0 24 24"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>'
 };
 
+// أيقونة سيارة مع سهم أمامي مدمج لضمان معرفة الاتجاه
 const CAR_ICON_TOPVIEW = `
 <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -1022,7 +1028,7 @@ const CAR_ICON_TOPVIEW = `
       <stop offset="100%" stop-color="#0d47a1"/>
     </linearGradient>
     <linearGradient id="carGlass" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#c5e3ff"/>
+      <stop offset="0%" stop-color="#e8f3ff"/>
       <stop offset="100%" stop-color="#4a90e2"/>
     </linearGradient>
     <filter id="carShadow">
@@ -1032,21 +1038,39 @@ const CAR_ICON_TOPVIEW = `
       <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
-  <path d="M32 4 C 24 4 20 8 20 14 L 18 22 L 16 26 L 16 48 C 16 54 20 58 24 58 L 40 58 C 44 58 48 54 48 48 L 48 26 L 46 22 L 44 14 C 44 8 40 4 32 4 Z"
+  <!-- سهم الاتجاه (أمام السيارة) -->
+  <path d="M32 1 L 27 8 L 30 7 L 30 10 L 34 10 L 34 7 L 37 8 Z"
+        fill="#34a853" stroke="#fff" stroke-width="1"/>
+  <!-- جسم السيارة -->
+  <path d="M32 5 C 25 5 21 9 21 15 L 19 22 L 17 26 L 17 48 C 17 54 21 57 25 57 L 39 57 C 43 57 47 54 47 48 L 47 26 L 45 22 L 43 15 C 43 9 39 5 32 5 Z"
         fill="url(#carBody)" stroke="#fff" stroke-width="2" filter="url(#carShadow)"/>
-  <path d="M24 14 Q 32 11 40 14 L 38 22 Q 32 20 26 22 Z" fill="url(#carGlass)" opacity="0.9"/>
-  <rect x="22" y="26" width="20" height="20" rx="3" fill="#1a73e8" opacity="0.7"/>
-  <circle cx="24" cy="8" r="2" fill="#ffe082"/>
-  <circle cx="40" cy="8" r="2" fill="#ffe082"/>
-  <rect x="22" y="56" width="4" height="2" rx="1" fill="#ff5252"/>
-  <rect x="38" y="56" width="4" height="2" rx="1" fill="#ff5252"/>
+  <!-- الزجاج الأمامي -->
+  <path d="M25 15 Q 32 12 39 15 L 37 23 Q 32 21 27 23 Z" fill="url(#carGlass)" opacity="0.95"/>
+  <!-- الزجاج الخلفي -->
+  <path d="M27 50 Q 32 48 37 50 L 38 54 Q 32 53 26 54 Z" fill="url(#carGlass)" opacity="0.85"/>
+  <!-- السقف -->
+  <rect x="23" y="27" width="18" height="20" rx="3" fill="#0d47a1" opacity="0.85"/>
+  <!-- خط الوسط -->
+  <line x1="32" y1="27" x2="32" y2="47" stroke="#4a90e2" stroke-width="0.8" opacity="0.6"/>
+  <!-- المصابيح الأمامية -->
+  <ellipse cx="24" cy="9" rx="2" ry="1.5" fill="#ffe082"/>
+  <ellipse cx="40" cy="9" rx="2" ry="1.5" fill="#ffe082"/>
+  <!-- المصابيح الخلفية -->
+  <rect x="21" y="55" width="4" height="1.8" rx="0.9" fill="#ff5252"/>
+  <rect x="39" y="55" width="4" height="1.8" rx="0.9" fill="#ff5252"/>
+  <!-- المرايا الجانبية -->
+  <path d="M19 22 L 17 24 L 17 22 Z" fill="#1a73e8" stroke="#fff" stroke-width="0.5"/>
+  <path d="M45 22 L 47 24 L 47 22 Z" fill="#1a73e8" stroke="#fff" stroke-width="0.5"/>
 </svg>`;
 
 const WALK_ICON = `
 <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="32" cy="32" r="26" fill="#1a73e8" stroke="#fff" stroke-width="3"/>
-  <circle cx="32" cy="32" r="22" fill="#4a90e2" opacity="0.4"/>
-  <g transform="translate(32,32)">
+  <!-- سهم الاتجاه -->
+  <path d="M32 2 L 28 10 L 30.5 9 L 30.5 12 L 33.5 12 L 33.5 9 L 36 10 Z"
+        fill="#34a853" stroke="#fff" stroke-width="1"/>
+  <circle cx="32" cy="34" r="24" fill="#1a73e8" stroke="#fff" stroke-width="3"/>
+  <circle cx="32" cy="34" r="20" fill="#4a90e2" opacity="0.4"/>
+  <g transform="translate(32,34)">
     <circle cx="0" cy="-10" r="4" fill="#fff"/>
     <path d="M -3 -6 L 3 -6 L 5 4 L 2 4 L 0 0 L -2 4 L -5 4 Z" fill="#fff"/>
     <path d="M -2 4 L -4 14 M 2 4 L 4 14" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
@@ -1054,7 +1078,7 @@ const WALK_ICON = `
 </svg>`;
 
 // ============================================================
-// إعداد الخريطة
+// إعداد الخريطة — مع دعم الدوران
 // ============================================================
 const DAMASCUS = [33.5138, 36.2765];
 const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1065,8 +1089,14 @@ const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x
 });
 
 const map = L.map('map', {
-  zoomControl: false, attributionControl: true,
-  rotate: true, touchRotate: true, rotateControl: false
+  zoomControl: false,
+  attributionControl: true,
+  rotate: true,
+  bearing: 0,
+  rotateControl: false,
+  touchRotate: false, // نمنع الدوران اليدوي حتى لا يتعارض مع التتبع
+  shiftKeyRotate: false,
+  compassBearing: false
 }).setView(DAMASCUS, 13);
 
 streetLayer.addTo(map);
@@ -1096,9 +1126,8 @@ let activeCategory = null;
 let poiMarkers = [];
 const SPEED_LIMIT = 120;
 
-// منع إعادة حساب المسار المتكرر
 let lastRouteRecalcTime = 0;
-const ROUTE_RECALC_COOLDOWN = 5000; // 5 ثوانٍ
+const ROUTE_RECALC_COOLDOWN = 5000;
 
 let savedPlaces = JSON.parse(localStorage.getItem('syria_nav_saved') || '[]');
 
@@ -1633,7 +1662,7 @@ function startGpsTracking() {
     pos => {
       const loc = [pos.coords.latitude, pos.coords.longitude];
       const accuracy = pos.coords.accuracy;
-      const heading = pos.coords.heading;
+      let heading = pos.coords.heading;
 
       if (!gpsFirstFix) {
         gpsFirstFix = true;
@@ -1644,9 +1673,13 @@ function startGpsTracking() {
       updateUserLocation(loc, accuracy, heading);
 
       if (navigationActive) {
-        updateVehiclePosition(loc, heading, pos.coords.speed || currentSpeed/3.6);
+        // استخدم سرعة GPS الفعلية
+        const speedMs = pos.coords.speed != null && pos.coords.speed >= 0
+          ? pos.coords.speed
+          : (currentSpeed / 3.6);
+
+        updateVehiclePosition(loc, heading, speedMs);
         checkProgress(loc);
-        // حساب المسار الجديد تلقائياً عند الانحراف
         checkOffRoute(loc);
       }
       gpsStatus.classList.add('active');
@@ -1661,13 +1694,12 @@ function startGpsTracking() {
 }
 
 // ============================================================
-// كشف الانحراف عن المسار وإعادة حسابه
+// كشف الانحراف
 // ============================================================
 function checkOffRoute(loc) {
   if (!routeLine || !navigationActive) return;
   if (Date.now() - lastRouteRecalcTime < ROUTE_RECALC_COOLDOWN) return;
 
-  // احسب أقرب مسافة بين الموقع والمسار
   const coords = routeLine.getLatLngs();
   let minDist = Infinity;
   for (let i = 0; i < coords.length; i++) {
@@ -1675,16 +1707,13 @@ function checkOffRoute(loc) {
     if (d < minDist) minDist = d;
   }
 
-  // إذا كنا أبعد من 50 متر عن المسار → أعد الحساب
   if (minDist > 0.05) {
     lastRouteRecalcTime = Date.now();
     showHint('🔄 إعادة حساب المسار...');
     playBeep(700, 200);
     speak('تم تغيير المسار، جاري إعادة الحساب', true);
 
-    // أعد حساب المسار من الموقع الحالي إلى الوجهة
-    if (currentDestination && !manualStart) {
-      // استخدم الموقع الحالي كبداية
+    if (currentDestination) {
       userLocation = loc;
       setDestination(currentDestination, null, true);
     }
@@ -1746,41 +1775,84 @@ function updateUserLocation(loc, accuracy, heading) {
   }
 }
 
+// ============================================================
+// ⭐ أيقونة المركبة مع تتبع صحيح ودوران صحيح
+// ============================================================
 function updateVehiclePosition(loc, heading, speedMs) {
-  if (heading === null || heading === undefined || isNaN(heading)) {
-    if (lastPosition) {
-      heading = computeBearing(lastPosition[0], lastPosition[1], loc[0], loc[1]);
-    } else {
-      heading = lastHeading;
+  // ⭐ حساب الاتجاه الحقيقي للسير
+  // heading من GPS قد يكون null → استخدم الفرق بين موقعين متتاليين
+  let newHeading = heading;
+  if (newHeading === null || newHeading === undefined || isNaN(newHeading) || newHeading < 0) {
+    if (lastPosition && lastPosition[1] !== loc[1]) {
+      // حرّك فعلياً → احسب الاتجاه من الموقع السابق
+      const d = haversine(lastPosition[0], lastPosition[1], loc[0], loc[1]);
+      if (d > 0.005) { // > 5 أمتار (تجنب الضجيج)
+        newHeading = computeBearing(lastPosition[0], lastPosition[1], loc[0], loc[1]);
+      }
     }
   }
-  if (!isNaN(heading) && heading >= 0) lastHeading = heading;
+
+  // Smooth rotation لتجنب الاهتزاز
+  if (newHeading !== null && newHeading !== undefined && !isNaN(newHeading)) {
+    // اختر الاتجاه الأقصر بين الدورتين
+    let delta = newHeading - lastHeading;
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+    lastHeading = (lastHeading + delta * 0.4 + 360) % 360;
+  }
 
   if (userMarker) { map.removeLayer(userMarker); userMarker = null; }
   if (userCircle) { map.removeLayer(userCircle); userCircle = null; }
 
   const iconSvg = currentTravelMode === 'foot' ? WALK_ICON : CAR_ICON_TOPVIEW;
+  // ⭐ الأيقونة تدور بنفس اتجاه السير (لا عكس!)
   const iconHtml = `<div class="vehicle-marker" style="transform: rotate(${lastHeading}deg);">${iconSvg}</div>`;
+
   const zoom = map.getZoom();
-  const size = Math.max(40, Math.min(90, 30 + (zoom - 14) * 8));
+  const size = Math.max(44, Math.min(88, 34 + (zoom - 14) * 8));
 
   const icon = L.divIcon({
-    className: '', html: iconHtml,
-    iconSize: [size, size], iconAnchor: [size/2, size/2]
+    className: '',
+    html: iconHtml,
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2]
   });
 
   if (vehicleMarker) {
     vehicleMarker.setLatLng(loc);
     vehicleMarker.setIcon(icon);
   } else {
-    vehicleMarker = L.marker(loc, { icon, zIndexOffset: 3000, interactive: false }).addTo(map);
+    vehicleMarker = L.marker(loc, {
+      icon, zIndexOffset: 3000, interactive: false
+    }).addTo(map);
   }
 
+  // ⭐ تتبع الخريطة للمؤشر (المؤشر يتحرك مع الشاشة)
   if (recenterMode === 'follow' && navigationActive) {
     const targetZoom = getDynamicZoom(speedMs || 0);
-    const targetCenter = offsetLatLng(loc, lastHeading + 180, map.getSize().y * 0.35);
-    map.setView(targetCenter, targetZoom, { animate: true, duration: 0.5, easeLinearity: 0.3 });
-    try { if (map.setBearing) map.setBearing(-lastHeading); } catch(e) {}
+
+    // ⭐ نضع السيارة في الثلث السفلي ونتحرك معها للأمام
+    // اتجاه الحركة: lastHeading
+    // نضع المركز خلف السيارة بمقدار 35% من ارتفاع الشاشة
+
+    // الزاوية العكسية: ندور الخريطة بنفس اتجاه السيارة (لا عكس!)
+    // لأن السيارة تبقى ثابتة نحو الأعلى، والخريطة تدور حولها
+    const rotationDeg = -lastHeading; // الخريطة تدور عكس اتجاه السيارة لتظهر السيارة دائماً نحو الأعلى
+
+    // احسب مركز الخريطة
+    const offsetPx = map.getSize().y * 0.32; // السيارة في الثلث السفلي
+    const mapHeightMeters = offsetPx * (156543.03392 * Math.cos(loc[0]*Math.PI/180) / Math.pow(2, targetZoom));
+    const centerLatLng = offsetLatLng(loc, lastHeading + 180, offsetPx);
+
+    // ⭐ استخدم panTo للمركز الجديد بدون تغيير الزوم لتفادي الإزعاج
+    map.setView(centerLatLng, targetZoom, { animate: true, duration: 0.35, easeLinearity: 0.5 });
+
+    // ⭐ تدوير الخريطة (المؤشر يبقى نحو الأعلى دائماً)
+    try {
+      if (map.setBearing) {
+        map.setBearing(rotationDeg);
+      }
+    } catch(e) {}
   }
 }
 
@@ -1824,7 +1896,6 @@ function setDestination(loc, name, isRecalc = false) {
     localStorage.setItem('syria_nav_last_dest', JSON.stringify({ loc, name: name || '' }));
   }
 
-  // ⭐ استخدم موقع المستخدم الحالي دائماً كنقطة انطلاق (بعد بدء الملاحة)
   const start = (navigationActive && userLocation) ? userLocation : (manualStart || userLocation);
   if (!start) {
     speak('يرجى تحديد موقع الانطلاق. اضغط مطولاً على الخريطة');
@@ -1872,7 +1943,6 @@ function setDestination(loc, name, isRecalc = false) {
         const modeText = currentTravelMode === 'foot' ? 'مشياً' : 'بالسيارة';
         speak(`تم حساب المسار ${modeText}. الأسرع ${(fastest.distance/1000).toFixed(1)} كيلومتر، ${Math.round(fastest.duration/60)} دقيقة`);
       } else {
-        // في وضع إعادة الحساب، أظهر التوجيهات الجديدة مباشرة
         currentStepIndex = 0;
         lastSpokenStep = -1;
         updateNavigationUI();
@@ -1911,7 +1981,7 @@ function selectRoute(profile) {
 
   const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
   routeLine = L.polyline(coords, {
-    color: '#1a73e8', weight: 8, opacity: 0.9,
+    color: '#1a73e8', weight: 9, opacity: 0.9,
     lineCap: 'round', lineJoin: 'round'
   }).addTo(map);
   if (!navigationActive) map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
@@ -1978,7 +2048,6 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
 document.getElementById('startBtn').onclick = async () => {
   if (!currentSteps.length) return;
 
-  // ⭐ تفعيل منع إطفاء الشاشة
   await keepScreenOn();
 
   // ⭐ تركيز على موقع المستخدم قبل البدء
@@ -2006,11 +2075,16 @@ document.getElementById('startBtn').onclick = async () => {
   playBeep(880, 120);
   setTimeout(() => speak('بدء التوجيه. ' + (currentSteps[0]?.text || '')), 200);
 
-  // ابدأ الكاميرا في وضع التتبع
+  // ⭐ ابدأ الكاميرا في وضع التتبع مع الدوران
   if (userLocation) {
     const targetZoom = 17;
-    const targetCenter = offsetLatLng(userLocation, lastHeading + 180, map.getSize().y * 0.35);
+    const targetCenter = offsetLatLng(userLocation, lastHeading + 180, map.getSize().y * 0.32);
     map.setView(targetCenter, targetZoom, { animate: true });
+
+    // تدوير الخريطة لاتجاه السير
+    setTimeout(() => {
+      try { if (map.setBearing) map.setBearing(-lastHeading); } catch(e) {}
+    }, 500);
   }
 
   map.on('dragstart', () => {
@@ -2026,7 +2100,6 @@ function stopNavigation() {
   synth.cancel();
   document.body.classList.remove('navigating');
 
-  // ⭐ السماح بإطفاء الشاشة عند الإنهاء
   allowScreenOff();
 
   document.getElementById('navTopBar').classList.remove('show');
@@ -2048,6 +2121,9 @@ function stopNavigation() {
   manualStart = null;
   lastRouteRecalcTime = 0;
 
+  // ⭐ إعادة دوران الخريطة للشمال
+  try { if (map.setBearing) map.setBearing(0); } catch(e) {}
+
   if (userLocation) {
     map.setView(userLocation, 16, { animate: true, duration: 0.8 });
     if (!userMarker) {
@@ -2055,7 +2131,6 @@ function stopNavigation() {
       const icon = L.divIcon({ className: '', html: iconHtml, iconSize: [24, 24], iconAnchor: [12, 12] });
       userMarker = L.marker(userLocation, { icon, zIndexOffset: 1000 }).addTo(map);
     }
-    try { if (map.setBearing) map.setBearing(0); } catch(e) {}
   } else if (gpsFirstFix && lastPosition) {
     map.setView(lastPosition, 16, { animate: true });
   } else {
@@ -2073,8 +2148,9 @@ document.getElementById('recenterBtn').onclick = () => {
   recenterMode = 'follow';
   document.getElementById('recenterBtn').classList.remove('show');
   if (userLocation) {
-    const targetCenter = offsetLatLng(userLocation, lastHeading + 180, map.getSize().y * 0.35);
+    const targetCenter = offsetLatLng(userLocation, lastHeading + 180, map.getSize().y * 0.32);
     map.setView(targetCenter, 17, { animate: true });
+    try { if (map.setBearing) map.setBearing(-lastHeading); } catch(e) {}
   }
 };
 
@@ -2185,15 +2261,12 @@ document.getElementById('exitCancel').onclick = () => {
 };
 document.getElementById('exitConfirm').onclick = () => {
   exitDialog.classList.remove('show');
-  // حاول إغلاق النافذة
   window.close();
-  // إن لم تعمل، أظهر رسالة
   setTimeout(() => {
     document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;padding:20px;background:#1a73e8;color:#fff;flex-direction:column;gap:16px;"><div style="font-size:60px;">👋</div><h2>شكراً لاستخدامك ملاحة الشام</h2><p style="opacity:0.9;">يمكنك إغلاق التبويب الآن</p></div>';
   }, 200);
 };
 
-// اعتراض زر الرجوع في المتصفح
 window.addEventListener('popstate', (e) => {
   if (!exitTriggered) {
     history.pushState(null, null, location.href);
@@ -2202,7 +2275,6 @@ window.addEventListener('popstate', (e) => {
   }
 });
 
-// ابدأ بتخزين حالة في الهيستوري
 history.pushState(null, null, location.href);
 
 // ============================================================
@@ -2212,7 +2284,6 @@ window.addEventListener('load', async () => {
   document.getElementById('travelModeBar').classList.add('show');
   document.getElementById('recenterBtn').classList.add('show');
 
-  // ⭐ محاولة تفعيل منع الإطفاء فور فتح التطبيق
   await keepScreenOn();
 
   setTimeout(() => {
