@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="كزدورة">
 <meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.json">
 <title>كزدورة — ملاحة وخرائط</title>
 
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
@@ -39,6 +40,17 @@
   #map { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 1; background: #e8eaed; }
   body.dark #map { background: #121212; }
 
+  /* ⭐ الوضع الليلي: فلتر داكن على بلاطات OSM العادية */
+  body.dark #map .maplibregl-canvas {
+    filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9);
+  }
+  /* الأيقونات والعلامات لا تتأثر بالفلتر */
+  body.dark .maplibregl-marker,
+  body.dark .maplibregl-popup,
+  body.dark .poi-marker {
+    filter: invert(1) hue-rotate(180deg);
+  }
+
   .maplibregl-ctrl-bottom-left,
   .maplibregl-ctrl-bottom-right { display: none !important; }
 
@@ -53,6 +65,44 @@
   }
   #offlineBadge.show { display: flex; }
   #offlineBadge svg { width: 14px; height: 14px; fill: #fff; }
+
+  /* ⭐ شارة تثبيت التطبيق */
+  #installPrompt {
+    position: fixed;
+    bottom: calc(88px + var(--safe-bottom));
+    left: 50%; transform: translateX(-50%) translateY(200%);
+    z-index: 1400;
+    background: linear-gradient(135deg, #1a73e8, #0d47a1);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 50px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 6px 24px rgba(26,115,232,0.5);
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    border: none; cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+    opacity: 0;
+  }
+  #installPrompt.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  #installPrompt svg { width: 20px; height: 20px; fill: #fff; }
+  #installPrompt .pulse {
+    position: absolute;
+    inset: 0;
+    border-radius: 50px;
+    box-shadow: 0 0 0 0 rgba(26,115,232,0.7);
+    animation: installPulse 2s infinite;
+    pointer-events: none;
+  }
+  @keyframes installPulse {
+    0% { box-shadow: 0 0 0 0 rgba(26,115,232,0.7); }
+    70% { box-shadow: 0 0 0 12px rgba(26,115,232,0); }
+    100% { box-shadow: 0 0 0 0 rgba(26,115,232,0); }
+  }
+  body.navigating #installPrompt { display: none; }
 
   #appHeader {
     position: fixed; top: 0; left: 0; right: 0; z-index: 1050;
@@ -348,7 +398,6 @@
   }
   .wp-item .wp-del svg { width: 14px; height: 14px; fill: var(--danger); }
 
-  /* ⭐ خيارات المسار — الآن يدعم 3 خيارات */
   #routeOptions {
     position: fixed; bottom: calc(88px + var(--safe-bottom));
     left: 50%; transform: translateX(-50%);
@@ -586,15 +635,16 @@
   #mapHint.show { display: block; animation: fadeInOut 3s ease-in-out; }
   @keyframes fadeInOut { 0%, 100% { opacity: 0; } 15%, 85% { opacity: 1; } }
 
-  #nameDialog, #exitDialog, #stopConfirmDialog {
+  #nameDialog, #exitDialog, #stopConfirmDialog, #installDialog {
     position: fixed; inset: 0; z-index: 4000;
     background: rgba(0,0,0,0.55);
     display: none; align-items: center; justify-content: center;
     padding: 20px;
   }
   #stopConfirmDialog { z-index: 4500; }
-  #nameDialog.show, #exitDialog.show, #stopConfirmDialog.show { display: flex; }
-  #nameDialogBox, #exitBox, #stopConfirmBox {
+  #installDialog { z-index: 4600; }
+  #nameDialog.show, #exitDialog.show, #stopConfirmDialog.show, #installDialog.show { display: flex; }
+  #nameDialogBox, #exitBox, #stopConfirmBox, #installBox {
     background: var(--panel); border-radius: 18px;
     padding: 22px; width: 100%; max-width: 340px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.3);
@@ -615,29 +665,32 @@
   #nameCancel { background: var(--input-bg); color: var(--text); }
   #nameSave { background: var(--primary); color: #fff; }
 
-  #exitBox, #stopConfirmBox { text-align: center; }
-  #exitBox .icon, #stopConfirmBox .icon {
+  #exitBox, #stopConfirmBox, #installBox { text-align: center; }
+  #exitBox .icon, #stopConfirmBox .icon, #installBox .icon {
     width: 60px; height: 60px; margin: 0 auto 14px;
     background: #fce8e6; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
   }
   #stopConfirmBox .icon { background: #fff3e0; }
+  #installBox .icon { background: #e8f0fe; }
   body.dark #exitBox .icon { background: #4a1e1c; }
   body.dark #stopConfirmBox .icon { background: #4a3020; }
+  body.dark #installBox .icon { background: #1a3a5c; }
   #exitBox .icon svg { width: 30px; height: 30px; fill: var(--danger); }
   #stopConfirmBox .icon svg { width: 30px; height: 30px; fill: #ff6d00; }
-  #exitBox h3, #stopConfirmBox h3 { font-size: 17px; margin-bottom: 8px; }
-  #exitBox p, #stopConfirmBox p { font-size: 13px; color: var(--text-sub); margin-bottom: 20px; line-height: 1.5; }
-  #exitBox .actions, #stopConfirmBox .actions { display: flex; gap: 10px; }
-  #exitBox button, #stopConfirmBox button {
+  #installBox .icon svg { width: 30px; height: 30px; fill: var(--primary); }
+  #exitBox h3, #stopConfirmBox h3, #installBox h3 { font-size: 17px; margin-bottom: 8px; }
+  #exitBox p, #stopConfirmBox p, #installBox p { font-size: 13px; color: var(--text-sub); margin-bottom: 20px; line-height: 1.5; }
+  #exitBox .actions, #stopConfirmBox .actions, #installBox .actions { display: flex; gap: 10px; }
+  #exitBox button, #stopConfirmBox button, #installBox button {
     flex: 1; padding: 12px; border-radius: 12px;
     border: none; cursor: pointer; font-family: inherit;
     font-size: 14px; font-weight: 600;
   }
-  #exitCancel { background: var(--input-bg); color: var(--text); }
+  #exitCancel, #stopConfirmCancel, #installCancel { background: var(--input-bg); color: var(--text); }
   #exitConfirm { background: var(--danger); color: #fff; }
-  #stopConfirmCancel { background: var(--input-bg); color: var(--text); }
   #stopConfirmOk { background: #ff6d00; color: #fff; }
+  #installOk { background: var(--primary); color: #fff; }
 
   .poi-marker {
     display: flex; align-items: center; justify-content: center;
@@ -685,6 +738,13 @@
   <span>لا يوجد اتصال — وضع محدود</span>
 </div>
 
+<!-- ⭐ شارة تثبيت التطبيق -->
+<button id="installPrompt">
+  <span class="pulse"></span>
+  <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+  <span>ثبّت التطبيق على جهازك</span>
+</button>
+
 <header id="appHeader">
   <div class="logo">
     <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
@@ -694,6 +754,9 @@
     <div class="subtitle">ملاحة وخرائط في سوريا</div>
   </div>
   <div class="actions">
+    <button class="header-btn" id="installHeaderBtn" title="تثبيت التطبيق" style="display:none;">
+      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+    </button>
     <button class="header-btn" id="savedHeaderBtn">
       <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
     </button>
@@ -924,6 +987,21 @@
   </div>
 </div>
 
+<!-- ⭐ نافذة تعليمات التثبيت (iOS) -->
+<div id="installDialog">
+  <div id="installBox">
+    <div class="icon">
+      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+    </div>
+    <h3>تثبيت كزدورة</h3>
+    <p id="installInstructions">لإضافة التطبيق إلى الشاشة الرئيسية:</p>
+    <div class="actions">
+      <button id="installCancel">حسناً</button>
+      <button id="installOk" style="display:none;">تثبيت الآن</button>
+    </div>
+  </div>
+</div>
+
 <button id="recenterBtn">
   <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
 </button>
@@ -954,6 +1032,128 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
 
+// ============================================================
+// ⭐ نظام تثبيت التطبيق (PWA)
+// ============================================================
+let deferredInstallPrompt = null;
+const installPrompt = document.getElementById('installPrompt');
+const installHeaderBtn = document.getElementById('installHeaderBtn');
+const installDialog = document.getElementById('installDialog');
+const installOk = document.getElementById('installOk');
+const installInstructions = document.getElementById('installInstructions');
+
+// الكشف عن iOS
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+// استقبال حدث beforeinstallprompt (Android/Chrome)
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  // أظهر زر التثبيت في الهيدر و الشارة السفلية
+  installHeaderBtn.style.display = 'flex';
+  if (!isStandalone) {
+    setTimeout(() => {
+      installPrompt.classList.add('show');
+      // أخفِ الشارة بعد 15 ثانية إذا لم يضغط المستخدم
+      setTimeout(() => installPrompt.classList.remove('show'), 15000);
+    }, 3000);
+  }
+});
+
+// عند نجاح التثبيت
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  installPrompt.classList.remove('show');
+  installHeaderBtn.style.display = 'none';
+  showHint('✅ تم تثبيت التطبيق بنجاح');
+  speak('تم تثبيت التطبيق');
+});
+
+// الضغط على شارة التثبيت
+installPrompt.onclick = async () => {
+  installPrompt.classList.remove('show');
+  await triggerInstall();
+};
+
+// الضغط على زر التثبيت في الهيدر
+installHeaderBtn.onclick = async () => {
+  await triggerInstall();
+};
+
+async function triggerInstall() {
+  if (isStandalone) {
+    showHint('التطبيق مثبت بالفعل ✅');
+    return;
+  }
+  
+  if (isIOS) {
+    // iOS لا يدعم beforeinstallprompt → اعرض تعليمات
+    installInstructions.innerHTML = `
+      لإضافة كزدورة إلى شاشتك الرئيسية:
+      <br><br>
+      1️⃣ اضغط على زر <b>المشاركة</b> <svg style="width:16px;height:16px;fill:#1a73e8;vertical-align:middle;" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+      <br>
+      2️⃣ اختر <b>"إضافة إلى الشاشة الرئيسية"</b>
+      <br>
+      3️⃣ اضغط <b>"إضافة"</b>
+    `;
+    installOk.style.display = 'none';
+    installDialog.classList.add('show');
+    return;
+  }
+  
+  if (deferredInstallPrompt) {
+    try {
+      deferredInstallPrompt.prompt();
+      const { outcome } = await deferredInstallPrompt.userChoice;
+      if (outcome === 'accepted') {
+        showHint('✅ جاري تثبيت التطبيق...');
+      }
+      deferredInstallPrompt = null;
+    } catch(e) {
+      console.warn('Install prompt failed:', e);
+      showManualInstructions();
+    }
+  } else {
+    // لا يوجد deferredPrompt → اعرض تعليمات يدوية
+    showManualInstructions();
+  }
+}
+
+function showManualInstructions() {
+  installInstructions.innerHTML = `
+    لتثبيت التطبيق:
+    <br><br>
+    <b>على Android (Chrome):</b>
+    <br>
+    اضغط القائمة ⋮ ثم "تثبيت التطبيق"
+    <br><br>
+    <b>على iOS (Safari):</b>
+    <br>
+    اضغط زر المشاركة ثم "إضافة إلى الشاشة الرئيسية"
+  `;
+  installOk.style.display = 'none';
+  installDialog.classList.add('show');
+}
+
+document.getElementById('installCancel').onclick = () => {
+  installDialog.classList.remove('show');
+};
+installOk.onclick = async () => {
+  installDialog.classList.remove('show');
+};
+
+// إخفاء شارة التثبيت عند التمرير داخل التطبيق أو بدء التوجيه
+setTimeout(() => {
+  if (!isStandalone && !deferredInstallPrompt && !isIOS) {
+    // لا يُظهر شيئاً
+  }
+}, 100);
+
+// ============================================================
+// شارة عدم الاتصال
+// ============================================================
 const offlineBadge = document.getElementById('offlineBadge');
 function updateOnlineStatus() {
   if (navigator.onLine) offlineBadge.classList.remove('show');
@@ -964,7 +1164,7 @@ window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
 
 // ============================================================
-// نمط الخريطة
+// نمط الخريطة — OSM فقط
 // ============================================================
 const MAP_STYLE = {
   version: 8,
@@ -1179,7 +1379,6 @@ function formatEta(seconds) {
 function readStateFromURL() {
   const hash = location.hash.replace(/^#kzdora\??/, '');
   const params = new URLSearchParams(hash);
-
   const dest = params.get('dest');
   const mode = params.get('mode');
   const dark = params.get('dark');
@@ -1191,8 +1390,7 @@ function readStateFromURL() {
 
   if (mode === 'foot' || mode === 'driving') {
     currentTravelMode = mode;
-    document.querySelectorAll('.mode-btn').forEach(b =>
-      b.classList.toggle('active', b.dataset.mode === mode));
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
   }
 
   if (wps) {
@@ -1356,8 +1554,7 @@ function displayPoiResults(results, category) {
       if (pendingWaypointPick) addWaypoint([r.lat, r.lng], r.name);
       else setDestination([r.lat, r.lng], r.name);
     };
-    const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
-      .setLngLat([r.lng, r.lat]).addTo(map);
+    const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat([r.lng, r.lat]).addTo(map);
     poiMarkers.push(marker);
     bounds.extend([r.lng, r.lat]);
   });
@@ -1810,7 +2007,7 @@ function getDynamicZoom(speedMs) {
 }
 
 // ============================================================
-// ⭐⭐⭐ تعيين الوجهة — مع دعم مسارات بديلة حقيقية عبر Valhalla
+// تعيين الوجهة
 // ============================================================
 function setDestination(loc, name, isRecalc = false) {
   currentDestination = loc;
@@ -1835,17 +2032,14 @@ function setDestination(loc, name, isRecalc = false) {
     document.getElementById('startBtn').classList.remove('show');
   }
 
-  // بناء قائمة الإحداثيات
   const allPoints = [start];
   currentWaypoints.forEach(wp => allPoints.push(wp.loc));
   allPoints.push(loc);
 
-  // ⭐ Valhalla أولاً للمسارات البديلة والمشي
   const costing = currentTravelMode === 'foot' ? 'pedestrian' : 'auto';
   fetchValhallaRoutes(allPoints, costing, isRecalc);
 }
 
-// ⭐ Valhalla يدعم alternates — نطلب 3 مسارات بديلة
 async function fetchValhallaRoutes(points, costing, isRecalc) {
   const locations = points.map(p => ({ lat: p[0], lon: p[1] }));
   const body = {
@@ -1853,11 +2047,8 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
     costing: costing,
     units: 'kilometers',
     language: 'ar-SA',
-    alternates: 2,               // ⭐ اطلب مسارين بديلين (يعطي إجمالاً 3)
-    directions_options: {
-      units: 'kilometers',
-      language: 'ar-SA'
-    }
+    alternates: 2,
+    directions_options: { units: 'kilometers', language: 'ar-SA' }
   };
 
   try {
@@ -1870,14 +2061,9 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
     if (!response.ok) throw new Error('Valhalla failed');
     const data = await response.json();
 
-    if (!data.trip || !data.trip.legs || !data.trip.legs.length) {
-      throw new Error('No trip data');
-    }
+    if (!data.trip || !data.trip.legs || !data.trip.legs.length) throw new Error('No trip data');
 
-    // المسار الأساسي
     const mainRoute = buildValhallaRoute(data.trip);
-
-    // المسارات البديلة (إن وجدت)
     const alternateRoutes = [];
     if (data.alternates && data.alternates.length) {
       data.alternates.forEach(alt => {
@@ -1885,35 +2071,25 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
       });
     }
 
-    // ترتيب المسارات حسب الزمن
     const allRoutes = [mainRoute, ...alternateRoutes].filter(Boolean);
     allRoutes.sort((a, b) => a.duration - b.duration);
 
     if (allRoutes.length === 0) throw new Error('No routes');
 
-    // اختيار الأسرع والبديل (الأقصر أو الأول من البدائل)
     const fastest = allRoutes[0];
-    
-    // البديل: البحث عن مسار مختلف (لو مسار واحد فقط، نستخدم الأقصر من OSRM كاحتياطي)
     let alternative = null;
     if (allRoutes.length > 1) {
-      // ابحث عن المسار الأقصر بين البقية
       const others = allRoutes.slice(1);
-      alternative = others.reduce((shortest, r) => 
-        r.distance < shortest.distance ? r : shortest, others[0]);
+      alternative = others.reduce((shortest, r) => r.distance < shortest.distance ? r : shortest, others[0]);
     }
 
     currentRoutes = { fastest, shortest: alternative };
     currentRouteData = fastest;
 
-    // تحديث أزرار المسار
-    document.getElementById('infoFastest').textContent = 
-      `${(fastest.distance/1000).toFixed(1)}كم · ${Math.round(fastest.duration/60)}د`;
-    
+    document.getElementById('infoFastest').textContent = `${(fastest.distance/1000).toFixed(1)}كم · ${Math.round(fastest.duration/60)}د`;
     const btnShortest = document.getElementById('btnShortest');
     if (alternative) {
-      document.getElementById('infoShortest').textContent = 
-        `${(alternative.distance/1000).toFixed(1)}كم · ${Math.round(alternative.duration/60)}د`;
+      document.getElementById('infoShortest').textContent = `${(alternative.distance/1000).toFixed(1)}كم · ${Math.round(alternative.duration/60)}د`;
       btnShortest.disabled = false;
       btnShortest.style.opacity = '1';
     } else {
@@ -1922,10 +2098,8 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
       btnShortest.style.opacity = '0.4';
     }
 
-    // تفعيل زر "الأسرع" ورسم المسار
-    document.querySelectorAll('.route-btn').forEach(b => 
-      b.classList.toggle('active', b.dataset.profile === 'fastest'));
-    
+    document.querySelectorAll('.route-btn').forEach(b => b.classList.toggle('active', b.dataset.profile === 'fastest'));
+
     drawRoute(fastest);
     currentSteps = fastest.steps;
     currentStepIndex = 0;
@@ -1945,12 +2119,10 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
       speak('تم إعادة حساب المسار');
     }
 
-    // ضبط الخريطة على حدود المسار
     map.fitBounds(fastest.bounds, { padding: 60, duration: 800 });
 
   } catch (err) {
     console.warn('Valhalla error:', err);
-    // ⭐ احتياطي: OSRM (مسار واحد فقط)
     if (currentTravelMode === 'foot') {
       fallbackOSRMRoute(points, isRecalc);
     } else {
@@ -1960,14 +2132,12 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
   }
 }
 
-// ⭐ بناء مسار من Valhalla trip
 function buildValhallaRoute(trip) {
   const coords = [];
   trip.legs.forEach(leg => {
     const shape = decodePolyline(leg.shape, 6);
     shape.forEach(c => coords.push(c));
   });
-
   let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
   coords.forEach(c => {
     if (c[0] < minLng) minLng = c[0];
@@ -1975,8 +2145,6 @@ function buildValhallaRoute(trip) {
     if (c[0] > maxLng) maxLng = c[0];
     if (c[1] > maxLat) maxLat = c[1];
   });
-
-  // استخراج الخطوات من maneuvers
   const steps = [];
   trip.legs.forEach(leg => {
     leg.maneuvers.forEach(m => {
@@ -1991,7 +2159,6 @@ function buildValhallaRoute(trip) {
       });
     });
   });
-
   return {
     geometry: { type: 'LineString', coordinates: coords },
     distance: trip.summary.length * 1000,
@@ -2001,93 +2168,66 @@ function buildValhallaRoute(trip) {
   };
 }
 
-// ⭐ احتياطي: OSRM للمشي
 function fallbackOSRMRoute(points, isRecalc) {
   const coordsStr = points.map(p => `${p[1]},${p[0]}`).join(';');
   const url = `https://router.project-osrm.org/route/v1/foot/${coordsStr}?overview=full&geometries=geojson&steps=true`;
-
   fetch(url)
     .then(r => r.json())
     .then(data => {
       if (!isRecalc) hideLoading();
       if (!data.routes || !data.routes.length) { if (!isRecalc) alert('تعذر حساب مسار المشي'); return; }
-
       const route = data.routes[0];
       const normalized = normalizeOSRMRoute(route);
       currentRouteData = normalized;
       currentRoutes = { fastest: normalized, shortest: null };
-
-      document.getElementById('infoFastest').textContent = 
-        `${(normalized.distance/1000).toFixed(1)}كم · ${Math.round(normalized.duration/60)}د`;
+      document.getElementById('infoFastest').textContent = `${(normalized.distance/1000).toFixed(1)}كم · ${Math.round(normalized.duration/60)}د`;
       document.getElementById('infoShortest').textContent = '—';
       document.getElementById('btnShortest').disabled = true;
       document.getElementById('btnShortest').style.opacity = '0.4';
-
       drawRoute(normalized);
       currentSteps = normalized.steps;
       currentStepIndex = 0;
       lastSpokenStep = -1;
-
       if (!isRecalc) {
         document.getElementById('routeOptions').classList.add('show');
         document.getElementById('startBtn').classList.add('show');
         speak(`تم حساب مسار المشي`);
-      } else {
-        currentStepIndex = 0;
-        lastSpokenStep = -1;
-        updateNavigationUI();
-        speak('تم إعادة حساب المسار');
       }
-
       map.fitBounds(normalized.bounds, { padding: 60, duration: 800 });
     })
     .catch(err => { if (!isRecalc) { hideLoading(); alert('تعذر حساب المسار'); } });
 }
 
-// ⭐ احتياطي: OSRM للسيارة (مسار واحد)
 function fetchOSRMRoute(coordsStr, isRecalc) {
   const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson&steps=true`;
-
   fetch(url)
     .then(r => r.json())
     .then(data => {
       if (!isRecalc) hideLoading();
       if (!data.routes || !data.routes.length) { if (!isRecalc) alert('تعذر حساب المسار'); return; }
-
       const route = data.routes[0];
       const normalized = normalizeOSRMRoute(route);
       currentRouteData = normalized;
       currentRoutes = { fastest: normalized, shortest: null };
-
-      document.getElementById('infoFastest').textContent = 
-        `${(normalized.distance/1000).toFixed(1)}كم · ${Math.round(normalized.duration/60)}د`;
+      document.getElementById('infoFastest').textContent = `${(normalized.distance/1000).toFixed(1)}كم · ${Math.round(normalized.duration/60)}د`;
       document.getElementById('infoShortest').textContent = '—';
       document.getElementById('btnShortest').disabled = true;
       document.getElementById('btnShortest').style.opacity = '0.4';
-
       drawRoute(normalized);
       currentSteps = normalized.steps;
       currentStepIndex = 0;
       lastSpokenStep = -1;
-
       if (!isRecalc) {
         document.getElementById('routeOptions').classList.add('show');
         document.getElementById('startBtn').classList.add('show');
         const modeText = currentTravelMode === 'foot' ? 'مشياً' : 'بالسيارة';
         speak(`تم حساب المسار ${modeText}`);
-      } else {
-        currentStepIndex = 0;
-        lastSpokenStep = -1;
-        updateNavigationUI();
-        speak('تم إعادة حساب المسار');
       }
-
       map.fitBounds(normalized.bounds, { padding: 60, duration: 800 });
     })
     .catch(err => { if (!isRecalc) { hideLoading(); alert('تعذر حساب المسار'); } });
 }
 
-// ⭐ تحويل مسار OSRM إلى تنسيق موحد
 function normalizeOSRMRoute(route) {
   const steps = [];
   route.legs.forEach(leg => {
@@ -2110,7 +2250,6 @@ function normalizeOSRMRoute(route) {
   };
 }
 
-// فك تشفير polyline
 function decodePolyline(encoded, precision = 6) {
   const factor = Math.pow(10, precision);
   const coords = [];
@@ -2149,7 +2288,6 @@ function mapValhallaManeuverType(type) {
 function drawRoute(route) {
   ['route-line-outline', 'route-line'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
   ['route-line'].forEach(id => { if (map.getSource(id)) map.removeSource(id); });
-
   try {
     map.addSource('route-line', { type: 'geojson', data: { type: 'Feature', geometry: route.geometry, properties: {} } });
     map.addLayer({
@@ -2206,7 +2344,7 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
 });
 
 // ============================================================
-// الوضع الليلي
+// الوضع الليلي — الآن عبر CSS Filter (بدون خادم)
 // ============================================================
 const themeHeaderBtn = document.getElementById('themeHeaderBtn');
 const themeIconHeader = document.getElementById('themeIconHeader');
@@ -2215,28 +2353,7 @@ function setDarkMode(isDark) {
   isDarkMode = isDark;
   document.body.classList.toggle('dark', isDark);
   if (themeIconHeader) themeIconHeader.innerHTML = isDark ? ICONS.sun : ICONS.moon;
-  try {
-    if (map.getLayer('osm-layer')) map.removeLayer('osm-layer');
-    if (map.getSource('osm-tiles')) map.removeSource('osm-tiles');
-    const darkTiles = [
-      'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-    ];
-    const lightTiles = [
-      'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
-    ];
-    map.addSource('osm-tiles', {
-      type: 'raster',
-      tiles: isDark ? darkTiles : lightTiles,
-      tileSize: 256,
-      maxzoom: 19
-    });
-    map.addLayer({ id: 'osm-layer', type: 'raster', source: 'osm-tiles' });
-    if (currentRouteData) setTimeout(() => drawRoute(currentRouteData), 100);
-  } catch(e) { console.warn(e); }
+  // لا حاجة لتغيير الطبقات — الفلتر يتولى الأمر
 }
 
 themeHeaderBtn.onclick = () => {
@@ -2439,7 +2556,6 @@ function getIcon(type) {
   return m[type] || ICONS.straight;
 }
 
-// ⭐ التبديل بين المسارات
 document.querySelectorAll('.route-btn').forEach(btn => {
   btn.onclick = () => {
     if (btn.disabled) return;
@@ -2508,6 +2624,16 @@ window.addEventListener('load', async () => {
   document.getElementById('recenterBtn').classList.add('show');
 
   await keepScreenOn();
+
+  // إذا كان iOS وليس مثبتاً → أظهر زر التثبيت في الهيدر
+  if (isIOS && !isStandalone) {
+    installHeaderBtn.style.display = 'flex';
+  }
+
+  // إذا كان Chrome/Android والحدث سبق أن أُطلق
+  if (!isStandalone && !isIOS && !deferredInstallPrompt) {
+    // احتفظ بزر الهيدر مخفياً حتى يصل الحدث
+  }
 
   readStateFromURL();
 
