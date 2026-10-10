@@ -3,108 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام المحاسبي والتجاري العالمي الشامل</title>
+    <title>النظام المحاسبي السوري الموحد - ERP Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.5/cdn.min.js" defer></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Cairo', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800" x-data="globalERP()">
+<body class="bg-slate-50 text-slate-800" x-data="syrianERP()">
 
     <div class="flex flex-col md:flex-row h-screen overflow-hidden">
         
-        <!-- الشريط الجانبي (Side Navigation) -->
-        <aside class="w-full md:w-72 bg-slate-900 text-slate-300 flex flex-col shadow-2xl z-20">
-            <div class="p-4 md:p-5 text-lg font-bold text-white border-b border-slate-800 flex justify-between items-center">
-                <div>
-                    <div x-text="currentCompany"></div>
-                    <span class="text-xs text-blue-400 font-normal">النظام العالمي الموحد</span>
-                </div>
+        <!-- الشريط الجانبي العصري والمبسط -->
+        <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl z-20">
+            <div class="p-5 border-b border-slate-800 flex flex-col">
+                <span class="text-xs text-blue-400 font-semibold mb-1">الشركة الحالية:</span>
+                <select x-model="currentCompany" @change="save" class="bg-slate-800 text-white border border-slate-700 rounded-lg p-2 text-sm font-bold focus:outline-none">
+                    <template x-for="comp in companies" :key="comp">
+                        <option :value="comp" x-text="comp"></option>
+                    </template>
+                </select>
             </div>
             
-            <nav class="flex md:flex-col p-2 md:p-3 space-x-1 md:space-x-0 md:space-y-1 overflow-x-auto md:overflow-y-auto text-xs md:text-sm whitespace-nowrap">
-                <button @click="currentTab = 'dashboard'" :class="currentTab === 'dashboard' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2.5 md:w-full text-right rounded transition flex items-center gap-2">📊 <span>لوحة المؤشرات</span></button>
-                <button @click="currentTab = 'accounts'" :class="currentTab === 'accounts' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2.5 md:w-full text-right rounded transition flex items-center gap-2">🌳 <span>شجرة الحسابات</span></button>
-                <button @click="currentTab = 'journal'" :class="currentTab === 'journal' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2.5 md:w-full text-right rounded transition flex items-center gap-2">📝 <span>قيود اليومية والأستاذ</span></button>
-                <button @click="currentTab = 'inventory'" :class="currentTab === 'inventory' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2.5 md:w-full text-right rounded transition flex items-center gap-2">📦 <span>إدارة المخازن والباركود</span></button>
-                <button @click="currentTab = 'invoices'" :class="currentTab === 'invoices' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2.5 md:w-full text-right rounded transition flex items-center gap-2">🧾 <span>الفواتير (مبيعات ومشتريات)</span></button>
-                <button @click="currentTab = 'reports'" :class="currentTab === 'reports' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2.5 md:w-full text-right rounded transition flex items-center gap-2">📈 <span>الحسابات الختامية والتقارير</span></button>
-                <button @click="currentTab = 'settings'" :class="currentTab === 'settings' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2.5 md:w-full text-right rounded transition flex items-center gap-2">⚙️ <span>الإعدادات والنسخ الاحتياطي</span></button>
+            <nav class="flex md:flex-col p-3 space-x-1 md:space-x-0 md:space-y-1 overflow-x-auto md:overflow-y-auto text-sm whitespace-nowrap">
+                <button @click="currentTab = 'dashboard'" :class="currentTab === 'dashboard' ? 'bg-blue-600 text-white font-bold shadow-md' : 'hover:bg-slate-800'" class="px-4 py-2.5 md:w-full text-right rounded-lg transition flex items-center gap-3">📊 لوحة المؤشرات</button>
+                <button @click="currentTab = 'companies_users'" :class="currentTab === 'companies_users' ? 'bg-blue-600 text-white font-bold shadow-md' : 'hover:bg-slate-800'" class="px-4 py-2.5 md:w-full text-right rounded-lg transition flex items-center gap-3">🏢 الشركات والمستخدمين</button>
+                <button @click="currentTab = 'accounts'" :class="currentTab === 'accounts' ? 'bg-blue-600 text-white font-bold shadow-md' : 'hover:bg-slate-800'" class="px-4 py-2.5 md:w-full text-right rounded-lg transition flex items-center gap-3">🌳 دليل الحسابات السوري</button>
+                <button @click="currentTab = 'vouchers'" :class="currentTab === 'vouchers' ? 'bg-blue-600 text-white font-bold shadow-md' : 'hover:bg-slate-800'" class="px-4 py-2.5 md:w-full text-right rounded-lg transition flex items-center gap-3">💵 سندات القبض والدفع</button>
+                <button @click="currentTab = 'journal'" :class="currentTab === 'journal' ? 'bg-blue-600 text-white font-bold shadow-md' : 'hover:bg-slate-800'" class="px-4 py-2.5 md:w-full text-right rounded-lg transition flex items-center gap-3">📝 قيود اليومية المزدوجة</button>
+                <button @click="currentTab = 'inventory'" :class="currentTab === 'inventory' ? 'bg-blue-600 text-white font-bold shadow-md' : 'hover:bg-slate-800'" class="px-4 py-2.5 md:w-full text-right rounded-lg transition flex items-center gap-3">📦 جرد ومستودعات الباركود</button>
+                <button @click="currentTab = 'invoices'" :class="currentTab === 'invoices' ? 'bg-blue-600 text-white font-bold shadow-md' : 'hover:bg-slate-800'" class="px-4 py-2.5 md:w-full text-right rounded-lg transition flex items-center gap-3">🧾 الفواتير التجارية</button>
+                <button @click="currentTab = 'reports'" :class="currentTab === 'reports' ? 'bg-blue-600 text-white font-bold shadow-md' : 'hover:bg-slate-800'" class="px-4 py-2.5 md:w-full text-right rounded-lg transition flex items-center gap-3">📈 الحسابات الختامية</button>
+                <button @click="currentTab = 'backup'" :class="currentTab === 'backup' ? 'bg-blue-600 text-white font-bold shadow-md' : 'hover:bg-slate-800'" class="px-4 py-2.5 md:w-full text-right rounded-lg transition flex items-center gap-3">🛡️ الحماية والنسخ</button>
             </nav>
         </aside>
 
-        <!-- المحتوى الرئيسي (Main Content Area) -->
+        <!-- المحتوى الرئيسي -->
         <div class="flex-1 flex flex-col overflow-y-auto">
             
             <header class="bg-white shadow-sm px-6 py-4 flex justify-between items-center border-b">
-                <h1 class="text-lg md:text-xl font-bold text-slate-800" x-text="getTabTitle()"></h1>
+                <h1 class="text-xl font-bold text-slate-800" x-text="getTabTitle()"></h1>
                 <div class="flex items-center gap-3">
-                    <select x-model="currentCompany" @change="save" class="border rounded px-2 py-1 text-xs bg-gray-50 font-semibold">
-                        <template x-for="comp in companies" :key="comp">
-                            <option :value="comp" x-text="comp"></option>
-                        </template>
-                    </select>
-                    <span class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-medium">متصل وآمن محلياً</span>
+                    <span class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-semibold">المستخدم: <span x-text="currentUser"></span></span>
                 </div>
             </header>
 
-            <main class="p-4 md:p-6 space-y-6">
+            <main class="p-6 space-y-6">
 
                 <!-- 1. لوحة المؤشرات -->
-                <div x-show="currentTab === 'dashboard'" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-5 rounded-xl shadow-sm border-r-4 border-blue-500">
-                        <h3 class="text-gray-500 text-sm">إجمالي إيرادات المبيعات</h3>
-                        <p class="text-3xl font-bold mt-2 text-slate-800" x-text="totalSales() + ' ل.س'"></p>
+                <div x-show="currentTab === 'dashboard'" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 border-r-4 border-r-blue-500">
+                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">إجمالي المبيعات</h3>
+                        <p class="text-3xl font-extrabold mt-2 text-slate-900" x-text="totalSales() + ' ل.س'"></p>
                     </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border-r-4 border-emerald-500">
-                        <h3 class="text-gray-500 text-sm">صافي أرباح النشاط</h3>
-                        <p class="text-3xl font-bold mt-2 text-emerald-600" x-text="netProfit() + ' ل.س'"></p>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 border-r-4 border-r-emerald-500">
+                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">فائض النشاط التقديري</h3>
+                        <p class="text-3xl font-extrabold mt-2 text-emerald-600" x-text="netSurplus() + ' ل.س'"></p>
                     </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border-r-4 border-amber-500">
-                        <h3 class="text-gray-500 text-sm">أصناف المخزن الحالية</h3>
-                        <p class="text-3xl font-bold mt-2 text-slate-800" x-text="inventory.length"></p>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 border-r-4 border-r-amber-500">
+                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">أصناف المخزن النشطة</h3>
+                        <p class="text-3xl font-extrabold mt-2 text-slate-900" x-text="inventory.length"></p>
                     </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border-r-4 border-indigo-500">
-                        <h3 class="text-gray-500 text-sm">عدد قيود اليومية</h3>
-                        <p class="text-3xl font-bold mt-2 text-slate-800" x-text="journalEntries.length"></p>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 border-r-4 border-r-indigo-500">
+                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">حسابات الدليل الموحد</h3>
+                        <p class="text-3xl font-extrabold mt-2 text-slate-900" x-text="accounts.length"></p>
                     </div>
                 </div>
 
-                <!-- 2. شجرة الحسابات -->
-                <div x-show="currentTab === 'accounts'" class="space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm">
-                        <h2 class="text-lg font-bold mb-4">إضافة حساب رئيسي أو فرعي جديد</h2>
-                        <form @submit.prevent="addAccount" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <input type="text" x-model="newAcc.code" placeholder="رقم الحساب (مثال: 101)" required class="border rounded-lg p-2 text-sm">
-                            <input type="text" x-model="newAcc.name" placeholder="اسم الحساب" required class="border rounded-lg p-2 text-sm">
-                            <select x-model="newAcc.type" class="border rounded-lg p-2 text-sm">
-                                <option value="أصول">أصول</option>
-                                <option value="خصوم">خصوم</option>
-                                <option value="حقوق ملكية">حقوق ملكية</option>
-                                <option value="إيرادات">إيرادات</option>
-                                <option value="مصروفات">مصروفات</option>
+                <!-- 2. إدارة الشركات والمستخدمين -->
+                <div x-show="currentTab === 'companies_users'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                        <h2 class="text-lg font-bold text-slate-800">إدارة الشركات والمؤسسات</h2>
+                        <form @submit.prevent="addCompany" class="space-y-3">
+                            <input type="text" x-model="newComp" placeholder="اسم الشركة أو المؤسسة الجديدة" required class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            <button type="submit" class="w-full bg-blue-600 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-blue-700 transition">إضافة وتفعيل الشركة</button>
+                        </form>
+                        <div class="pt-2">
+                            <p class="text-xs text-slate-400 mb-2 font-semibold">الشركات المسجلة حالياً:</p>
+                            <div class="flex flex-wrap gap-2">
+                                <template x-for="c in companies" :key="c">
+                                    <span class="bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 border" x-text="c"></span>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                        <h2 class="text-lg font-bold text-slate-800">إدارة المستخدمين والصلاحيات</h2>
+                        <form @submit.prevent="addUser" class="space-y-3">
+                            <input type="text" x-model="newUser.name" placeholder="اسم المستخدم" required class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            <select x-model="newUser.role" class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="مدير عام">مدير عام (Admin)</option>
+                                <option value="محاسب رئيسي">محاسب رئيسي</option>
+                                <option value="أمين صندوق">أمين صندوق</option>
                             </select>
-                            <button type="submit" class="bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700 transition">إضافة للحسابات</button>
+                            <button type="submit" class="w-full bg-slate-800 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-slate-900 transition">تسجيل المستخدم</button>
+                        </form>
+                        <div class="pt-2">
+                            <div class="space-y-1">
+                                <template x-for="u in users" :key="u.name">
+                                    <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg text-xs border">
+                                        <span class="font-bold text-slate-700" x-text="u.name"></span>
+                                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-semibold" x-text="u.role"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. دليل الحسابات السوري (الموحد) -->
+                <div x-show="currentTab === 'accounts'" class="space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h2 class="text-lg font-bold text-slate-800 mb-4">إضافة حساب فرعي وفق النظام المحاسبي الموحد السوري</h2>
+                        <form @submit.prevent="addAccount" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <input type="text" x-model="newAcc.code" placeholder="الرمز (مثل: 1811 الصندوق)" required class="border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" x-model="newAcc.name" placeholder="اسم الحساب" required class="border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                            <select x-model="newAcc.type" class="border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="1 الموجودات">1 الموجودات (أصول)</option>
+                                <option value="2 الخصوم">2 الخصوم (التزامات وحقوق)</option>
+                                <option value="3 الاستخدامات">3 الاستخدامات (مصروفات)</option>
+                                <option value="4 الموارد">4 الموارد (إيرادات)</option>
+                            </select>
+                            <button type="submit" class="bg-blue-600 text-white rounded-xl py-3 text-sm font-bold hover:bg-blue-700 transition">اعتماد الحساب</button>
                         </form>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-x-auto">
                         <table class="w-full text-right border-collapse text-sm">
-                            <thead class="bg-slate-50 border-b">
+                            <thead class="bg-slate-50 border-b text-slate-500">
                                 <tr>
-                                    <th class="p-4">رقم الحساب</th>
+                                    <th class="p-4">رمز الحساب</th>
                                     <th class="p-4">اسم الحساب</th>
-                                    <th class="p-4">التصنيف</th>
+                                    <th class="p-4">المجموعة الأساسية</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y">
+                            <tbody class="divide-y text-slate-700">
                                 <template x-for="acc in accounts" :key="acc.code">
                                     <tr>
                                         <td class="p-4 font-mono font-bold text-blue-600" x-text="acc.code"></td>
                                         <td class="p-4 font-semibold" x-text="acc.name"></td>
-                                        <td class="p-4"><span class="bg-gray-100 px-2 py-1 rounded text-xs" x-text="acc.type"></span></td>
+                                        <td class="p-4"><span class="bg-slate-100 px-2.5 py-1 rounded-lg text-xs font-bold" x-text="acc.type"></span></td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -112,44 +152,92 @@
                     </div>
                 </div>
 
-                <!-- 3. قيود اليومية والأستاذ -->
-                <div x-show="currentTab === 'journal'" class="space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm">
-                        <h2 class="text-lg font-bold mb-4">تسجيل قيد يومية مزدوج (مدين ودائن)</h2>
-                        <form @submit.prevent="addJournalEntry" class="space-y-4">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <input type="date" x-model="newEntry.date" required class="border rounded-lg p-2 text-sm">
-                                <input type="text" x-model="newEntry.desc" placeholder="شرح القيد أو البيان" required class="border rounded-lg p-2 text-sm">
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-xs text-gray-500 mb-1">الحساب المدين</label>
-                                    <select x-model="newEntry.debitAcc" class="w-full border rounded-lg p-2 text-sm">
-                                        <template x-for="acc in accounts" :key="acc.code">
-                                            <option :value="acc.name" x-text="acc.code + ' - ' + acc.name"></option>
-                                        </template>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-500 mb-1">الحساب الدائن</label>
-                                    <select x-model="newEntry.creditAcc" class="w-full border rounded-lg p-2 text-sm">
-                                        <template x-for="acc in accounts" :key="acc.code">
-                                            <option :value="acc.name" x-text="acc.code + ' - ' + acc.name"></option>
-                                        </template>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-500 mb-1">المبلغ</label>
-                                    <input type="number" step="0.01" x-model.number="newEntry.amount" required class="w-full border rounded-lg p-2 text-sm">
-                                </div>
-                            </div>
-                            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-700 transition">ترحيل القيد المحاسبي</button>
+                <!-- 4. سندات القبض والدفع -->
+                <div x-show="currentTab === 'vouchers'" class="space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h2 class="text-lg font-bold text-slate-800 mb-4">تحرير سند قبض أو سند دفع نقدي/مصرفي</h2>
+                        <form @submit.prevent="addVoucher" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            <select x-model="newVou.type" class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                                <option value="سند قبض">سند قبض (إيصال استلام)</option>
+                                <option value="سند دفع">سند دفع (صرف نقدي)</option>
+                            </select>
+                            <input type="text" x-model="newVou.party" placeholder="اسم المستفيد / الدافع" required class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                            <select x-model="newVou.acc" class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                                <template x-for="a in accounts" :key="a.code">
+                                    <option :value="a.name" x-text="a.code + ' - ' + a.name"></option>
+                                </template>
+                            </select>
+                            <input type="number" step="0.01" x-model.number="newVou.amount" placeholder="المبلغ" required class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                            <button type="submit" class="bg-emerald-600 text-white rounded-xl py-3 text-sm font-bold hover:bg-emerald-700 transition">حفظ وترحيل السند</button>
                         </form>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-x-auto">
                         <table class="w-full text-right border-collapse text-sm">
-                            <thead class="bg-slate-50 border-b">
+                            <thead class="bg-slate-50 border-b text-slate-500">
+                                <tr>
+                                    <th class="p-4">رقم السند</th>
+                                    <th class="p-4">النوع</th>
+                                    <th class="p-4">الجهة</th>
+                                    <th class="p-4">الحساب المقابل</th>
+                                    <th class="p-4">المبلغ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y text-slate-700">
+                                <template x-for="v in vouchers" :key="v.id">
+                                    <tr>
+                                        <td class="p-4 font-mono" x-text="'#' + v.id"></td>
+                                        <td class="p-4">
+                                            <span :class="v.type === 'سند قبض' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'" class="px-2.5 py-1 rounded-lg text-xs font-bold" x-text="v.type"></span>
+                                        </td>
+                                        <td class="p-4 font-semibold" x-text="v.party"></td>
+                                        <td class="p-4" x-text="v.acc"></td>
+                                        <td class="p-4 font-bold" x-text="v.amount + ' ل.س'"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 5. قيود اليومية المزدوجة -->
+                <div x-show="currentTab === 'journal'" class="space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h2 class="text-lg font-bold text-slate-800 mb-4">تسجيل قيد اليومية المزدوجة (مدين / دائن)</h2>
+                        <form @submit.prevent="addJournalEntry" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input type="date" x-model="newEntry.date" required class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                                <input type="text" x-model="newEntry.desc" placeholder="شرح القيد المحاسبي" required class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 mb-1">من ح/ (المدين)</label>
+                                    <select x-model="newEntry.debitAcc" class="w-full border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                                        <template x-for="acc in accounts" :key="acc.code">
+                                            <option :value="acc.name" x-text="acc.code + ' - ' + acc.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 mb-1">إلى ح/ (الدائن)</label>
+                                    <select x-model="newEntry.creditAcc" class="w-full border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                                        <template x-for="acc in accounts" :key="acc.code">
+                                            <option :value="acc.name" x-text="acc.code + ' - ' + acc.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 mb-1">المبلغ</label>
+                                    <input type="number" step="0.01" x-model.number="newEntry.amount" placeholder="المبلغ" required class="w-full border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                                </div>
+                            </div>
+                            <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-blue-700 transition">ترحيل القيد المالي</button>
+                        </form>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-x-auto">
+                        <table class="w-full text-right border-collapse text-sm">
+                            <thead class="bg-slate-50 border-b text-slate-500">
                                 <tr>
                                     <th class="p-4">التاريخ</th>
                                     <th class="p-4">البيان</th>
@@ -158,13 +246,13 @@
                                     <th class="p-4">المبلغ</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y">
+                            <tbody class="divide-y text-slate-700">
                                 <template x-for="entry in journalEntries" :key="entry.id">
                                     <tr>
-                                        <td class="p-4 text-gray-500" x-text="entry.date"></td>
+                                        <td class="p-4 text-slate-400 font-mono" x-text="entry.date"></td>
                                         <td class="p-4 font-semibold" x-text="entry.desc"></td>
-                                        <td class="p-4 text-emerald-600 font-medium" x-text="entry.debitAcc"></td>
-                                        <td class="p-4 text-rose-600 font-medium" x-text="entry.creditAcc"></td>
+                                        <td class="p-4 text-emerald-600 font-bold" x-text="entry.debitAcc"></td>
+                                        <td class="p-4 text-rose-600 font-bold" x-text="entry.creditAcc"></td>
                                         <td class="p-4 font-bold" x-text="entry.amount + ' ل.س'"></td>
                                     </tr>
                                 </template>
@@ -173,47 +261,45 @@
                     </div>
                 </div>
 
-                <!-- 4. المخازن والباركود -->
+                <!-- 6. جرد ومستودعات الباركود -->
                 <div x-show="currentTab === 'inventory'" class="space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm">
-                        <h2 class="text-lg font-bold mb-4">تعريف صنف جديد وربطه بالباركود والمستودع</h2>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h2 class="text-lg font-bold text-slate-800 mb-4">تعريف صنف جديد في المخزن (مع الباركود)</h2>
                         <form @submit.prevent="addInventoryItem" class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                            <input type="text" x-model="newItem.barcode" placeholder="رقم الباركود" required class="border rounded-lg p-2 text-sm">
-                            <input type="text" x-model="newItem.name" placeholder="اسم الصنف" required class="border rounded-lg p-2 text-sm">
-                            <select x-model="newItem.warehouse" class="border rounded-lg p-2 text-sm">
+                            <input type="text" x-model="newItem.barcode" placeholder="رقم الباركود" required class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                            <input type="text" x-model="newItem.name" placeholder="اسم الصنف" required class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                            <select x-model="newItem.warehouse" class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
                                 <template x-for="wh in warehouses" :key="wh">
                                     <option :value="wh" x-text="wh"></option>
                                 </template>
                             </select>
-                            <input type="number" x-model.number="newItem.qty" placeholder="الكمية" required class="border rounded-lg p-2 text-sm">
-                            <input type="number" step="0.01" x-model.number="newItem.cost" placeholder="سعر التكلفة" required class="border rounded-lg p-2 text-sm">
-                            <div class="md:col-span-5">
-                                <button type="submit" class="w-full bg-slate-800 text-white py-2 rounded-lg text-sm hover:bg-slate-900 transition">حفظ الصنف في المخزون</button>
-                            </div>
+                            <input type="number" x-model.number="newItem.qty" placeholder="الكمية الافتتاحية" required class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                            <input type="number" step="0.01" x-model.number="newItem.cost" placeholder="سعر التكلفة" required class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                            <button type="submit" class="md:col-span-5 bg-slate-900 text-white py-3 rounded-xl text-sm font-bold hover:bg-slate-800 transition">حفظ الصنف وجرد المخزون</button>
                         </form>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-x-auto">
                         <table class="w-full text-right border-collapse text-sm">
-                            <thead class="bg-slate-50 border-b">
+                            <thead class="bg-slate-50 border-b text-slate-500">
                                 <tr>
                                     <th class="p-4">الباركود</th>
-                                    <th class="p-4">الصنف</th>
+                                    <th class="p-4">اسم الصنف</th>
                                     <th class="p-4">المستودع</th>
                                     <th class="p-4">الكمية الحالية</th>
-                                    <th class="p-4">سعر التكلفة</th>
-                                    <th class="p-4">إجمالي التقييم</th>
+                                    <th class="p-4">التكلفة الفردية</th>
+                                    <th class="p-4">إجمالي القيمة</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y">
+                            <tbody class="divide-y text-slate-700">
                                 <template x-for="item in inventory" :key="item.barcode">
                                     <tr>
-                                        <td class="p-4 font-mono text-blue-600" x-text="item.barcode"></td>
+                                        <td class="p-4 font-mono text-blue-600 font-bold" x-text="item.barcode"></td>
                                         <td class="p-4 font-semibold" x-text="item.name"></td>
                                         <td class="p-4" x-text="item.warehouse"></td>
                                         <td class="p-4 font-bold" x-text="item.qty"></td>
                                         <td class="p-4" x-text="item.cost + ' ل.س'"></td>
-                                        <td class="p-4 font-bold" x-text="(item.qty * item.cost) + ' ل.س'"></td>
+                                        <td class="p-4 font-bold text-slate-900" x-text="(item.qty * item.cost) + ' ل.س'"></td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -221,47 +307,45 @@
                     </div>
                 </div>
 
-                <!-- 5. الفواتير (بيع وشراء) -->
+                <!-- 7. الفواتير التجارية -->
                 <div x-show="currentTab === 'invoices'" class="space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm">
-                        <h2 class="text-lg font-bold mb-4">إصدار فاتورة تجارية مرتبطة بالمخزن والحسابات</h2>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h2 class="text-lg font-bold text-slate-800 mb-4">إصدار فاتورة بيع أو شراء (مرتبطة بالمخزن آلياً)</h2>
                         <form @submit.prevent="addInvoice" class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                            <select x-model="newInv.type" class="border rounded-lg p-2 text-sm">
+                            <select x-model="newInv.type" class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
                                 <option value="مبيعات">فاتورة مبيعات</option>
                                 <option value="مشتريات">فاتورة مشتريات</option>
                             </select>
-                            <input type="text" x-model="newInv.party" placeholder="اسم العميل أو المورد" required class="border rounded-lg p-2 text-sm">
-                            <select x-model="newInv.item" class="border rounded-lg p-2 text-sm">
+                            <input type="text" x-model="newInv.party" placeholder="اسم العميل / المورد" required class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                            <select x-model="newInv.item" class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
                                 <template x-for="i in inventory" :key="i.name">
-                                    <option :value="i.name" x-text="i.name + ' (متوفر: ' + i.qty + ')'"></option>
+                                    <option :value="i.name" x-text="i.name + ' (المتوفر: ' + i.qty + ')'"></option>
                                 </template>
                             </select>
-                            <input type="number" x-model.number="newInv.qty" placeholder="الكمية" required class="border rounded-lg p-2 text-sm" min="1">
-                            <input type="number" step="0.01" x-model.number="newInv.total" placeholder="المبلغ الإجمالي" required class="border rounded-lg p-2 text-sm">
-                            <div class="md:col-span-5">
-                                <button type="submit" class="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-blue-700 transition">ترحيل الفاتورة وتحديث المخازن والقيود</button>
-                            </div>
+                            <input type="number" x-model.number="newInv.qty" placeholder="الكمية" required class="border border-slate-200 rounded-xl p-3 text-sm outline-none" min="1">
+                            <input type="number" step="0.01" x-model.number="newInv.total" placeholder="المبلغ الإجمالي" required class="border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                            <button type="submit" class="md:col-span-5 bg-blue-600 text-white py-3 rounded-xl text-sm font-bold hover:bg-blue-700 transition">إصدار وترحيل الفاتورة وتحديث المخازن</button>
                         </form>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-x-auto">
                         <table class="w-full text-right border-collapse text-sm">
-                            <thead class="bg-slate-50 border-b">
+                            <thead class="bg-slate-50 border-b text-slate-500">
                                 <tr>
                                     <th class="p-4">رقم الفاتورة</th>
                                     <th class="p-4">النوع</th>
                                     <th class="p-4">الجهة</th>
                                     <th class="p-4">الصنف</th>
                                     <th class="p-4">الكمية</th>
-                                    <th class="p-4">الإجمالي</th>
+                                    <th class="p-4">المبلغ</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y">
+                            <tbody class="divide-y text-slate-700">
                                 <template x-for="inv in invoices" :key="inv.id">
                                     <tr>
                                         <td class="p-4 font-mono" x-text="'#' + inv.id"></td>
                                         <td class="p-4">
-                                            <span :class="inv.type === 'مبيعات' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'" class="px-2 py-1 rounded text-xs font-bold" x-text="inv.type"></span>
+                                            <span :class="inv.type === 'مبيعات' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'" class="px-2.5 py-1 rounded-lg text-xs font-bold" x-text="inv.type"></span>
                                         </td>
                                         <td class="p-4 font-semibold" x-text="inv.party"></td>
                                         <td class="p-4" x-text="inv.item"></td>
@@ -274,51 +358,51 @@
                     </div>
                 </div>
 
-                <!-- 6. الحسابات الختامية والتقارير -->
+                <!-- 8. الحسابات الختامية -->
                 <div x-show="currentTab === 'reports'" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white p-6 rounded-xl shadow-sm border">
-                            <h3 class="text-md font-bold text-slate-800 mb-4 border-b pb-2">قائمة الدخل (الأرباح والخسائر)</h3>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                            <h3 class="text-md font-bold text-slate-800 border-b pb-2">قائمة الدخل (الموارد - الاستخدامات)</h3>
                             <div class="space-y-3 text-sm">
                                 <div class="flex justify-between py-1 border-b">
-                                    <span class="text-gray-600">إجمالي إيرادات المبيعات</span>
+                                    <span class="text-slate-500">إجمالي إيرادات المبيعات</span>
                                     <span class="font-bold text-emerald-600" x-text="totalSales() + ' ل.س'"></span>
                                 </div>
                                 <div class="flex justify-between py-1 border-b">
-                                    <span class="text-gray-600">إجمالي تكاليف ومشتريات النشاط</span>
+                                    <span class="text-slate-500">إجمالي المشتريات والمصروفات</span>
                                     <span class="font-bold text-rose-600" x-text="totalPurchases() + ' ل.س'"></span>
                                 </div>
-                                <div class="flex justify-between py-2 bg-slate-50 px-3 rounded-lg font-bold">
-                                    <span>صافي ربح النشاط</span>
-                                    <span class="text-blue-600" x-text="netProfit() + ' ل.س'"></span>
+                                <div class="flex justify-between py-2 bg-slate-50 px-3 rounded-xl font-bold">
+                                    <span>فائض النشاط الصافي</span>
+                                    <span class="text-blue-600" x-text="netSurplus() + ' ل.س'"></span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="bg-white p-6 rounded-xl shadow-sm border">
-                            <h3 class="text-md font-bold text-slate-800 mb-4 border-b pb-2">الميزانية العمومية (المركز المالي)</h3>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                            <h3 class="text-md font-bold text-slate-800 border-b pb-2">قائمة المركز المالي (الميزانية العمومية)</h3>
                             <div class="space-y-3 text-sm">
                                 <div class="flex justify-between py-1 border-b">
-                                    <span class="text-gray-600">إجمالي قيمة المخزون السلعي</span>
-                                    <span class="font-bold" x-text="totalInventoryValue() + ' ل.س'"></span>
+                                    <span class="text-slate-500">إجمالي قيمة المخزون الحالي</span>
+                                    <span class="font-bold text-slate-900" x-text="totalInventoryValue() + ' ل.س'"></span>
                                 </div>
                                 <div class="flex justify-between py-1 border-b">
-                                    <span class="text-gray-600">حقوق الملكية ورأس المال والأرباح</span>
-                                    <span class="font-bold text-emerald-600" x-text="(500000 + netProfit()) + ' ل.س'"></span>
+                                    <span class="text-slate-500">رأس المال وحقوق الملكية</span>
+                                    <span class="font-bold text-emerald-600" x-text="(1000000 + netSurplus()) + ' ل.س'"></span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 7. الإعدادات والنسخ الاحتياطي -->
-                <div x-show="currentTab === 'settings'" class="space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm max-w-xl space-y-4">
-                        <h2 class="text-lg font-bold">النسخ الاحتياطي والسيادة الكاملة للبيانات</h2>
-                        <p class="text-sm text-gray-500">تصدير قاعدة البيانات بالكامل لضمان عدم ضياع أي سجل تجاري أو محاسبي.</p>
+                <!-- 9. الحماية والنسخ -->
+                <div x-show="currentTab === 'backup'" class="space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 max-w-xl space-y-4">
+                        <h2 class="text-lg font-bold text-slate-800">النسخ الاحتياطي والأمان التام</h2>
+                        <p class="text-sm text-slate-500">تصدير واستعادة قواعد البيانات والشركات والمستخدمين بسهولة تامة بملف JSON واحد.</p>
                         <div class="flex gap-4">
-                            <button @click="exportData" class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg text-sm font-bold">📥 تصدير ملف النسخة الاحتياطية (JSON)</button>
-                            <button @click="clearData" class="bg-rose-100 text-rose-700 px-4 py-2.5 rounded-lg text-sm">⚠️ إعادة ضبط المصنع</button>
+                            <button @click="exportData" class="flex-1 bg-blue-600 text-white py-3 rounded-xl text-sm font-bold hover:bg-blue-700 transition">📥 تصدير البيانات (JSON)</button>
+                            <button @click="clearData" class="bg-rose-50 text-rose-600 px-5 py-3 rounded-xl text-sm font-bold border border-rose-100 hover:bg-rose-100 transition">⚠️ إعادة ضبط المصنع</button>
                         </div>
                     </div>
                 </div>
@@ -328,60 +412,97 @@
     </div>
 
     <script>
-        function globalERP() {
+        function syrianERP() {
             return {
                 currentTab: 'dashboard',
-                currentCompany: 'شركة الأفق الموحدة العالمية',
-                companies: JSON.parse(localStorage.getItem('erp_global_comps')) || ['شركة الأفق الموحدة العالمية', 'مجموعة النور التجارية'],
-                warehouses: JSON.parse(localStorage.getItem('erp_global_whs')) || ['المستودع الرئيسي - حلب', 'مستودع الفرع الفرعي'],
+                currentCompany: 'شركة حلب التجارية الكبرى',
+                currentUser: 'مدير النظام',
+                companies: JSON.parse(localStorage.getItem('sy_comps')) || ['شركة حلب التجارية الكبرى', 'مؤسسة السراج للصناعة والتجارة'],
+                users: JSON.parse(localStorage.getItem('sy_users')) || [{name: 'مدير النظام', role: 'مدير عام'}],
+                warehouses: JSON.parse(localStorage.getItem('sy_whs')) || ['المستودع الرئيسي - حلب', 'مستودع المعرض'],
                 
-                accounts: JSON.parse(localStorage.getItem('erp_global_accs')) || [
-                    { code: '101', name: 'الصندوق الرئيسي', type: 'أصول' },
-                    { code: '102', name: 'المصرف التجاري', type: 'أصول' },
-                    { code: '131', name: 'المخزون السلعي العام', type: 'أصول' },
-                    { code: '201', name: 'الموردين الدائنون', type: 'خصوم' },
-                    { code: '301', name: 'رأس المال', type: 'حقوق ملكية' },
-                    { code: '401', name: 'إيرادات المبيعات', type: 'إيرادات' },
-                    { code: '501', name: 'تكلفة المشتريات والمصروفات', type: 'مصروفات' }
+                // دليل الحسابات وفق النظام الموحد السوري
+                accounts: JSON.parse(localStorage.getItem('sy_accs')) || [
+                    { code: '1811', name: 'الصندوق النقدي', type: '1 الموجودات' },
+                    { code: '1821', name: 'المصارف التجارية (حـ/جاري)', type: '1 الموجودات' },
+                    { code: '1311', name: 'المخزون السلعي والبضائع', type: '1 الموجودات' },
+                    { code: '2111', name: 'رأس المال المدفوع', type: '2 الخصوم' },
+                    { code: '2611', name: 'الموردين والدائنون', type: '2 الخصوم' },
+                    { code: '3111', name: 'الأجور والمصروفات الإدارية', type: '3 الاستخدامات' },
+                    { code: '4111', name: 'إيرادات المبيعات والنشاط الجاري', type: '4 الموارد' }
                 ],
 
-                inventory: JSON.parse(localStorage.getItem('erp_global_inv')) || [
-                    { barcode: '2001', name: 'شاي أخضر فاخر', warehouse: 'المستودع الرئيسي - حلب', qty: 100, cost: 15000 }
+                inventory: JSON.parse(localStorage.getItem('sy_inv')) || [
+                    { barcode: '3001', name: 'قماش قطني فاخر', warehouse: 'المستودع الرئيسي - حلب', qty: 200, cost: 25000 }
                 ],
 
-                invoices: JSON.parse(localStorage.getItem('erp_global_invs')) || [],
-                journalEntries: JSON.parse(localStorage.getItem('erp_global_ents')) || [],
+                vouchers: JSON.parse(localStorage.getItem('sy_vous')) || [],
+                invoices: JSON.parse(localStorage.getItem('sy_invs')) || [],
+                journalEntries: JSON.parse(localStorage.getItem('sy_ents')) || [],
 
-                newAcc: { code: '', name: '', type: 'أصول' },
+                newComp: '',
+                newUser: { name: '', role: 'محاسب رئيسي' },
+                newAcc: { code: '', name: '', type: '1 الموجودات' },
+                newVou: { type: 'سند قبض', party: '', acc: 'الصندوق النقدي', amount: 0 },
                 newItem: { barcode: '', name: '', warehouse: 'المستودع الرئيسي - حلب', qty: 0, cost: 0 },
                 newInv: { type: 'مبيعات', party: '', item: '', qty: 1, total: 0 },
-                newEntry: { date: new Date().toISOString().split('T')[0], desc: '', debitAcc: 'الصندوق الرئيسي', creditAcc: 'إيرادات المبيعات', amount: 0 },
+                newEntry: { date: new Date().toISOString().split('T')[0], desc: '', debitAcc: 'الصندوق النقدي', creditAcc: 'إيرادات المبيعات والنشاط الجاري', amount: 0 },
 
                 getTabTitle() {
                     const titles = {
-                        'dashboard': 'لوحة المؤشرات وتحليلات الأداء المالية',
-                        'accounts': 'شجرة الحسابات المحاسبية العامة',
-                        'journal': 'دفتر اليومية المزدوجة والأستاذ العام',
-                        'inventory': 'إدارة وتتبع المستودعات والأصناف والباركود',
-                        'invoices': 'نظام إصدار الفواتير (بيع وشراء)',
-                        'reports': 'الحسابات الختامية وقائمة الدخل والميزانية',
-                        'settings': 'إعدادات النظام والنسخ الاحتياطي'
+                        'dashboard': 'لوحة المؤشرات وتحليلات الأداء',
+                        'companies_users': 'إدارة الشركات والمستخدمين',
+                        'accounts': 'دليل الحسابات وفق النظام الموحد السوري',
+                        'vouchers': 'سندات القبض والصرف النقدي',
+                        'journal': 'دفتر قيود اليومية المحاسبية المزدوجة',
+                        'inventory': 'جرد المستودعات وتتبع الباركود',
+                        'invoices': 'إدارة الفواتير التجارية وتحديث الأرصدة',
+                        'reports': 'الحسابات الختامية وقائمة الدخل والمركز المالي',
+                        'backup': 'الأمان والنسخ الاحتياطي التام'
                     };
                     return titles[this.currentTab] || '';
+                },
+
+                addCompany() {
+                    if(this.newComp && !this.companies.includes(this.newComp)) {
+                        this.companies.push(this.newComp);
+                        this.currentCompany = this.newComp;
+                        this.newComp = '';
+                        this.save();
+                        alert('تمت إضافة الشركة وتفعيلها بنجاح');
+                    }
+                },
+
+                addUser() {
+                    if(this.newUser.name) {
+                        this.users.push({...this.newUser});
+                        this.currentUser = this.newUser.name;
+                        this.newUser.name = '';
+                        this.save();
+                        alert('تم تسجيل المستخدم بنجاح');
+                    }
                 },
 
                 addAccount() {
                     this.accounts.push({...this.newAcc});
                     this.save();
-                    this.newAcc = { code: '', name: '', type: 'أصول' };
-                    alert('تم إضافة الحساب بنجاح');
+                    this.newAcc = { code: '', name: '', type: '1 الموجودات' };
+                    alert('تم إضافة وحفظ الحساب في الدليل الموحد السوري');
+                },
+
+                addVoucher() {
+                    this.vouchers.push({ id: Date.now(), ...this.newVou });
+                    this.save();
+                    alert('تم حفظ وترحيل السند المالي بنجاح');
+                    this.newVou.party = '';
+                    this.newVou.amount = 0;
                 },
 
                 addInventoryItem() {
                     this.inventory.push({...this.newItem});
                     this.save();
                     this.newItem = { barcode: '', name: '', warehouse: 'المستودع الرئيسي - حلب', qty: 0, cost: 0 };
-                    alert('تم حفظ الصنف بالمستودع بنجاح');
+                    alert('تم إضافة الصنف للمستودع بنجاح');
                 },
 
                 addInvoice() {
@@ -389,7 +510,7 @@
                     if(itemObj) {
                         if(this.newInv.type === 'مبيعات') {
                             if(itemObj.qty < this.newInv.qty) {
-                                alert('الكمية غير متوفرة في المستودع!');
+                                alert('الكمية المطلوبة غير متوفرة في المخزن!');
                                 return;
                             }
                             itemObj.qty -= Number(this.newInv.qty);
@@ -400,14 +521,14 @@
 
                     this.invoices.push({ id: Date.now(), ...this.newInv });
                     this.save();
-                    alert('تم إصدار الفاتورة وتحديث المخزون بنجاح');
+                    alert('تم إصدار الفاتورة وتحديث المخازن آلياً');
                     this.newInv = { type: 'مبيعات', party: '', item: '', qty: 1, total: 0 };
                 },
 
                 addJournalEntry() {
                     this.journalEntries.push({ id: Date.now(), ...this.newEntry });
                     this.save();
-                    alert('تم ترحيل قيد اليومية المالي بنجاح');
+                    alert('تم ترحيل القيد المالي بنجاح');
                     this.newEntry.desc = '';
                     this.newEntry.amount = 0;
                 },
@@ -420,7 +541,7 @@
                     return this.invoices.filter(i => i.type === 'مشتريات').reduce((sum, i) => sum + Number(i.total || 0), 0);
                 },
 
-                netProfit() {
+                netSurplus() {
                     return this.totalSales() - this.totalPurchases();
                 },
 
@@ -431,9 +552,11 @@
                 exportData() {
                     const data = {
                         companies: this.companies,
+                        users: this.users,
                         warehouses: this.warehouses,
                         accounts: this.accounts,
                         inventory: this.inventory,
+                        vouchers: this.vouchers,
                         invoices: this.invoices,
                         entries: this.journalEntries
                     };
@@ -441,24 +564,26 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'global_erp_backup.json';
+                    a.download = 'syrian_erp_system_backup.json';
                     a.click();
                 },
 
                 clearData() {
-                    if(confirm('هل أنت متأكد من تصفير كافة بيانات النظام؟')) {
+                    if(confirm('هل أنت متأكد من تصفير وإعادة ضبط النظام بالكامل؟')) {
                         localStorage.clear();
                         location.reload();
                     }
                 },
 
                 save() {
-                    localStorage.setItem('erp_global_comps', JSON.stringify(this.companies));
-                    localStorage.setItem('erp_global_whs', JSON.stringify(this.warehouses));
-                    localStorage.setItem('erp_global_accs', JSON.stringify(this.accounts));
-                    localStorage.setItem('erp_global_inv', JSON.stringify(this.inventory));
-                    localStorage.setItem('erp_global_invs', JSON.stringify(this.invoices));
-                    localStorage.setItem('erp_global_ents', JSON.stringify(this.journalEntries));
+                    localStorage.setItem('sy_comps', JSON.stringify(this.companies));
+                    localStorage.setItem('sy_users', JSON.stringify(this.users));
+                    localStorage.setItem('sy_whs', JSON.stringify(this.warehouses));
+                    localStorage.setItem('sy_accs', JSON.stringify(this.accounts));
+                    localStorage.setItem('sy_inv', JSON.stringify(this.inventory));
+                    localStorage.setItem('sy_vous', JSON.stringify(this.vouchers));
+                    localStorage.setItem('sy_invs', JSON.stringify(this.invoices));
+                    localStorage.setItem('sy_ents', JSON.stringify(this.journalEntries));
                 }
             }
         }
