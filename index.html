@@ -8,7 +8,6 @@
 <title>ملاحة سوريا</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 
 <style>
   :root {
@@ -25,9 +24,13 @@
   html, body {
     height: 100%; font-family: -apple-system, 'Segoe UI', Tahoma, Arial, sans-serif;
     overflow: hidden; background: var(--bg); color: var(--text);
-    transition: background 0.3s, color 0.3s;
   }
-  #map { position: absolute; inset: 0; z-index: 1; }
+  #map {
+    position: absolute; inset: 0; z-index: 1;
+    transition: filter 0.4s;
+  }
+  /* عند وضع الملاحة - زيادة تشبع الألوان قليلاً */
+  body.navigating #map { filter: saturate(1.08) contrast(1.03); }
 
   /* ============ شريط البحث ============ */
   #searchBar {
@@ -35,6 +38,10 @@
     z-index: 1000; display: flex; gap: 6px; align-items: center;
     background: var(--panel); border-radius: 14px; padding: 6px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    transition: transform 0.3s, opacity 0.3s;
+  }
+  body.navigating #searchBar {
+    transform: translateY(-150%); opacity: 0; pointer-events: none;
   }
   #searchInput {
     flex: 1; border: none; outline: none; padding: 12px 14px;
@@ -46,12 +53,10 @@
     background: transparent; border: none; cursor: pointer;
     width: 42px; height: 42px; border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
-    transition: background 0.2s;
   }
-  .icon-btn:hover { background: var(--input-bg); }
   .icon-btn svg { width: 22px; height: 22px; fill: var(--primary); }
 
-  /* ============ شريط الوضع (سيارة/مشياً) ============ */
+  /* ============ شريط نوع الرحلة ============ */
   #travelModeBar {
     position: absolute; top: calc(72px + env(safe-area-inset-top)); left: 50%;
     transform: translateX(-50%);
@@ -59,29 +64,36 @@
     border-radius: 14px; padding: 4px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
     display: none; gap: 4px;
+    transition: transform 0.3s, opacity 0.3s;
   }
   #travelModeBar.show { display: flex; }
+  body.navigating #travelModeBar {
+    transform: translate(-50%, -150%); opacity: 0; pointer-events: none;
+  }
   .mode-btn {
     background: transparent; border: none; cursor: pointer;
     padding: 8px 16px; border-radius: 10px;
     display: flex; flex-direction: column; align-items: center; gap: 2px;
     font-family: inherit; font-size: 11px; color: var(--text-sub);
-    transition: all 0.2s; min-width: 60px;
+    min-width: 60px;
   }
-  .mode-btn:hover { background: var(--input-bg); }
   .mode-btn.active { background: var(--primary); color: #fff; }
   .mode-btn svg { width: 22px; height: 22px; fill: var(--text-sub); }
   .mode-btn.active svg { fill: #fff; }
 
-  /* ============ عداد السرعة ============ */
+  /* ============ عداد السرعة (وضع عادي) ============ */
   #speedometer {
     position: absolute; top: calc(130px + env(safe-area-inset-top)); left: 10px;
     z-index: 999; background: var(--panel);
     padding: 8px 14px; border-radius: 14px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
     display: none; align-items: center; gap: 8px;
+    transition: transform 0.3s, opacity 0.3s;
   }
   #speedometer.show { display: flex; }
+  body.navigating #speedometer {
+    transform: translateY(-150%); opacity: 0; pointer-events: none;
+  }
   #speedometer.over { background: #fce8e6; }
   #speedometer.over #speedValue { color: var(--danger); }
   #speedValue {
@@ -99,8 +111,12 @@
     font-size: 11px; color: var(--text-sub); display: none;
     align-items: center; gap: 6px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s, opacity 0.3s;
   }
   #gpsStatus.show { display: flex; }
+  body.navigating #gpsStatus {
+    transform: translateY(-150%); opacity: 0; pointer-events: none;
+  }
   #gpsStatus .dot {
     width: 8px; height: 8px; border-radius: 50%; background: var(--danger);
     animation: pulse 1.5s infinite;
@@ -120,7 +136,6 @@
     padding: 12px 16px; border-bottom: 1px solid var(--border);
     cursor: pointer; font-size: 14px; color: var(--text);
     display: flex; gap: 12px; align-items: center;
-    transition: background 0.15s;
   }
   .result-item:last-child { border-bottom: none; }
   .result-item:hover, .result-item:active { background: var(--input-bg); }
@@ -135,52 +150,45 @@
   .result-item .save-btn svg { width: 18px; height: 18px; fill: var(--text-sub); }
   .result-item .save-btn.saved svg { fill: #fbbc04; }
 
-  /* ============ قائمة منبثقة عند الضغط المطول ============ */
+  /* ============ قائمة الضغط المطول ============ */
   #mapPopup {
     position: absolute; z-index: 2000;
     background: var(--panel); border-radius: 14px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-    padding: 6px; display: none; min-width: 180px;
+    padding: 6px; display: none; min-width: 200px;
     animation: popIn 0.15s ease-out;
   }
   #mapPopup.show { display: block; }
-  @keyframes popIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
-  }
+  @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
   .popup-item {
     background: transparent; border: none; cursor: pointer;
     padding: 12px 14px; border-radius: 10px;
     display: flex; align-items: center; gap: 10px;
     font-family: inherit; font-size: 14px; color: var(--text);
-    width: 100%; text-align: right; transition: background 0.15s;
+    width: 100%; text-align: right;
   }
-  .popup-item:hover, .popup-item:active { background: var(--input-bg); }
+  .popup-item:hover { background: var(--input-bg); }
   .popup-item svg { width: 20px; height: 20px; flex-shrink: 0; }
   .popup-item.start svg { fill: var(--success); }
   .popup-item.dest svg { fill: var(--danger); }
   .popup-item.save svg { fill: #fbbc04; }
-  .popup-item.cancel svg { fill: var(--text-sub); }
 
   /* ============ لوحة الأماكن المحفوظة ============ */
   #savedPanel {
-    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    z-index: 1500; background: rgba(0,0,0,0.5);
+    position: absolute; inset: 0; z-index: 1500;
+    background: rgba(0,0,0,0.5);
     display: none; align-items: flex-end;
   }
   #savedPanel.show { display: flex; }
   #savedContent {
     background: var(--panel); width: 100%; max-height: 70vh;
-    border-radius: 20px 20px 0 0;
-    padding: 18px;
-    animation: slideUp 0.3s ease-out;
-    overflow-y: auto;
+    border-radius: 20px 20px 0 0; padding: 18px;
+    animation: slideUp 0.3s ease-out; overflow-y: auto;
   }
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   #savedHeader {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 16px; padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
   }
   #savedHeader h3 { font-size: 18px; }
   #savedClose {
@@ -193,8 +201,7 @@
   #savedList li {
     padding: 14px; border-bottom: 1px solid var(--border);
     display: flex; align-items: center; gap: 12px;
-    cursor: pointer; transition: background 0.15s;
-    border-radius: 10px;
+    cursor: pointer; border-radius: 10px;
   }
   #savedList li:hover { background: var(--input-bg); }
   #savedList li .star svg { width: 20px; height: 20px; fill: #fbbc04; }
@@ -202,8 +209,7 @@
   #savedList li .name { font-weight: 500; font-size: 14px; }
   #savedList li .coords { font-size: 11px; color: var(--text-sub); margin-top: 3px; }
   #savedList li .del-btn {
-    background: transparent; border: none; cursor: pointer;
-    padding: 8px; border-radius: 8px;
+    background: transparent; border: none; cursor: pointer; padding: 8px;
   }
   #savedList li .del-btn svg { width: 18px; height: 18px; fill: var(--danger); }
   #savedList .empty {
@@ -211,7 +217,7 @@
     padding: 40px 20px; font-size: 14px;
   }
 
-  /* ============ لوحة خيارات المسار ============ */
+  /* ============ خيارات المسار ============ */
   #routeOptions {
     position: absolute; bottom: calc(20px + env(safe-area-inset-bottom));
     left: 50%; transform: translateX(-50%);
@@ -219,17 +225,20 @@
     border-radius: 16px; padding: 8px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     display: none; gap: 6px;
+    transition: transform 0.3s, opacity 0.3s;
   }
   #routeOptions.show { display: flex; }
+  body.navigating #routeOptions {
+    transform: translate(-50%, 200%); opacity: 0; pointer-events: none;
+  }
   .route-btn {
     background: transparent; border: none; cursor: pointer;
     padding: 10px 14px; border-radius: 10px;
     font-size: 13px; font-weight: 500; font-family: inherit;
     color: var(--text-sub); display: flex; flex-direction: column;
     align-items: center; gap: 3px;
-    transition: all 0.2s; min-width: 78px;
+    min-width: 78px;
   }
-  .route-btn:hover { background: var(--input-bg); }
   .route-btn.active { background: var(--primary); color: #fff; }
   .route-btn.active svg { fill: #fff; }
   .route-btn svg { width: 18px; height: 18px; fill: var(--text-sub); }
@@ -242,9 +251,12 @@
     border-radius: 20px 20px 0 0;
     box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
     padding: 16px 18px calc(20px + env(safe-area-inset-bottom));
-    display: none; max-height: 50vh; overflow-y: auto;
+    display: none; max-height: 45vh; overflow-y: auto;
     animation: slideUp 0.3s ease-out;
+    transition: background 0.3s;
   }
+  body.dark #navPanel { background: #0d0d0d; }
+  #navPanel.show { display: block; }
   #navHeader {
     display: flex; justify-content: space-between;
     align-items: center; margin-bottom: 14px;
@@ -266,8 +278,7 @@
   #steps li {
     padding: 12px 14px; border-bottom: 1px solid var(--border);
     font-size: 14px; color: var(--text); display: flex;
-    gap: 12px; align-items: flex-start;
-    border-radius: 10px;
+    gap: 12px; align-items: flex-start; border-radius: 10px;
   }
   #steps li.current { background: #e8f0fe; color: #0d47a1; font-weight: 600; }
   body.dark #steps li.current { background: #1a3a5c; color: #8ab4f8; }
@@ -282,6 +293,99 @@
   #steps .info { flex: 1; }
   #steps .dist { color: var(--text-sub); font-size: 12px; margin-top: 3px; font-weight: 400; }
 
+  /* ============ شريط الملاحة العلوي (وضع Sygic) ============ */
+  #navTopBar {
+    position: absolute; top: 0; left: 0; right: 0;
+    z-index: 1100; padding: calc(14px + env(safe-area-inset-top)) 14px 14px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 70%, transparent 100%);
+    display: none; align-items: center; gap: 16px;
+    color: #fff;
+    animation: slideDown 0.4s ease-out;
+  }
+  #navTopBar.show { display: flex; }
+  @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+  #navTopBar .turn-icon {
+    width: 70px; height: 70px; flex-shrink: 0;
+    background: var(--primary); border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(26,115,232,0.5);
+  }
+  #navTopBar .turn-icon svg {
+    width: 44px; height: 44px; fill: #fff;
+  }
+  #navTopBar .info { flex: 1; min-width: 0; }
+  #navTopBar .dist {
+    font-size: 30px; font-weight: 800; line-height: 1;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  #navTopBar .instr {
+    font-size: 15px; margin-top: 6px; opacity: 0.95;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  /* ============ شريط الملاحة السفلي المختصر (وضع Sygic) ============ */
+  #navBottomBar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    z-index: 1100; padding: 14px 18px calc(18px + env(safe-area-inset-bottom));
+    background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 70%, transparent 100%);
+    display: none; align-items: center; gap: 16px; color: #fff;
+  }
+  #navBottomBar.show { display: flex; }
+  #navBottomBar .stat { text-align: center; flex: 1; }
+  #navBottomBar .stat .val {
+    font-size: 22px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  #navBottomBar .stat .lbl {
+    font-size: 11px; opacity: 0.85; margin-top: 3px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+  #navBottomBar .stat .val.eta { color: #8ab4f8; }
+  #navBottomBar .speed-badge {
+    background: #fff; color: #1a73e8;
+    padding: 8px 14px; border-radius: 14px;
+    text-align: center; min-width: 70px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+  }
+  #navBottomBar .speed-badge.over { background: var(--danger); color: #fff; }
+  #navBottomBar .speed-badge .val {
+    font-size: 26px; font-weight: 800; line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  #navBottomBar .speed-badge .lbl {
+    font-size: 10px; opacity: 0.8; margin-top: 2px;
+  }
+
+  /* ============ زر الإيقاف العائم أثناء الملاحة ============ */
+  #navStopFloat {
+    position: absolute; top: calc(14px + env(safe-area-inset-top)); left: 14px;
+    z-index: 1200;
+    background: rgba(234,67,53,0.95); color: #fff;
+    border: none; cursor: pointer;
+    width: 46px; height: 46px; border-radius: 50%;
+    display: none; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  #navStopFloat.show { display: flex; }
+  #navStopFloat svg { width: 20px; height: 20px; fill: #fff; }
+
+  /* ============ زر إعادة التمركز ============ */
+  #recenterBtn {
+    position: absolute; bottom: calc(20px + env(safe-area-inset-bottom)); right: 10px;
+    z-index: 998;
+    background: var(--panel); border: none; cursor: pointer;
+    width: 46px; height: 46px; border-radius: 50%;
+    display: none; align-items: center; justify-content: center;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+    transition: bottom 0.3s;
+  }
+  #recenterBtn.show { display: flex; }
+  #recenterBtn svg { width: 22px; height: 22px; fill: var(--text); }
+  body.navigating #recenterBtn { display: none !important; }
+
   /* ============ زر بدء التوجيه ============ */
   #startBtn {
     position: absolute; bottom: calc(80px + env(safe-area-inset-bottom));
@@ -292,8 +396,12 @@
     box-shadow: 0 6px 20px rgba(26,115,232,0.4);
     display: none; font-family: inherit;
     align-items: center; gap: 8px;
+    transition: transform 0.3s, opacity 0.3s;
   }
   #startBtn.show { display: flex; }
+  body.navigating #startBtn {
+    transform: translate(-50%, 200%); opacity: 0; pointer-events: none;
+  }
   #startBtn svg { width: 20px; height: 20px; fill: #fff; }
 
   /* ============ تحميل ============ */
@@ -313,7 +421,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ============ أيقونات المستخدم ============ */
+  /* ============ أيقونات ============ */
   .user-location-icon { position: relative; width: 24px; height: 24px; }
   .user-location-icon .pulse {
     position: absolute; inset: 0; border-radius: 50%;
@@ -329,9 +437,27 @@
     background: var(--primary); border: 3px solid #fff;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   }
-  .car-icon { width: 40px; height: 40px; transition: transform 0.4s ease-out; }
-  .car-icon svg, .walk-icon svg { width: 100%; height: 100%; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35)); }
-  .walk-icon { width: 36px; height: 36px; transition: transform 0.4s ease-out; }
+
+  /* ============ أيقونة المركبة (Sygic style) ============ */
+  .vehicle-marker {
+    width: 56px; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    transform-origin: center center;
+    will-change: transform;
+  }
+  .vehicle-marker svg {
+    width: 100%; height: 100%;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+  }
+  /* هالة ضوئية أسفل السيارة */
+  .vehicle-marker::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 50%; transform: translateX(-50%);
+    width: 40px; height: 12px;
+    background: radial-gradient(ellipse, rgba(26,115,232,0.5) 0%, transparent 70%);
+    border-radius: 50%;
+  }
 
   /* ============ أزرار جانبية ============ */
   .side-btn {
@@ -352,8 +478,7 @@
     left: 50%; transform: translateX(-50%);
     z-index: 998; background: rgba(32,33,36,0.9); color: #fff;
     padding: 8px 14px; border-radius: 20px;
-    font-size: 12px; display: none;
-    white-space: nowrap;
+    font-size: 12px; display: none; white-space: nowrap;
   }
   #mapHint.show { display: block; animation: fadeInOut 3s ease-in-out; }
   @keyframes fadeInOut {
@@ -361,7 +486,7 @@
     15%, 85% { opacity: 1; }
   }
 
-  /* نافذة إدخال اسم المكان */
+  /* ============ نافذة إدخال اسم ============ */
   #nameDialog {
     position: absolute; inset: 0; z-index: 4000;
     background: rgba(0,0,0,0.5);
@@ -380,9 +505,7 @@
     color: var(--text); font-family: inherit; font-size: 15px;
     outline: none; margin-bottom: 14px;
   }
-  #nameDialogBox .actions {
-    display: flex; gap: 8px; justify-content: flex-end;
-  }
+  #nameDialogBox .actions { display: flex; gap: 8px; justify-content: flex-end; }
   #nameDialogBox button {
     padding: 10px 18px; border-radius: 10px;
     border: none; cursor: pointer; font-family: inherit;
@@ -391,7 +514,8 @@
   #nameCancel { background: var(--input-bg); color: var(--text); }
   #nameSave { background: var(--primary); color: #fff; }
 
-  .leaflet-routing-container { display: none !important; }
+  /* إخفاء شريط attribution أثناء الملاحة */
+  body.navigating .leaflet-control-attribution { display: none; }
   .leaflet-control-attribution { font-size: 10px; }
 </style>
 </head>
@@ -434,7 +558,7 @@
 <!-- نتائج البحث -->
 <div id="results"></div>
 
-<!-- خيارات نوع المسار -->
+<!-- خيارات المسار -->
 <div id="routeOptions">
   <button class="route-btn active" data-profile="fastest">
     <svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
@@ -459,7 +583,7 @@
   ابدأ التوجيه
 </button>
 
-<!-- لوحة التوجيهات -->
+<!-- لوحة التوجيهات (وضع التخطيط) -->
 <div id="navPanel">
   <div id="navHeader">
     <span id="navDistance">
@@ -471,7 +595,37 @@
   <ul id="steps"></ul>
 </div>
 
-<!-- قائمة منبثقة عند الضغط المطول -->
+<!-- ============ وضع الملاحة (Sygic) ============ -->
+<div id="navTopBar">
+  <div class="turn-icon" id="currentTurnIcon">
+    <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.59 5.58L20 12l-8-8-8 8z"/></svg>
+  </div>
+  <div class="info">
+    <div class="dist" id="navCurrentDist">—</div>
+    <div class="instr" id="navCurrentInstr">—</div>
+  </div>
+</div>
+
+<div id="navBottomBar">
+  <div class="stat">
+    <div class="val" id="navRemaining">—</div>
+    <div class="lbl">متبقٍ</div>
+  </div>
+  <div class="stat">
+    <div class="val eta" id="navEta">—</div>
+    <div class="lbl">الوصول</div>
+  </div>
+  <div class="speed-badge" id="navSpeedBadge">
+    <div class="val" id="navSpeedVal">0</div>
+    <div class="lbl">كم/س</div>
+  </div>
+</div>
+
+<button id="navStopFloat" title="إنهاء الملاحة">
+  <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+</button>
+
+<!-- قائمة الضغط المطول -->
 <div id="mapPopup">
   <button class="popup-item start" id="popupStart">
     <svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
@@ -520,11 +674,14 @@
   <svg id="themeIcon" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
 </button>
 
+<button id="recenterBtn" title="إعادة التمركز">
+  <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+</button>
+
 <div id="mapHint"></div>
 <div id="loading"><div class="spinner"></div><span id="loadingText">جاري المعالجة...</span></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
 <script>
 // ============================================================
@@ -542,11 +699,63 @@ const ICONS = {
   arrive:     '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>',
   depart:     '<svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>',
   waypoint:   '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>',
-  car:        '<svg viewBox="0 0 24 24" fill="#1a73e8"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>',
-  walk:       '<svg viewBox="0 0 24 24" fill="#1a73e8"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>',
   moon:       '<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>',
   sun:        '<svg viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>'
 };
+
+// أيقونة سيارة علوية (Sygic style) — منظر من فوق
+const CAR_ICON_TOPVIEW = `
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="carBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a90e2"/>
+      <stop offset="50%" stop-color="#1a73e8"/>
+      <stop offset="100%" stop-color="#0d47a1"/>
+    </linearGradient>
+    <linearGradient id="carGlass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c5e3ff"/>
+      <stop offset="100%" stop-color="#4a90e2"/>
+    </linearGradient>
+    <filter id="carShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.5"/>
+      <feOffset dx="0" dy="1.5" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.35"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- الجسم الخارجي -->
+  <path d="M32 4 C 24 4 20 8 20 14 L 18 22 L 16 26 L 16 48 C 16 54 20 58 24 58 L 40 58 C 44 58 48 54 48 48 L 48 26 L 46 22 L 44 14 C 44 8 40 4 32 4 Z"
+        fill="url(#carBody)" stroke="#fff" stroke-width="2" filter="url(#carShadow)"/>
+  <!-- الزجاج الأمامي -->
+  <path d="M24 14 Q 32 11 40 14 L 38 22 Q 32 20 26 22 Z" fill="url(#carGlass)" opacity="0.9"/>
+  <!-- السقف -->
+  <rect x="22" y="26" width="20" height="20" rx="3" fill="#1a73e8" opacity="0.7"/>
+  <!-- المصابيح الأمامية -->
+  <circle cx="24" cy="8" r="2" fill="#ffe082"/>
+  <circle cx="40" cy="8" r="2" fill="#ffe082"/>
+  <!-- المصابيح الخلفية -->
+  <rect x="22" y="56" width="4" height="2" rx="1" fill="#ff5252"/>
+  <rect x="38" y="56" width="4" height="2" rx="1" fill="#ff5252"/>
+  <!-- سهم اتجاه -->
+  <path d="M32 20 L 32 12 L 30 14 M 32 12 L 34 14" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+</svg>`;
+
+// أيقونة ماشي
+const WALK_ICON = `
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="32" cy="32" r="26" fill="#1a73e8" stroke="#fff" stroke-width="3"/>
+  <circle cx="32" cy="32" r="22" fill="#4a90e2" opacity="0.4"/>
+  <g transform="translate(32,32)">
+    <circle cx="0" cy="-10" r="4" fill="#fff"/>
+    <path d="M -3 -6 L 3 -6 L 5 4 L 2 4 L 0 0 L -2 4 L -5 4 Z" fill="#fff"/>
+    <path d="M -2 4 L -4 14 M 2 4 L 4 14" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg>`;
 
 // ============================================================
 // إعداد الخريطة
@@ -559,32 +768,41 @@ const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x
   maxZoom: 19, subdomains: 'abcd', attribution: '© OpenStreetMap © CARTO'
 });
 
-const map = L.map('map', { zoomControl: false, attributionControl: true }).setView(DAMASCUS, 13);
+const map = L.map('map', {
+  zoomControl: false,
+  attributionControl: true,
+  rotate: true,
+  touchRotate: true,
+  rotateControl: false
+}).setView(DAMASCUS, 13);
+
 streetLayer.addTo(map);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
 // ============================================================
 // الحالة العامة
 // ============================================================
-let destMarker = null, startMarker = null, savedTempMarker = null;
-let routingControl = null;
+let destMarker = null, startMarker = null;
+let routeLine = null, altLines = [];
 let currentSteps = [];
 let currentStepIndex = 0;
 let navigationActive = false;
 let watchId = null;
 let lastSpokenStep = -1;
 let userLocation = null, manualStart = null;
-let userMarker = null, userCircle = null, carMarker = null;
+let userMarker = null, userCircle = null, vehicleMarker = null;
 let lastHeading = 0, gpsFirstFix = false;
 let lastPosition = null, lastPositionTime = null;
 let currentSpeed = 0;
 let currentRouteProfile = 'fastest';
 let currentRouteOptions = { fastest: null, shortest: null, traffic: null, all: null };
 let currentDestination = null;
-let currentTravelMode = 'driving'; // driving | foot
+let currentTravelMode = 'driving';
+let currentRouteData = null; // لحساب المسافة المتبقية
+let recenterMode = 'follow'; // 'follow' | 'free' — للتحكم في تتبع الخريطة
 const SPEED_LIMIT = 120;
 
-// حفظ آخر إعدادات
+// حفظ الأماكن
 let savedPlaces = JSON.parse(localStorage.getItem('syria_nav_saved') || '[]');
 
 // ============================================================
@@ -652,7 +870,7 @@ function playBeep(freq = 880, duration = 150) {
 }
 
 // ============================================================
-// أدوات مساعدة
+// أدوات
 // ============================================================
 function showLoading(msg) {
   document.getElementById('loadingText').textContent = msg;
@@ -686,6 +904,18 @@ function haversine(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
+function formatDist(meters) {
+  if (meters >= 1000) return (meters/1000).toFixed(1) + ' كم';
+  return Math.round(meters) + ' م';
+}
+
+function formatEta(seconds) {
+  const d = new Date(Date.now() + seconds * 1000);
+  const h = d.getHours().toString().padStart(2, '0');
+  const m = d.getMinutes().toString().padStart(2, '0');
+  return `${h}:${m}`;
+}
+
 // ============================================================
 // قائمة الضغط المطول
 // ============================================================
@@ -694,13 +924,12 @@ let popupLatLng = null;
 
 function showMapPopup(latlng, x, y) {
   popupLatLng = latlng;
-  mapPopup.style.left = Math.min(x, window.innerWidth - 200) + 'px';
-  mapPopup.style.top = Math.min(y, window.innerHeight - 200) + 'px';
+  mapPopup.style.left = Math.min(x, window.innerWidth - 220) + 'px';
+  mapPopup.style.top = Math.min(y, window.innerHeight - 220) + 'px';
   mapPopup.classList.add('show');
 }
 function hideMapPopup() { mapPopup.classList.remove('show'); }
 
-// استخدم contextmenu (يعمل مع الضغط المطول على الجوال)
 map.on('contextmenu', e => {
   e.originalEvent.preventDefault();
   const x = e.originalEvent.clientX || e.originalEvent.touches?.[0]?.clientX || (window.innerWidth/2);
@@ -708,7 +937,6 @@ map.on('contextmenu', e => {
   showMapPopup(e.latlng, x, y);
 });
 
-// دعم إضافي للضغط المطول عبر setTimeout (يعمل على كل المتصفحات)
 let pressTimer = null;
 map.on('touchstart mousedown', e => {
   if (e.originalEvent.touches && e.originalEvent.touches.length > 1) return;
@@ -720,12 +948,9 @@ map.on('touchstart mousedown', e => {
     if (navigator.vibrate) navigator.vibrate(30);
   }, 550);
 });
-map.on('touchend mouseup mousemove touchmove dragstart zoomstart', () => {
-  clearTimeout(pressTimer);
-});
+map.on('touchend mouseup mousemove touchmove dragstart zoomstart', () => clearTimeout(pressTimer));
 map.on('click', () => hideMapPopup());
 
-// أحداث القائمة المنبثقة
 document.getElementById('popupStart').onclick = () => {
   if (popupLatLng) setManualStart([popupLatLng.lat, popupLatLng.lng]);
   hideMapPopup();
@@ -758,7 +983,7 @@ function setManualStart(loc) {
 }
 
 // ============================================================
-// البحث (Nominatim)
+// البحث
 // ============================================================
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
@@ -796,18 +1021,15 @@ async function searchPlaces(query) {
           <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
         </button>`;
 
-      // زر البحث → تعيين وجهة
       div.querySelector('.text').onclick = () => {
         resultsBox.style.display = 'none';
         searchInput.value = title;
         setDestination(loc, title);
       };
-      // زر النجمة → حفظ
       div.querySelector('.save-btn').onclick = (ev) => {
         ev.stopPropagation();
         const btn = ev.currentTarget;
         if (btn.classList.contains('saved')) {
-          // إزالة من المحفوظة
           savedPlaces = savedPlaces.filter(p => !(Math.abs(p.loc[0]-loc[0])<1e-5 && Math.abs(p.loc[1]-loc[1])<1e-5));
           persistSaved();
           btn.classList.remove('saved');
@@ -845,13 +1067,10 @@ function openNameDialog(loc, defaultName = '', callback = null) {
   nameDialog.classList.add('show');
   setTimeout(() => nameInput.focus(), 100);
 }
-
 document.getElementById('nameCancel').onclick = () => {
   nameDialog.classList.remove('show');
-  pendingSaveLocation = null;
-  pendingSaveCallback = null;
+  pendingSaveLocation = null; pendingSaveCallback = null;
 };
-
 document.getElementById('nameSave').onclick = () => {
   const name = nameInput.value.trim() || 'مكان محفوظ';
   if (pendingSaveLocation) {
@@ -862,22 +1081,17 @@ document.getElementById('nameSave').onclick = () => {
     if (pendingSaveCallback) pendingSaveCallback();
   }
   nameDialog.classList.remove('show');
-  pendingSaveLocation = null;
-  pendingSaveCallback = null;
+  pendingSaveLocation = null; pendingSaveCallback = null;
 };
-
 nameInput.addEventListener('keypress', e => {
   if (e.key === 'Enter') document.getElementById('nameSave').click();
 });
-
 function persistSaved() {
   localStorage.setItem('syria_nav_saved', JSON.stringify(savedPlaces));
 }
 
-// لوحة الأماكن المحفوظة
 const savedPanel = document.getElementById('savedPanel');
 const savedList = document.getElementById('savedList');
-
 document.getElementById('savedBtn').onclick = () => {
   renderSavedList();
   savedPanel.classList.add('show');
@@ -902,7 +1116,6 @@ function renderSavedList() {
       <button class="del-btn">
         <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
       </button>`;
-
     li.querySelector('.info').onclick = () => {
       savedPanel.classList.remove('show');
       setDestination(place.loc, place.name);
@@ -949,10 +1162,15 @@ function startGpsTracking() {
 
       updateSpeed(pos);
       updateUserLocation(loc, accuracy, heading);
+
+      // تحديث حالة الخريطة في وضع الملاحة
+      if (navigationActive) {
+        updateVehiclePosition(loc, heading, pos.coords.speed || currentSpeed/3.6);
+        checkProgress(loc);
+      }
+
       gpsStatus.classList.add('active');
       gpsText.textContent = `GPS · ${Math.round(accuracy)}م`;
-
-      if (navigationActive) checkProgress(loc);
     },
     err => {
       gpsStatus.classList.remove('active');
@@ -986,16 +1204,17 @@ function updateSpeed(pos) {
 function updateSpeedDisplay() {
   if (gpsFirstFix) speedometer.classList.add('show');
   speedValue.textContent = currentSpeed;
-  if (currentSpeed > SPEED_LIMIT) {
-    speedometer.classList.add('over');
-    if (!window._speedWarned) {
-      window._speedWarned = true;
-      playBeep(1200, 300);
-      speak(`تحذير، تجاوزت حد السرعة. سرعتك ${currentSpeed} كيلومتر في الساعة`);
-      setTimeout(() => window._speedWarned = false, 15000);
-    }
-  } else {
-    speedometer.classList.remove('over');
+  document.getElementById('navSpeedVal').textContent = currentSpeed;
+
+  const isOver = currentSpeed > SPEED_LIMIT;
+  speedometer.classList.toggle('over', isOver);
+  document.getElementById('navSpeedBadge').classList.toggle('over', isOver);
+
+  if (isOver && !window._speedWarned) {
+    window._speedWarned = true;
+    playBeep(1200, 300);
+    speak(`تحذير، تجاوزت حد السرعة. سرعتك ${currentSpeed} كيلومتر في الساعة`);
+    setTimeout(() => window._speedWarned = false, 15000);
   }
 }
 
@@ -1018,25 +1237,115 @@ function updateUserLocation(loc, accuracy, heading) {
   }
 }
 
-function updateVehicleMarker(loc, heading) {
-  if (heading === null || heading === undefined || isNaN(heading)) heading = lastHeading;
-  lastHeading = heading;
+// ============================================================
+// أيقونة المركبة (Sygic style) — تتحرك مع الاتجاه
+// ============================================================
+function updateVehiclePosition(loc, heading, speedMs) {
+  if (heading === null || heading === undefined || isNaN(heading)) {
+    // استخدم اتجاه الحركة الفعلي
+    if (lastPosition) {
+      heading = computeBearing(lastPosition[0], lastPosition[1], loc[0], loc[1]);
+    } else {
+      heading = lastHeading;
+    }
+  }
+  if (!isNaN(heading) && heading >= 0) lastHeading = heading;
 
-  const iconSvg = currentTravelMode === 'foot' ? ICONS.walk : ICONS.car;
-  const size = currentTravelMode === 'foot' ? 36 : 40;
-  const iconHtml = `<div class="${currentTravelMode==='foot'?'walk-icon':'car-icon'}" style="transform: rotate(${heading}deg);">${iconSvg}</div>`;
-  const icon = L.divIcon({ className: '', html: iconHtml, iconSize: [size, size], iconAnchor: [size/2, size/2] });
+  // إخفاء المؤشر الأزرق العادي أثناء الملاحة
+  if (userMarker) { map.removeLayer(userMarker); userMarker = null; }
+  if (userCircle) { map.removeLayer(userCircle); userCircle = null; }
 
-  if (carMarker) {
-    carMarker.setLatLng(loc);
-    carMarker.setIcon(icon);
+  const iconSvg = currentTravelMode === 'foot' ? WALK_ICON : CAR_ICON_TOPVIEW;
+  const iconHtml = `<div class="vehicle-marker" style="transform: rotate(${lastHeading}deg);">${iconSvg}</div>`;
+
+  // حجم الأيقونة يعتمد على الزوم
+  const zoom = map.getZoom();
+  const size = Math.max(40, Math.min(90, 30 + (zoom - 14) * 8));
+
+  const icon = L.divIcon({
+    className: '',
+    html: iconHtml,
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2]
+  });
+
+  if (vehicleMarker) {
+    vehicleMarker.setLatLng(loc);
+    vehicleMarker.setIcon(icon);
   } else {
-    carMarker = L.marker(loc, { icon, zIndexOffset: 2000 }).addTo(map);
+    vehicleMarker = L.marker(loc, {
+      icon,
+      zIndexOffset: 3000,
+      interactive: false
+    }).addTo(map);
+  }
+
+  // === تحريك الكاميرا (Sygic style) ===
+  if (recenterMode === 'follow' && navigationActive) {
+    // الزوم الديناميكي حسب السرعة
+    const targetZoom = getDynamicZoom(speedMs || 0);
+
+    // حرّك الخريطة بحيث تكون السيارة في الثلث السفلي من الشاشة
+    // دوران الخريطة مع اتجاه السيارة (مهمة Sygic)
+    const rotation = -lastHeading;
+
+    // استخدم panTo مع offset (السيارة في الأسفل)
+    // نحسب موقعاً وهمياً يكون مركز الخريطة
+    const centerOffset = 0.35; // 35% من عرض الشاشة للخلف
+    const mapHeight = map.getSize().y;
+    const offsetPixels = mapHeight * centerOffset;
+
+    // انقل الخريطة لتُظهر موقعاً خلف السيارة في اتجاه السير
+    const targetCenter = offsetLatLng(loc, lastHeading + 180, offsetPixels);
+
+    map.setView(targetCenter, targetZoom, {
+      animate: true,
+      duration: 0.5,
+      easeLinearity: 0.3
+    });
+
+    // تدوير الخريطة (Leaflet rotate plugin أو CSS transform)
+    if (map._rotate !== undefined) {
+      try { map.setBearing(rotation); } catch(e) {}
+    } else {
+      // بديل: استخدم CSS على طبقة الخريطة
+      const mapPane = map.getPanes().mapPane;
+      mapPane.style.transformOrigin = '50% 50%';
+      // نستخدم transform على عناصر الخريطة عبر CSS variable
+      document.getElementById('map').style.setProperty('--rotation', rotation + 'deg');
+    }
   }
 }
 
+function getDynamicZoom(speedMs) {
+  const kmh = speedMs * 3.6;
+  if (kmh < 10) return 18;
+  if (kmh < 30) return 17;
+  if (kmh < 60) return 16;
+  if (kmh < 90) return 15;
+  return 14;
+}
+
+// حساب نقطة إحداثية على مسافة معينة واتجاه معين من موقع
+function offsetLatLng(loc, bearingDeg, pixels) {
+  // نحول البكسل إلى متر تقريبي حسب الزوم الحالي
+  const metersPerPixel = 156543.03392 * Math.cos(loc[0] * Math.PI / 180) / Math.pow(2, map.getZoom());
+  const distanceMeters = pixels * metersPerPixel;
+
+  const R = 6371000;
+  const δ = distanceMeters / R;
+  const θ = bearingDeg * Math.PI / 180;
+  const φ1 = loc[0] * Math.PI / 180;
+  const λ1 = loc[1] * Math.PI / 180;
+
+  const φ2 = Math.asin(Math.sin(φ1)*Math.cos(δ) + Math.cos(φ1)*Math.sin(δ)*Math.cos(θ));
+  const λ2 = λ1 + Math.atan2(Math.sin(θ)*Math.sin(δ)*Math.cos(φ1), Math.cos(δ)-Math.sin(φ1)*Math.sin(φ2));
+
+  return [φ2 * 180 / Math.PI, λ2 * 180 / Math.PI];
+}
+
 // ============================================================
-// تعيين الوجهة + حساب المسارات
+// تعيين الوجهة
 // ============================================================
 function setDestination(loc, name) {
   currentDestination = loc;
@@ -1062,7 +1371,6 @@ function setDestination(loc, name) {
   document.getElementById('routeOptions').classList.remove('show');
   document.getElementById('startBtn').classList.remove('show');
 
-  // اختر مقطع OSRM حسب نمط الرحلة
   const profile = currentTravelMode === 'foot' ? 'foot' : 'driving';
   const coordsStr = `${start[1]},${start[0]};${loc[1]},${loc[0]}`;
   const url = `https://router.project-osrm.org/route/v1/${profile}/${coordsStr}?overview=full&geometries=geojson&steps=true&alternatives=true&annotations=speed`;
@@ -1104,15 +1412,13 @@ function setDestination(loc, name) {
 }
 
 // ============================================================
-// عرض المسار المختار
+// عرض المسار
 // ============================================================
-let routeLine = null;
-let altLines = [];
-
 function selectRoute(profile) {
   currentRouteProfile = profile;
   const route = currentRouteOptions[profile];
   if (!route) return;
+  currentRouteData = route;
 
   document.querySelectorAll('.route-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.profile === profile);
@@ -1132,7 +1438,10 @@ function selectRoute(profile) {
   });
 
   const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
-  routeLine = L.polyline(coords, { color: '#1a73e8', weight: 8, opacity: 0.9 }).addTo(map);
+  routeLine = L.polyline(coords, {
+    color: '#1a73e8', weight: 8, opacity: 0.9,
+    lineCap: 'round', lineJoin: 'round'
+  }).addTo(map);
   map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
 
   const leg = route.legs[0];
@@ -1141,7 +1450,8 @@ function selectRoute(profile) {
     text: translateInstruction(s),
     distance: s.distance,
     duration: s.duration,
-    location: s.maneuver.location
+    location: s.maneuver.location,
+    geometry: s.geometry
   }));
   currentStepIndex = 0;
   lastSpokenStep = -1;
@@ -1180,7 +1490,7 @@ function translateInstruction(step) {
 }
 
 // ============================================================
-// نمط الرحلة (سيارة/مشياً)
+// نمط الرحلة
 // ============================================================
 document.querySelectorAll('.mode-btn').forEach(btn => {
   btn.onclick = () => {
@@ -1189,46 +1499,130 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
     currentTravelMode = mode;
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
     playBeep(1000, 100);
-    if (mode === 'foot') {
-      speedometer.classList.remove('show');
-      speak('وضع المشي');
-    } else {
-      speak('وضع السيارة');
-    }
-    // أعد حساب المسار إن كانت هناك وجهة
+    speak(mode === 'foot' ? 'وضع المشي' : 'وضع السيارة');
     if (currentDestination) setDestination(currentDestination);
   };
 });
 
 // ============================================================
-// بدء التوجيه
+// بدء التوجيه — الدخول في وضع الملاحة Sygic
 // ============================================================
 document.getElementById('startBtn').onclick = () => {
   if (!currentSteps.length) return;
+
   navigationActive = true;
+  recenterMode = 'follow';
   currentStepIndex = 0;
   lastSpokenStep = -1;
+
+  // فعّل وضع الملاحة
+  document.body.classList.add('navigating');
+
+  // أخفِ العناصر القديمة وأظهر عناصر الملاحة الجديدة
   document.getElementById('startBtn').classList.remove('show');
   document.getElementById('routeOptions').classList.remove('show');
-  document.getElementById('travelModeBar').classList.remove('show');
-  document.getElementById('navPanel').style.display = 'block';
-  renderSteps();
+  document.getElementById('navPanel').classList.remove('show');
+  document.getElementById('navTopBar').classList.add('show');
+  document.getElementById('navBottomBar').classList.add('show');
+  document.getElementById('navStopFloat').classList.add('show');
 
+  // أظهر الخطوة الأولى
+  updateNavigationUI();
+
+  // ابدأ التتبع
   if (watchId === null) startGpsTracking();
 
+  // انطلق صوتياً
   playBeep(880, 120);
   setTimeout(() => speak('بدء التوجيه. ' + (currentSteps[0]?.text || '')), 200);
+
+  // ضع الخريطة في وضع التركيز (السيارة في الأسفل + دوران)
+  if (userLocation) {
+    // ارتفاع افتراضي
+    const targetZoom = 17;
+    const targetCenter = offsetLatLng(userLocation, lastHeading + 180, map.getSize().y * 0.35);
+    map.setView(targetCenter, targetZoom, { animate: true });
+  }
+
+  // قفل التفاعل مع الخريطة في وضع التتبع (لكن اسمح بالسحب)
+  map.on('dragstart', () => {
+    if (navigationActive) {
+      recenterMode = 'free';
+      document.getElementById('recenterBtn').classList.add('show');
+    }
+  });
 };
 
-document.getElementById('stopBtn').onclick = () => {
+// ============================================================
+// إنهاء التوجيه والعودة للموقع الحالي
+// ============================================================
+function stopNavigation() {
   navigationActive = false;
-  document.getElementById('navPanel').style.display = 'none';
-  document.getElementById('startBtn').classList.toggle('show', !!currentSteps.length);
-  document.getElementById('routeOptions').classList.toggle('show', !!currentSteps.length);
-  document.getElementById('travelModeBar').classList.add('show');
   synth.cancel();
-  if (carMarker) { map.removeLayer(carMarker); carMarker = null; }
+
+  // أزل كلاسات وضع الملاحة
+  document.body.classList.remove('navigating');
+
+  // أخفِ عناصر الملاحة
+  document.getElementById('navTopBar').classList.remove('show');
+  document.getElementById('navBottomBar').classList.remove('show');
+  document.getElementById('navStopFloat').classList.remove('show');
+  document.getElementById('recenterBtn').classList.remove('show');
+
+  // أعد إظهار العناصر العادية
+  document.getElementById('travelModeBar').classList.add('show');
+
+  // أعد إظهار المؤشر الأزرق العادي
+  if (vehicleMarker) { map.removeLayer(vehicleMarker); vehicleMarker = null; }
+
+  // أعِد مسح المسار والعلامات
+  if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
+  altLines.forEach(l => map.removeLayer(l));
+  altLines = [];
+  if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
+  if (startMarker) { map.removeLayer(startMarker); startMarker = null; }
+
+  currentSteps = [];
+  currentRouteOptions = { fastest: null, shortest: null, traffic: null, all: null };
+  currentDestination = null;
+  manualStart = null;
+
+  // ⭐ العودة التلقائية للموقع الحالي
+  if (userLocation) {
+    map.setView(userLocation, 16, { animate: true, duration: 0.8 });
+
+    // أعد إنشاء المؤشر الأزرق
+    if (!userMarker) {
+      const iconHtml = `<div class="user-location-icon"><div class="pulse"></div><div class="core"></div></div>`;
+      const icon = L.divIcon({ className: '', html: iconHtml, iconSize: [24, 24], iconAnchor: [12, 12] });
+      userMarker = L.marker(userLocation, { icon, zIndexOffset: 1000 }).addTo(map);
+    }
+    // أعد دوران الخريطة إلى الشمال
+    try {
+      if (map.setBearing) map.setBearing(0);
+    } catch(e) {}
+  } else if (gpsFirstFix && lastPosition) {
+    map.setView(lastPosition, 16, { animate: true });
+  } else {
+    map.setView(DAMASCUS, 13, { animate: true });
+  }
+
   speak('تم إنهاء التوجيه');
+}
+
+document.getElementById('stopBtn').onclick = stopNavigation;
+document.getElementById('navStopFloat').onclick = () => {
+  if (confirm('إنهاء التوجيه والعودة إلى موقعك؟')) stopNavigation();
+};
+
+// زر إعادة التمركز
+document.getElementById('recenterBtn').onclick = () => {
+  recenterMode = 'follow';
+  document.getElementById('recenterBtn').classList.remove('show');
+  if (userLocation) {
+    const targetCenter = offsetLatLng(userLocation, lastHeading + 180, map.getSize().y * 0.35);
+    map.setView(targetCenter, 17, { animate: true });
+  }
 };
 
 // ============================================================
@@ -1236,14 +1630,8 @@ document.getElementById('stopBtn').onclick = () => {
 // ============================================================
 function checkProgress(loc) {
   if (!currentSteps.length) return;
-  if (userMarker) { map.removeLayer(userMarker); userMarker = null; }
-  if (userCircle) { map.removeLayer(userCircle); userCircle = null; }
 
-  if (userLocation && loc) {
-    const heading = computeBearing(userLocation[0], userLocation[1], loc[0], loc[1]);
-    if (heading > 0) updateVehicleMarker(loc, heading);
-  }
-
+  // ابحث عن الخطوة الحالية بناءً على أقرب مسافة
   let nearestIdx = 0, minDist = Infinity;
   currentSteps.forEach((s, i) => {
     const d = haversine(loc[0], loc[1], s.location[1], s.location[0]);
@@ -1252,9 +1640,10 @@ function checkProgress(loc) {
 
   if (nearestIdx !== currentStepIndex) {
     currentStepIndex = nearestIdx;
-    renderSteps();
+    updateNavigationUI();
   }
 
+  // تنبيه صوتي قبل الخطوة التالية
   if (nearestIdx < currentSteps.length - 1) {
     const nextStep = currentSteps[nearestIdx + 1];
     const distToNext = haversine(loc[0], loc[1], nextStep.location[1], nextStep.location[0]);
@@ -1272,34 +1661,59 @@ function checkProgress(loc) {
     }
   }
 
+  // الوصول
   const last = currentSteps[currentSteps.length - 1];
   const distToDest = haversine(loc[0], loc[1], last.location[1], last.location[0]);
   if (distToDest < 0.03) {
     playBeep(1500, 400);
     setTimeout(() => speak('لقد وصلت إلى وجهتك'), 300);
-    setTimeout(() => document.getElementById('stopBtn').click(), 4000);
+    setTimeout(() => stopNavigation(), 4000);
   }
+
+  // حدّث معلومات الرحلة
+  updateTripInfo(loc);
 }
 
-function renderSteps() {
-  const ul = document.getElementById('steps');
-  ul.innerHTML = '';
-  const total = currentSteps.reduce((s, st) => s + st.distance, 0);
-  document.getElementById('navDistanceText').textContent = `${(total/1000).toFixed(1)} كم`;
+// ============================================================
+// تحديث واجهة الملاحة
+// ============================================================
+function updateNavigationUI() {
+  const step = currentSteps[currentStepIndex];
+  if (!step) return;
 
-  currentSteps.forEach((step, i) => {
-    const li = document.createElement('li');
-    if (i === currentStepIndex) li.className = 'current';
-    const icon = getIcon(step.type);
-    const distText = step.distance > 1000
-      ? `${(step.distance/1000).toFixed(1)} كم`
-      : `${Math.round(step.distance)} م`;
-    li.innerHTML = `<div class="icon">${icon}</div><div class="info"><div>${step.text}</div><div class="dist">${distText}</div></div>`;
-    ul.appendChild(li);
-  });
+  // الشريط العلوي
+  document.getElementById('currentTurnIcon').innerHTML = getIcon(step.type);
+  document.getElementById('navCurrentDist').textContent = formatDist(step.distance);
+  document.getElementById('navCurrentInstr').textContent = step.text;
+}
 
-  const current = ul.children[currentStepIndex];
-  if (current) current.scrollIntoView({ block: 'center', behavior: 'smooth' });
+// ============================================================
+// تحديث معلومات الرحلة (المسافة المتبقية + الوصول)
+// ============================================================
+function updateTripInfo(loc) {
+  if (!currentSteps.length) return;
+
+  // احسب المسافة والزمن المتبقيين من الخطوات الحالية
+  let remainingDist = 0;
+  let remainingTime = 0;
+
+  // الخطوات السابقة انتهت
+  // الخطوة الحالية: المسافة من موقعنا إلى نهايتها
+  const currentStep = currentSteps[currentStepIndex];
+  if (currentStep) {
+    const d = haversine(loc[0], loc[1], currentStep.location[1], currentStep.location[0]);
+    remainingDist += Math.min(d * 1000, currentStep.distance);
+    remainingTime += currentStep.duration * (d*1000 / Math.max(currentStep.distance,1));
+  }
+  // الخطوات التالية
+  for (let i = currentStepIndex + 1; i < currentSteps.length; i++) {
+    remainingDist += currentSteps[i].distance;
+    remainingTime += currentSteps[i].duration;
+  }
+
+  document.getElementById('navRemaining').textContent =
+    remainingDist >= 1000 ? (remainingDist/1000).toFixed(1) + ' كم' : Math.round(remainingDist) + ' م';
+  document.getElementById('navEta').textContent = formatEta(remainingTime);
 }
 
 function getIcon(type) {
@@ -1348,6 +1762,7 @@ document.getElementById('locBtn').onclick = () => {
 // ============================================================
 window.addEventListener('load', () => {
   document.getElementById('travelModeBar').classList.add('show');
+  document.getElementById('recenterBtn').classList.add('show');
 
   setTimeout(() => {
     if (navigator.geolocation) {
@@ -1373,6 +1788,14 @@ window.addEventListener('load', () => {
     }
     setTimeout(() => showHint('💡 نصيحة: اضغط مطولاً على الخريطة لتحديد موقع أو حفظ مكان'), 5000);
   }, 600);
+});
+
+// إخفاء زر إعادة التمركز عند بدء السحب
+map.on('dragstart', () => {
+  if (navigationActive) {
+    recenterMode = 'free';
+    document.getElementById('recenterBtn').classList.add('show');
+  }
 });
 </script>
 </body>
