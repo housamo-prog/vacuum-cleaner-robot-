@@ -3,29 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام المحاسبة المتكامل</title>
+<title>نظام المحاسبة والمخازن المتكامل - Enterprise Edition</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 <style>
+  * { box-sizing: border-box; }
   body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f6f9; margin: 0; }
-  .sidebar { background: #1e293b; color: #fff; min-height: 100vh; padding: 20px 0; position: fixed; width: 240px; top: 0; right: 0; overflow-y: auto; }
-  .sidebar a { color: #cbd5e1; text-decoration: none; padding: 12px 20px; display: block; border-right: 3px solid transparent; cursor: pointer; }
+  .sidebar { background: #1e293b; color: #fff; min-height: 100vh; padding: 8px 0; position: fixed; width: 240px; top: 0; right: 0; overflow-y: auto; z-index: 100; }
+  .sidebar a { color: #cbd5e1; text-decoration: none; padding: 9px 18px; display: block; border-right: 3px solid transparent; cursor: pointer; font-size: .9rem; }
   .sidebar a:hover, .sidebar a.active { background: #334155; color: #fff; border-right-color: #3b82f6; }
-  .sidebar .brand { padding: 15px 20px; font-size: 1.2rem; font-weight: bold; border-bottom: 1px solid #334155; margin-bottom: 15px; }
-  .main { margin-right: 240px; padding: 24px; min-height: 100vh; }
+  .sidebar .brand { padding: 12px 18px; font-size: 1.05rem; font-weight: bold; border-bottom: 1px solid #334155; margin-bottom: 6px; }
+  .sidebar .section { padding: 6px 18px; font-size: .72rem; color: #64748b; margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .main { margin-right: 240px; padding: 18px; min-height: 100vh; }
   .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,.06); border-radius: 10px; }
-  .stat-card { padding: 20px; border-radius: 10px; color: #fff; }
-  .stat-card h3 { font-size: 1.5rem; margin: 8px 0; }
+  .stat-card { padding: 14px; border-radius: 10px; color: #fff; }
+  .stat-card h3 { font-size: 1.25rem; margin: 4px 0; }
+  .stat-card h5 { font-size: 1.05rem; margin: 4px 0; }
   .bg-grad-blue { background: linear-gradient(135deg,#3b82f6,#1d4ed8); }
   .bg-grad-green { background: linear-gradient(135deg,#10b981,#047857); }
   .bg-grad-orange { background: linear-gradient(135deg,#f59e0b,#d97706); }
   .bg-grad-red { background: linear-gradient(135deg,#ef4444,#b91c1c); }
+  .bg-grad-purple { background: linear-gradient(135deg,#8b5cf6,#6d28d9); }
+  .bg-grad-teal { background: linear-gradient(135deg,#14b8a6,#0f766e); }
   .table thead { background: #1e293b; color: #fff; }
   .page { display: none; }
   .page.active { display: block; }
-  .login-box { max-width: 400px; margin: 100px auto; }
+  .login-box { max-width: 420px; margin: 60px auto; }
   .toast-msg { position: fixed; top: 20px; left: 20px; z-index: 9999; min-width: 250px; }
+  .barcode { font-family: 'Courier New', monospace; }
+  .stock-low { color: #dc2626; font-weight: bold; }
+  .stock-ok { color: #16a34a; }
+  #lowStockAlert { position: fixed; bottom: 20px; left: 20px; z-index: 1050; max-width: 380px; }
+  #lowStockAlert .card { border-right: 4px solid #dc2626; box-shadow: 0 4px 16px rgba(220,38,38,.3); }
+  .label-sheet { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 10px; }
+  .label-item { border: 1px dashed #999; padding: 6px; text-align: center; page-break-inside: avoid; }
+  .kpi-mini { padding: 10px; border-radius: 8px; background: #f1f5f9; }
+  .kpi-mini h6 { margin: 0; font-size: .78rem; color: #64748b; }
+  .kpi-mini .val { font-size: 1.1rem; font-weight: bold; color: #0f172a; }
+  .timeline-item { padding: 8px 12px; border-right: 3px solid #3b82f6; background: #f8fafc; margin-bottom: 6px; border-radius: 6px; }
+  .timeline-item.overdue { border-right-color: #dc2626; background: #fef2f2; }
+  .timeline-item.warning { border-right-color: #f59e0b; background: #fffbeb; }
   @media (max-width: 768px) {
     .sidebar { width: 100%; position: relative; min-height: auto; }
     .main { margin-right: 0; }
@@ -34,359 +54,726 @@
 </head>
 <body>
 
-<!-- شاشة الدخول -->
+<!-- ═══════════ الدخول ═══════════ -->
 <div id="loginView">
   <div class="card p-4 login-box">
     <div class="text-center mb-4">
       <i class="bi bi-calculator text-primary" style="font-size:3rem"></i>
-      <h4 class="mt-2">نظام المحاسبة المتكامل</h4>
-      <p class="text-muted">سجّل دخولك للمتابعة</p>
+      <h4 class="mt-2">نظام المحاسبة والمخازن المتكامل</h4>
+      <p class="text-muted small">Enterprise Accounting & Inventory System</p>
     </div>
-    <div class="mb-3">
-      <label class="form-label">اسم المستخدم</label>
-      <input id="loginUser" class="form-control" value="admin">
-    </div>
-    <div class="mb-3">
-      <label class="form-label">كلمة المرور</label>
-      <input id="loginPass" type="password" class="form-control" value="Admin@123">
-    </div>
+    <div class="mb-3"><label class="form-label">اسم المستخدم</label>
+      <input id="loginUser" class="form-control" value="admin"></div>
+    <div class="mb-3"><label class="form-label">كلمة المرور</label>
+      <input id="loginPass" type="password" class="form-control" value="Admin@123"></div>
     <button class="btn btn-primary w-100" onclick="doLogin()">دخول</button>
-    <div class="text-center mt-3 text-muted small">الافتراضي: admin / Admin@123</div>
+    <div class="text-center mt-3 text-muted small"><b>admin</b> / <b>Admin@123</b></div>
   </div>
 </div>
 
-<!-- التطبيق -->
+<!-- ═══════════ التطبيق ═══════════ -->
 <div id="appView" style="display:none">
   <div class="sidebar">
-    <div class="brand"><i class="bi bi-calculator"></i> نظام المحاسبة</div>
-    <a onclick="showPage('dashboard')" data-nav="dashboard" class="active"><i class="bi bi-speedometer2"></i> الرئيسية</a>
+    <div class="brand"><i class="bi bi-calculator"></i> نظام متكامل</div>
+    <div class="section">الرئيسية</div>
+    <a onclick="showPage('dashboard')" data-nav="dashboard" class="active"><i class="bi bi-speedometer2"></i> لوحة التحكم</a>
+    
+    <div class="section">المحاسبة</div>
     <a onclick="showPage('accounts')" data-nav="accounts"><i class="bi bi-diagram-3"></i> دليل الحسابات</a>
     <a onclick="showPage('journal')" data-nav="journal"><i class="bi bi-journal-text"></i> القيود اليومية</a>
     <a onclick="showPage('invoices')" data-nav="invoices"><i class="bi bi-receipt"></i> الفواتير</a>
+    <a onclick="showPage('payments')" data-nav="payments"><i class="bi bi-cash-coin"></i> المدفوعات</a>
+    
+    <div class="section">المخازن</div>
+    <a onclick="showPage('items')" data-nav="items"><i class="bi bi-box-seam"></i> المواد والأصناف</a>
+    <a onclick="showPage('warehouses')" data-nav="warehouses"><i class="bi bi-building"></i> المخازن</a>
+    <a onclick="showPage('stock')" data-nav="stock"><i class="bi bi-boxes"></i> أرصدة المخزون</a>
+    <a onclick="showPage('stockMove')" data-nav="stockMove"><i class="bi bi-arrow-left-right"></i> حركات المخزون</a>
+    <a onclick="showPage('inventory')" data-nav="inventory"><i class="bi bi-clipboard-check"></i> الجرد الفعلي</a>
+    <a onclick="showPage('barcode')" data-nav="barcode"><i class="bi bi-upc-scan"></i> الباركود</a>
+    <a onclick="showPage('fifo')" data-nav="fifo"><i class="bi bi-layers"></i> تقييم FIFO</a>
+    
+    <div class="section">البيانات</div>
     <a onclick="showPage('parties')" data-nav="parties"><i class="bi bi-people"></i> العملاء والموردون</a>
-    <a onclick="showPage('reports')" data-nav="reports"><i class="bi bi-bar-chart"></i> التقارير</a>
+    <a onclick="showPage('units')" data-nav="units"><i class="bi bi-rulers"></i> الوحدات</a>
+    <a onclick="showPage('currencies')" data-nav="currencies"><i class="bi bi-currency-exchange"></i> العملات</a>
+    
+    <div class="section">التقارير</div>
+    <a onclick="showPage('reports')" data-nav="reports"><i class="bi bi-bar-chart"></i> التقارير المالية</a>
+    <a onclick="showPage('stockReports')" data-nav="stockReports"><i class="bi bi-file-earmark-bar-graph"></i> تقارير المخزون</a>
+    <a onclick="showPage('aging')" data-nav="aging"><i class="bi bi-hourglass-split"></i> أعمار الديون</a>
+    <a onclick="showPage('statements')" data-nav="statements"><i class="bi bi-file-text"></i> كشوف الحسابات</a>
+    <a onclick="showPage('salesTrend')" data-nav="salesTrend"><i class="bi bi-graph-up"></i> تطور المبيعات</a>
+    <a onclick="showPage('compare')" data-nav="compare"><i class="bi bi-arrow-left-right"></i> مقارنة الفترات</a>
+    <a onclick="showPage('salesReps')" data-nav="salesReps"><i class="bi bi-person-badge"></i> أداء المندوبين</a>
+    <a onclick="showPage('calendar')" data-nav="calendar"><i class="bi bi-calendar-event"></i> تقويم المستحقات</a>
+    
+    <div class="section">الإدارة</div>
+    <a onclick="showPage('companies')" data-nav="companies"><i class="bi bi-briefcase"></i> الشركات</a>
+    <a onclick="showPage('users')" data-nav="users"><i class="bi bi-person-badge"></i> المستخدمون</a>
     <a onclick="showPage('audit')" data-nav="audit"><i class="bi bi-shield-check"></i> سجل التدقيق</a>
+    <a onclick="showPage('backup')" data-nav="backup"><i class="bi bi-download"></i> النسخ الاحتياطي</a>
     <hr style="border-color:#334155">
     <a onclick="doLogout()"><i class="bi bi-box-arrow-right"></i> خروج</a>
   </div>
 
   <div class="main">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h4 id="pageTitle">لوحة التحكم</h4>
-      <span class="badge bg-primary">admin (admin)</span>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 id="pageTitle" class="mb-0">لوحة التحكم</h4>
+      <div class="d-flex gap-2 align-items-center">
+        <select id="companySelector" class="form-select form-select-sm" style="width:auto" onchange="switchCompany(this.value)"></select>
+        <span class="badge bg-primary" id="userBadge">admin</span>
+      </div>
     </div>
 
-    <!-- لوحة التحكم -->
+    <!-- ═══ لوحة التحكم ═══ -->
     <div class="page active" id="page-dashboard">
-      <div class="row g-3 mb-4">
+      <div class="row g-3 mb-3">
         <div class="col-md-3"><div class="stat-card bg-grad-blue">
-          <i class="bi bi-wallet2 fs-3"></i>
-          <h3 id="stAssets">0.00</h3><div>إجمالي الأصول</div>
-        </div></div>
+          <i class="bi bi-wallet2 fs-3"></i><h3 id="stAssets">0.00</h3><div>إجمالي الأصول</div></div></div>
         <div class="col-md-3"><div class="stat-card bg-grad-orange">
-          <i class="bi bi-cash-stack fs-3"></i>
-          <h3 id="stLiab">0.00</h3><div>إجمالي الخصوم</div>
-        </div></div>
+          <i class="bi bi-cash-stack fs-3"></i><h3 id="stLiab">0.00</h3><div>إجمالي الخصوم</div></div></div>
         <div class="col-md-3"><div class="stat-card bg-grad-green">
-          <i class="bi bi-graph-up-arrow fs-3"></i>
-          <h3 id="stRev">0.00</h3><div>الإيرادات</div>
-        </div></div>
+          <i class="bi bi-graph-up-arrow fs-3"></i><h3 id="stRev">0.00</h3><div>الإيرادات</div></div></div>
         <div class="col-md-3"><div class="stat-card bg-grad-red">
-          <i class="bi bi-graph-down-arrow fs-3"></i>
-          <h3 id="stNet">0.00</h3><div>صافي الربح</div>
-        </div></div>
+          <i class="bi bi-graph-down-arrow fs-3"></i><h3 id="stNet">0.00</h3><div>صافي الربح</div></div></div>
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-md-3"><div class="stat-card bg-grad-purple">
+          <i class="bi bi-box-seam fs-3"></i><h3 id="stItems">0</h3><div>عدد الأصناف</div></div></div>
+        <div class="col-md-3"><div class="stat-card bg-grad-teal">
+          <i class="bi bi-boxes fs-3"></i><h3 id="stStockValue">0.00</h3><div>قيمة المخزون</div></div></div>
+        <div class="col-md-3"><div class="stat-card bg-grad-blue">
+          <i class="bi bi-exclamation-triangle fs-3"></i><h3 id="stLowStock">0</h3><div>أصناف منخفضة</div></div></div>
+        <div class="col-md-3"><div class="stat-card bg-grad-green">
+          <i class="bi bi-people fs-3"></i><h3 id="stParties">0</h3><div>عملاء وموردون</div></div></div>
       </div>
       <div class="row g-3">
-        <div class="col-md-7">
-          <div class="card p-3">
-            <h5>أحدث القيود</h5>
-            <table class="table table-hover">
-              <thead><tr><th>الرقم</th><th>التاريخ</th><th>البيان</th><th>مدين</th><th>دائن</th></tr></thead>
-              <tbody id="recentEntries"></tbody>
-            </table>
-          </div>
-        </div>
-        <div class="col-md-5">
-          <div class="card p-3">
-            <h5>نظرة عامة</h5>
-            <canvas id="chartOverview" height="220"></canvas>
-          </div>
-        </div>
+        <div class="col-md-7"><div class="card p-3">
+          <h6>أحدث القيود</h6>
+          <table class="table table-sm table-hover"><thead><tr><th>الرقم</th><th>التاريخ</th><th>البيان</th><th>مدين</th><th>دائن</th></tr></thead>
+          <tbody id="recentEntries"></tbody></table>
+        </div></div>
+        <div class="col-md-5"><div class="card p-3">
+          <h6>نظرة عامة</h6>
+          <canvas id="chartOverview" height="220"></canvas>
+        </div></div>
       </div>
     </div>
 
-    <!-- دليل الحسابات -->
+    <!-- ═══ الحسابات ═══ -->
     <div class="page" id="page-accounts">
-      <div class="card p-3 mb-3">
-        <h5>إضافة حساب</h5>
+      <div class="card p-3 mb-3"><h6>إضافة حساب</h6>
         <form onsubmit="addAccount(event)" class="row g-2">
-          <div class="col-md-2"><input name="code" class="form-control" placeholder="الكود" required></div>
-          <div class="col-md-4"><input name="name" class="form-control" placeholder="اسم الحساب" required></div>
-          <div class="col-md-3">
-            <select name="type" class="form-select" required>
-              <option value="asset">أصول</option>
-              <option value="liability">خصوم</option>
-              <option value="equity">حقوق ملكية</option>
-              <option value="revenue">إيرادات</option>
-              <option value="expense">مصروفات</option>
-            </select>
-          </div>
-          <div class="col-md-2"><div class="form-check mt-2">
-            <input type="checkbox" name="isGroup" class="form-check-input" id="isG">
-            <label class="form-check-label" for="isG">مجموعة</label>
-          </div></div>
-          <div class="col-md-1"><button class="btn btn-primary w-100">إضافة</button></div>
+          <div class="col-md-2"><input name="code" class="form-control form-control-sm" placeholder="الكود" required></div>
+          <div class="col-md-3"><input name="name" class="form-control form-control-sm" placeholder="الاسم" required></div>
+          <div class="col-md-2"><select name="type" class="form-select form-select-sm" required>
+            <option value="asset">أصول</option><option value="liability">خصوم</option>
+            <option value="equity">حقوق ملكية</option><option value="revenue">إيرادات</option>
+            <option value="expense">مصروفات</option></select></div>
+          <div class="col-md-2"><input name="currency" class="form-control form-control-sm" value="SAR"></div>
+          <div class="col-md-1"><div class="form-check mt-2"><input type="checkbox" name="isGroup" class="form-check-input" id="isG">
+            <label for="isG" class="form-check-label small">مجموعة</label></div></div>
+          <div class="col-md-2"><button class="btn btn-primary btn-sm w-100">إضافة</button></div>
         </form>
       </div>
-      <div class="card p-3">
-        <table class="table table-hover">
-          <thead><tr><th>الكود</th><th>الاسم</th><th>النوع</th><th>مجموعة</th><th>الرصيد</th><th></th></tr></thead>
-          <tbody id="accountsList"></tbody>
-        </table>
-      </div>
+      <div class="card p-3"><table class="table table-hover table-sm">
+        <thead><tr><th>الكود</th><th>الاسم</th><th>النوع</th><th>العملة</th><th>الرصيد</th><th></th></tr></thead>
+        <tbody id="accountsList"></tbody></table></div>
     </div>
 
-    <!-- القيود اليومية -->
+    <!-- ═══ القيود ═══ -->
     <div class="page" id="page-journal">
       <div class="d-flex justify-content-between mb-3">
-        <h5>القيود اليومية</h5>
-        <button class="btn btn-primary" onclick="openNewEntry()"><i class="bi bi-plus-circle"></i> قيد جديد</button>
+        <h6 class="mb-0">القيود اليومية</h6>
+        <button class="btn btn-primary btn-sm" onclick="openNewEntry()"><i class="bi bi-plus-circle"></i> قيد جديد</button>
       </div>
-      <div class="card p-3">
-        <table class="table table-hover">
-          <thead><tr><th>الرقم</th><th>التاريخ</th><th>البيان</th><th>مدين</th><th>دائن</th><th></th></tr></thead>
-          <tbody id="journalList"></tbody>
-        </table>
-      </div>
+      <div class="card p-3"><table class="table table-hover table-sm">
+        <thead><tr><th>الرقم</th><th>التاريخ</th><th>البيان</th><th>مدين</th><th>دائن</th><th></th></tr></thead>
+        <tbody id="journalList"></tbody></table></div>
     </div>
 
-    <!-- الفواتير -->
+    <!-- ═══ الفواتير ═══ -->
     <div class="page" id="page-invoices">
       <div class="d-flex justify-content-between mb-3">
-        <h5>الفواتير</h5>
-        <button class="btn btn-primary" onclick="openNewInvoice()"><i class="bi bi-plus-circle"></i> فاتورة جديدة</button>
+        <h6 class="mb-0">الفواتير</h6>
+        <button class="btn btn-success btn-sm" onclick="openNewInvoice()"><i class="bi bi-plus-circle"></i> فاتورة جديدة</button>
       </div>
-      <div class="card p-3">
-        <table class="table table-hover">
-          <thead><tr><th>الرقم</th><th>التاريخ</th><th>النوع</th><th>الطرف</th><th>الإجمالي</th><th>الحالة</th></tr></thead>
-          <tbody id="invoicesList"></tbody>
-        </table>
-      </div>
+      <div class="card p-3"><table class="table table-hover table-sm">
+        <thead><tr><th>الرقم</th><th>التاريخ</th><th>النوع</th><th>الطرف</th><th>المندوب</th><th>الإجمالي</th><th>الحالة</th><th></th></tr></thead>
+        <tbody id="invoicesList"></tbody></table></div>
     </div>
 
-    <!-- العملاء والموردون -->
-    <div class="page" id="page-parties">
-      <div class="card p-3 mb-3">
-        <h5>إضافة طرف</h5>
-        <form onsubmit="addParty(event)" class="row g-2">
-          <div class="col-md-2">
-            <select name="partyType" class="form-select" required>
-              <option value="customer">عميل</option>
-              <option value="supplier">مورد</option>
-            </select>
-          </div>
-          <div class="col-md-2"><input name="code" class="form-control" placeholder="الكود" required></div>
-          <div class="col-md-3"><input name="name" class="form-control" placeholder="الاسم" required></div>
-          <div class="col-md-2"><input name="phone" class="form-control" placeholder="الهاتف"></div>
-          <div class="col-md-2"><input name="email" class="form-control" placeholder="البريد"></div>
-          <div class="col-md-1"><button class="btn btn-primary w-100">إضافة</button></div>
+    <!-- ═══ المدفوعات ═══ -->
+    <div class="page" id="page-payments">
+      <div class="card p-3 mb-3"><h6>تسجيل دفعة</h6>
+        <form onsubmit="addPayment(event)" class="row g-2">
+          <div class="col-md-2"><select name="type" class="form-select form-select-sm" required>
+            <option value="receipt">قبض من عميل</option><option value="payment">صرف لمورد</option></select></div>
+          <div class="col-md-3"><select name="partyId" class="form-select form-select-sm" id="payParty" required></select></div>
+          <div class="col-md-2"><input name="amount" type="number" step="0.01" class="form-control form-control-sm" placeholder="المبلغ" required></div>
+          <div class="col-md-2"><input name="date" type="date" class="form-control form-control-sm" required></div>
+          <div class="col-md-2"><select name="method" class="form-select form-select-sm">
+            <option value="cash">نقدي</option><option value="bank">بنكي</option><option value="card">بطاقة</option></select></div>
+          <div class="col-md-1"><button class="btn btn-primary btn-sm w-100">حفظ</button></div>
         </form>
       </div>
-      <div class="card p-3">
-        <table class="table table-hover">
-          <thead><tr><th>الكود</th><th>الاسم</th><th>النوع</th><th>الهاتف</th><th>البريد</th><th></th></tr></thead>
-          <tbody id="partiesList"></tbody>
-        </table>
+      <div class="card p-3"><table class="table table-hover table-sm">
+        <thead><tr><th>التاريخ</th><th>النوع</th><th>الطرف</th><th>المبلغ</th><th>الطريقة</th></tr></thead>
+        <tbody id="paymentsList"></tbody></table></div>
+    </div>
+
+    <!-- ═══ الأصناف ═══ -->
+    <div class="page" id="page-items">
+      <ul class="nav nav-tabs mb-3">
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#itemsTab">الأصناف</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#categoriesTab">الفئات</a></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="itemsTab">
+          <div class="card p-3 mb-3"><h6>إضافة صنف</h6>
+            <form onsubmit="addItem(event)" class="row g-2">
+              <div class="col-md-2"><input name="code" class="form-control form-control-sm" placeholder="كود الصنف" required></div>
+              <div class="col-md-2"><input name="name" class="form-control form-control-sm" placeholder="اسم الصنف" required></div>
+              <div class="col-md-2"><input name="barcode" class="form-control form-control-sm" placeholder="الباركود (اتركه فارغاً)"></div>
+              <div class="col-md-2"><select name="category" class="form-select form-select-sm" id="itemCategory"></select></div>
+              <div class="col-md-2"><select name="baseUnit" class="form-select form-select-sm" id="itemUnit"></select></div>
+              <div class="col-md-2"><input name="cost" type="number" step="0.01" class="form-control form-control-sm" placeholder="التكلفة" value="0"></div>
+              <div class="col-md-2 mt-2"><input name="price" type="number" step="0.01" class="form-control form-control-sm" placeholder="سعر البيع" value="0"></div>
+              <div class="col-md-2 mt-2"><input name="minStock" type="number" step="0.01" class="form-control form-control-sm" placeholder="حد الطلب" value="0"></div>
+              <div class="col-md-2 mt-2"><input name="openingStock" type="number" step="0.01" class="form-control form-control-sm" placeholder="رصيد افتتاحي" value="0"></div>
+              <div class="col-md-2 mt-2"><select name="openingWarehouse" class="form-select form-select-sm" id="itemOpeningWH"></select></div>
+              <div class="col-md-2 mt-2"><button class="btn btn-primary btn-sm w-100">إضافة</button></div>
+            </form>
+          </div>
+          <div class="card p-3">
+            <input class="form-control form-control-sm mb-2" placeholder="🔍 بحث..." oninput="filterItems(this.value)">
+            <table class="table table-hover table-sm">
+              <thead><tr><th>الكود</th><th>الاسم</th><th>الفئة</th><th>الوحدة</th><th>التكلفة</th><th>البيع</th><th>الرصيد</th><th>الباركود</th><th></th></tr></thead>
+              <tbody id="itemsList"></tbody></table>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="categoriesTab">
+          <div class="card p-3 mb-3"><h6>إضافة فئة</h6>
+            <form onsubmit="addCategory(event)" class="row g-2">
+              <div class="col-md-3"><input name="code" class="form-control form-control-sm" placeholder="الكود" required></div>
+              <div class="col-md-6"><input name="name" class="form-control form-control-sm" placeholder="اسم الفئة" required></div>
+              <div class="col-md-3"><button class="btn btn-primary btn-sm w-100">إضافة</button></div>
+            </form>
+          </div>
+          <div class="card p-3"><table class="table table-sm"><thead><tr><th>الكود</th><th>الاسم</th><th></th></tr></thead>
+            <tbody id="categoriesList"></tbody></table></div>
+        </div>
       </div>
     </div>
 
-    <!-- التقارير -->
+    <!-- ═══ المخازن ═══ -->
+    <div class="page" id="page-warehouses">
+      <div class="card p-3 mb-3"><h6>إضافة مخزن</h6>
+        <form onsubmit="addWarehouse(event)" class="row g-2">
+          <div class="col-md-2"><input name="code" class="form-control form-control-sm" placeholder="الكود" required></div>
+          <div class="col-md-4"><input name="name" class="form-control form-control-sm" placeholder="اسم المخزن" required></div>
+          <div class="col-md-4"><input name="location" class="form-control form-control-sm" placeholder="الموقع"></div>
+          <div class="col-md-2"><button class="btn btn-primary btn-sm w-100">إضافة</button></div>
+        </form>
+      </div>
+      <div class="card p-3"><table class="table table-hover table-sm">
+        <thead><tr><th>الكود</th><th>الاسم</th><th>الموقع</th><th>عدد الأصناف</th><th></th></tr></thead>
+        <tbody id="warehousesList"></tbody></table></div>
+    </div>
+
+    <!-- ═══ أرصدة المخزون ═══ -->
+    <div class="page" id="page-stock">
+      <div class="card p-3 mb-3"><div class="row g-2">
+        <div class="col-md-4"><select id="stockWarehouseFilter" class="form-select form-select-sm" onchange="renderStock()">
+          <option value="">كل المخازن</option></select></div>
+        <div class="col-md-8"><input class="form-control form-control-sm" placeholder="🔍 بحث..." oninput="renderStock(this.value)"></div>
+      </div></div>
+      <div class="card p-3"><table class="table table-hover table-sm">
+        <thead><tr><th>الكود</th><th>الصنف</th><th>المخزن</th><th>الوحدة</th><th>الرصيد</th><th>التكلفة</th><th>القيمة</th><th>الحالة</th></tr></thead>
+        <tbody id="stockList"></tbody></table></div>
+    </div>
+
+    <!-- ═══ حركات المخزون ═══ -->
+    <div class="page" id="page-stockMove">
+      <div class="card p-3 mb-3"><h6>تسجيل حركة</h6>
+        <form onsubmit="addStockMove(event)" class="row g-2">
+          <div class="col-md-2"><select name="type" class="form-select form-select-sm" required>
+            <option value="in">إدخال</option><option value="out">إخراج</option>
+            <option value="transfer">تحويل</option><option value="adjust">تسوية</option>
+          </select></div>
+          <div class="col-md-2"><select name="itemId" class="form-select form-select-sm" id="mvItem" required></select></div>
+          <div class="col-md-2"><select name="warehouseId" class="form-select form-select-sm" id="mvWH" required></select></div>
+          <div class="col-md-2"><select name="toWarehouseId" class="form-select form-select-sm" id="mvToWH"></select></div>
+          <div class="col-md-1"><input name="qty" type="number" step="0.01" class="form-control form-control-sm" placeholder="الكمية" required></div>
+          <div class="col-md-1"><input name="cost" type="number" step="0.01" class="form-control form-control-sm" placeholder="التكلفة"></div>
+          <div class="col-md-1"><input name="date" type="date" class="form-control form-control-sm" required></div>
+          <div class="col-md-1"><button class="btn btn-primary btn-sm w-100">حفظ</button></div>
+        </form>
+      </div>
+      <div class="card p-3"><table class="table table-hover table-sm">
+        <thead><tr><th>التاريخ</th><th>النوع</th><th>الصنف</th><th>من</th><th>إلى</th><th>الكمية</th><th>التكلفة</th><th></th></tr></thead>
+        <tbody id="stockMovesList"></tbody></table></div>
+    </div>
+
+    <!-- ═══ الجرد ═══ -->
+    <div class="page" id="page-inventory">
+      <div class="card p-3 mb-3">
+        <div class="row g-2">
+          <div class="col-md-3"><select id="invWarehouse" class="form-select form-select-sm"></select></div>
+          <div class="col-md-3"><input id="invDate" type="date" class="form-control form-control-sm"></div>
+          <div class="col-md-3"><input id="invNotes" class="form-control form-control-sm" placeholder="ملاحظات"></div>
+          <div class="col-md-3"><button class="btn btn-primary btn-sm w-100" onclick="startInventory()">
+            <i class="bi bi-clipboard-check"></i> بدء الجرد</button></div>
+        </div>
+      </div>
+      <div id="inventorySheet"></div>
+      <div class="card p-3 mt-3">
+        <h6>سجل الجرد</h6>
+        <table class="table table-sm"><thead><tr><th>التاريخ</th><th>المخزن</th><th>عدد الأصناف</th><th>الفروق</th><th>ملاحظات</th></tr></thead>
+        <tbody id="inventoryHistoryList"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ═══ الباركود ═══ -->
+    <div class="page" id="page-barcode">
+      <div class="card p-3 mb-3"><h6>توليد وطباعة الباركود</h6>
+        <div class="row g-2">
+          <div class="col-md-3"><select id="bcItem" class="form-select form-select-sm"></select></div>
+          <div class="col-md-2"><input id="bcCount" type="number" class="form-control form-control-sm" value="1" min="1" max="100"></div>
+          <div class="col-md-2"><select id="bcType" class="form-select form-select-sm">
+            <option value="CODE128">CODE128</option><option value="EAN13">EAN13</option>
+            <option value="UPC">UPC</option><option value="CODE39">CODE39</option></select></div>
+          <div class="col-md-2"><button class="btn btn-primary btn-sm w-100" onclick="generateBarcode()">
+            <i class="bi bi-upc"></i> توليد</button></div>
+          <div class="col-md-1"><button class="btn btn-success btn-sm w-100" onclick="printBarcodes()">
+            <i class="bi bi-printer"></i></button></div>
+          <div class="col-md-2"><button class="btn btn-warning btn-sm w-100" onclick="printBarcodeSheet()">
+            <i class="bi bi-file-earmark-zip"></i> ملصقات A4</button></div>
+        </div>
+      </div>
+      <div class="card p-3" id="barcodePreview">
+        <p class="text-center text-muted">اختر صنفاً واضغط "توليد"</p>
+      </div>
+    </div>
+
+    <!-- ═══ FIFO ═══ -->
+    <div class="page" id="page-fifo">
+      <div class="card p-3 mb-3">
+        <div class="row g-2">
+          <div class="col-md-4"><select id="fifoWarehouse" class="form-select form-select-sm" onchange="renderFIFO()"></select></div>
+          <div class="col-md-4"><select id="fifoItem" class="form-select form-select-sm" onchange="renderFIFO()"></select></div>
+          <div class="col-md-4"><button class="btn btn-primary btn-sm w-100" onclick="renderFIFO()">تحديث</button></div>
+        </div>
+      </div>
+      <div id="fifoResult"></div>
+    </div>
+
+    <!-- ═══ الأطراف ═══ -->
+    <div class="page" id="page-parties">
+      <div class="card p-3 mb-3"><h6>إضافة طرف</h6>
+        <form onsubmit="addParty(event)" class="row g-2">
+          <div class="col-md-2"><select name="partyType" class="form-select form-select-sm" required>
+            <option value="customer">عميل</option><option value="supplier">مورد</option></select></div>
+          <div class="col-md-2"><input name="code" class="form-control form-control-sm" placeholder="الكود" required></div>
+          <div class="col-md-3"><input name="name" class="form-control form-control-sm" placeholder="الاسم" required></div>
+          <div class="col-md-2"><input name="phone" class="form-control form-control-sm" placeholder="الهاتف"></div>
+          <div class="col-md-2"><input name="email" class="form-control form-control-sm" placeholder="البريد"></div>
+          <div class="col-md-1"><button class="btn btn-primary btn-sm w-100">إضافة</button></div>
+        </form>
+      </div>
+      <div class="card p-3"><table class="table table-hover table-sm">
+        <thead><tr><th>الكود</th><th>الاسم</th><th>النوع</th><th>الهاتف</th><th>البريد</th><th></th></tr></thead>
+        <tbody id="partiesList"></tbody></table></div>
+    </div>
+
+    <!-- ═══ الوحدات ═══ -->
+    <div class="page" id="page-units">
+      <div class="card p-3 mb-3"><h6>إضافة وحدة</h6>
+        <form onsubmit="addUnit(event)" class="row g-2">
+          <div class="col-md-2"><input name="code" class="form-control form-control-sm" placeholder="الكود" required></div>
+          <div class="col-md-3"><input name="name" class="form-control form-control-sm" placeholder="الاسم" required></div>
+          <div class="col-md-3"><select name="baseUnit" class="form-select form-select-sm" id="unitBase"></select></div>
+          <div class="col-md-2"><input name="factor" type="number" step="0.0001" class="form-control form-control-sm" value="1"></div>
+          <div class="col-md-2"><button class="btn btn-primary btn-sm w-100">إضافة</button></div>
+        </form>
+      </div>
+      <div class="card p-3"><table class="table table-hover table-sm">
+        <thead><tr><th>الكود</th><th>الاسم</th><th>الأساسية</th><th>المعامل</th><th></th></tr></thead>
+        <tbody id="unitsList"></tbody></table></div>
+    </div>
+
+    <!-- ═══ العملات ═══ -->
+    <div class="page" id="page-currencies">
+      <div class="card p-3 mb-3"><h6>إضافة عملة</h6>
+        <form onsubmit="addCurrency(event)" class="row g-2">
+          <div class="col-md-2"><input name="code" class="form-control form-control-sm" required maxlength="3"></div>
+          <div class="col-md-3"><input name="name" class="form-control form-control-sm" placeholder="الاسم" required></div>
+          <div class="col-md-2"><input name="symbol" class="form-control form-control-sm" placeholder="الرمز"></div>
+          <div class="col-md-2"><input name="rate" type="number" step="0.0001" class="form-control form-control-sm" required></div>
+          <div class="col-md-2"><div class="form-check mt-2"><input type="checkbox" name="isBase" class="form-check-input" id="isBase">
+            <label for="isBase" class="form-check-label small">أساسية</label></div></div>
+          <div class="col-md-1"><button class="btn btn-primary btn-sm w-100">إضافة</button></div>
+        </form>
+      </div>
+      <div class="card p-3"><table class="table table-hover table-sm">
+        <thead><tr><th>الكود</th><th>الاسم</th><th>الرمز</th><th>السعر</th><th>أساسية</th><th></th></tr></thead>
+        <tbody id="currenciesList"></tbody></table></div>
+    </div>
+
+    <!-- ═══ التقارير المالية ═══ -->
     <div class="page" id="page-reports">
       <div class="row g-3 mb-3">
-        <div class="col-md-4"><button class="card p-4 text-center w-100 border-0" onclick="showReport('trial')">
-          <i class="bi bi-list-check fs-1 text-primary"></i><h5 class="mt-2">ميزان المراجعة</h5></button></div>
-        <div class="col-md-4"><button class="card p-4 text-center w-100 border-0" onclick="showReport('income')">
-          <i class="bi bi-graph-up fs-1 text-success"></i><h5 class="mt-2">قائمة الدخل</h5></button></div>
-        <div class="col-md-4"><button class="card p-4 text-center w-100 border-0" onclick="showReport('balance')">
-          <i class="bi bi-clipboard-data fs-1 text-warning"></i><h5 class="mt-2">الميزانية العمومية</h5></button></div>
+        <div class="col-md-3"><button class="card p-3 text-center w-100 border-0" onclick="showReport('trial')">
+          <i class="bi bi-list-check fs-1 text-primary"></i><b>ميزان المراجعة</b></button></div>
+        <div class="col-md-3"><button class="card p-3 text-center w-100 border-0" onclick="showReport('income')">
+          <i class="bi bi-graph-up fs-1 text-success"></i><b>الأرباح والخسائر</b></button></div>
+        <div class="col-md-3"><button class="card p-3 text-center w-100 border-0" onclick="showReport('balance')">
+          <i class="bi bi-clipboard-data fs-1 text-warning"></i><b>الميزانية العمومية</b></button></div>
+        <div class="col-md-3"><button class="card p-3 text-center w-100 border-0" onclick="showReport('cashflow')">
+          <i class="bi bi-cash-stack fs-1 text-info"></i><b>التدفقات النقدية</b></button></div>
       </div>
       <div id="reportContent"></div>
     </div>
 
-    <!-- سجل التدقيق -->
-    <div class="page" id="page-audit">
+    <!-- ═══ تقارير المخزون ═══ -->
+    <div class="page" id="page-stockReports">
+      <div class="row g-3 mb-3">
+        <div class="col-md-3"><button class="card p-3 text-center w-100 border-0" onclick="stockReport('valuation')">
+          <i class="bi bi-cash-coin fs-1 text-success"></i><b>تقييم المخزون</b></button></div>
+        <div class="col-md-3"><button class="card p-3 text-center w-100 border-0" onclick="stockReport('low')">
+          <i class="bi bi-exclamation-triangle fs-1 text-danger"></i><b>أصناف منخفضة</b></button></div>
+        <div class="col-md-3"><button class="card p-3 text-center w-100 border-0" onclick="stockReport('movement')">
+          <i class="bi bi-arrow-left-right fs-1 text-primary"></i><b>حركة الأصناف</b></button></div>
+        <div class="col-md-3"><button class="card p-3 text-center w-100 border-0" onclick="stockReport('profit')">
+          <i class="bi bi-graph-up-arrow fs-1 text-warning"></i><b>ربح الأصناف</b></button></div>
+      </div>
+      <div id="stockReportContent"></div>
+    </div>
+
+    <!-- ═══ أعمار الديون ═══ -->
+    <div class="page" id="page-aging">
+      <div class="card p-3 mb-3">
+        <div class="row g-2">
+          <div class="col-md-3"><select id="agingType" class="form-select form-select-sm" onchange="renderAging()">
+            <option value="customer">العملاء</option><option value="supplier">الموردين</option></select></div>
+          <div class="col-md-3"><input id="agingAsOf" type="date" class="form-control form-control-sm" onchange="renderAging()"></div>
+          <div class="col-md-3"><button class="btn btn-primary btn-sm w-100" onclick="renderAging()">تحديث</button></div>
+          <div class="col-md-3"><button class="btn btn-success btn-sm w-100" onclick="printAging()">
+            <i class="bi bi-printer"></i> طباعة</button></div>
+        </div>
+      </div>
       <div class="card p-3">
+        <div id="agingSummary" class="row g-2 mb-3"></div>
         <table class="table table-sm table-hover">
-          <thead><tr><th>الوقت</th><th>الإجراء</th><th>التفاصيل</th></tr></thead>
-          <tbody id="auditList"></tbody>
+          <thead><tr><th>الطرف</th><th>الإجمالي</th><th>0-30</th><th>31-60</th><th>61-90</th><th>91-180</th><th>+180</th></tr></thead>
+          <tbody id="agingList"></tbody>
         </table>
       </div>
     </div>
+
+    <!-- ═══ كشوف الحسابات ═══ -->
+    <div class="page" id="page-statements">
+      <div class="card p-3 mb-3">
+        <div class="row g-2">
+          <div class="col-md-3"><select id="stmtParty" class="form-select form-select-sm" onchange="renderStatement()"></select></div>
+          <div class="col-md-2"><input id="stmtFrom" type="date" class="form-control form-control-sm" onchange="renderStatement()"></div>
+          <div class="col-md-2"><input id="stmtTo" type="date" class="form-control form-control-sm" onchange="renderStatement()"></div>
+          <div class="col-md-2"><button class="btn btn-primary btn-sm w-100" onclick="renderStatement()">تحديث</button></div>
+          <div class="col-md-3"><button class="btn btn-success btn-sm w-100" onclick="printStatement()">
+            <i class="bi bi-printer"></i> طباعة</button></div>
+        </div>
+      </div>
+      <div id="statementContent"></div>
+    </div>
+
+    <!-- ═══ تطور المبيعات ═══ -->
+    <div class="page" id="page-salesTrend">
+      <div class="card p-3 mb-3">
+        <div class="row g-2">
+          <div class="col-md-3"><input id="trendYear" type="number" class="form-control form-control-sm" onchange="renderSalesTrend()"></div>
+          <div class="col-md-3"><button class="btn btn-primary btn-sm w-100" onclick="renderSalesTrend()">تحديث</button></div>
+        </div>
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-md-3"><div class="kpi-mini"><h6>إجمالي المبيعات</h6><div class="val text-success" id="trendTotalSales">0</div></div></div>
+        <div class="col-md-3"><div class="kpi-mini"><h6>عدد الفواتير</h6><div class="val" id="trendCount">0</div></div></div>
+        <div class="col-md-3"><div class="kpi-mini"><h6>متوسط الفاتورة</h6><div class="val" id="trendAvg">0</div></div></div>
+        <div class="col-md-3"><div class="kpi-mini"><h6>أفضل شهر</h6><div class="val text-primary" id="trendBest">-</div></div></div>
+      </div>
+      <div class="card p-3"><canvas id="chartSalesTrend" height="120"></canvas></div>
+      <div class="card p-3 mt-3"><canvas id="chartMonthlyCompare" height="120"></canvas></div>
+    </div>
+
+    <!-- ═══ مقارنة الفترات ═══ -->
+    <div class="page" id="page-compare">
+      <div class="card p-3 mb-3">
+        <div class="row g-2">
+          <div class="col-md-2"><label class="small">من</label><input id="cmpFrom1" type="date" class="form-control form-control-sm"></div>
+          <div class="col-md-2"><label class="small">إلى</label><input id="cmpTo1" type="date" class="form-control form-control-sm"></div>
+          <div class="col-md-1 d-flex align-items-end"><b>VS</b></div>
+          <div class="col-md-2"><label class="small">من</label><input id="cmpFrom2" type="date" class="form-control form-control-sm"></div>
+          <div class="col-md-2"><label class="small">إلى</label><input id="cmpTo2" type="date" class="form-control form-control-sm"></div>
+          <div class="col-md-3 d-flex align-items-end"><button class="btn btn-primary btn-sm w-100" onclick="renderCompare()">مقارنة</button></div>
+        </div>
+      </div>
+      <div id="compareContent"></div>
+    </div>
+
+    <!-- ═══ أداء المندوبين ═══ -->
+    <div class="page" id="page-salesReps">
+      <div class="card p-3 mb-3">
+        <div class="row g-2">
+          <div class="col-md-3"><input id="repFrom" type="date" class="form-control form-control-sm"></div>
+          <div class="col-md-3"><input id="repTo" type="date" class="form-control form-control-sm"></div>
+          <div class="col-md-3"><button class="btn btn-primary btn-sm w-100" onclick="renderSalesReps()">تحديث</button></div>
+        </div>
+      </div>
+      <div id="repsContent"></div>
+    </div>
+
+    <!-- ═══ تقويم المستحقات ═══ -->
+    <div class="page" id="page-calendar">
+      <div class="card p-3 mb-3">
+        <div class="row g-2">
+          <div class="col-md-3"><input id="calMonth" type="month" class="form-control form-control-sm" onchange="renderCalendar()"></div>
+          <div class="col-md-3"><button class="btn btn-primary btn-sm" onclick="renderCalendar()">تحديث</button></div>
+        </div>
+      </div>
+      <div id="calendarContent"></div>
+    </div>
+
+    <!-- ═══ الشركات ═══ -->
+    <div class="page" id="page-companies">
+      <div class="card p-3 mb-3"><h6>إضافة شركة</h6>
+        <form onsubmit="addCompany(event)" class="row g-2">
+          <div class="col-md-2"><input name="code" class="form-control form-control-sm" placeholder="الكود" required></div>
+          <div class="col-md-4"><input name="name" class="form-control form-control-sm" placeholder="اسم الشركة" required></div>
+          <div class="col-md-3"><input name="taxNumber" class="form-control form-control-sm" placeholder="الرقم الضريبي"></div>
+          <div class="col-md-3"><input name="currency" class="form-control form-control-sm" value="SAR"></div>
+          <div class="col-md-12 mt-2"><input name="address" class="form-control form-control-sm" placeholder="العنوان"></div>
+          <div class="col-md-12 mt-2"><button class="btn btn-primary btn-sm">إضافة الشركة</button></div>
+        </form>
+      </div>
+      <div class="card p-3"><table class="table table-hover table-sm">
+        <thead><tr><th>الكود</th><th>الاسم</th><th>الرقم الضريبي</th><th>العملة</th><th>الحالة</th><th></th></tr></thead>
+        <tbody id="companiesList"></tbody></table></div>
+    </div>
+
+    <!-- ═══ المستخدمون ═══ -->
+    <div class="page" id="page-users">
+      <div class="card p-3 mb-3"><h6>إضافة مستخدم</h6>
+        <form onsubmit="addUser(event)" class="row g-2">
+          <div class="col-md-2"><input name="username" class="form-control form-control-sm" placeholder="المستخدم" required></div>
+          <div class="col-md-2"><input name="fullname" class="form-control form-control-sm" placeholder="الاسم" required></div>
+          <div class="col-md-3"><input name="email" type="email" class="form-control form-control-sm" placeholder="البريد" required></div>
+          <div class="col-md-2"><input name="password" type="password" class="form-control form-control-sm" placeholder="كلمة المرور" required></div>
+          <div class="col-md-2"><select name="role" class="form-select form-select-sm">
+            <option value="admin">مدير</option><option value="accountant">محاسب</option>
+            <option value="warehouse">أمين مخزن</option><option value="sales">مندوب مبيعات</option>
+            <option value="viewer">مشاهد</option></select></div>
+          <div class="col-md-1"><button class="btn btn-primary btn-sm w-100">إضافة</button></div>
+        </form>
+      </div>
+      <div class="card p-3"><table class="table table-hover table-sm">
+        <thead><tr><th>المستخدم</th><th>الاسم</th><th>البريد</th><th>الدور</th><th>الحالة</th><th></th></tr></thead>
+        <tbody id="usersList"></tbody></table></div>
+    </div>
+
+    <!-- ═══ سجل التدقيق ═══ -->
+    <div class="page" id="page-audit">
+      <div class="card p-3"><table class="table table-sm table-hover">
+        <thead><tr><th>الوقت</th><th>المستخدم</th><th>الإجراء</th><th>التفاصيل</th></tr></thead>
+        <tbody id="auditList"></tbody></table></div>
+    </div>
+
+    <!-- ═══ النسخ الاحتياطي ═══ -->
+    <div class="page" id="page-backup">
+      <div class="row g-3">
+        <div class="col-md-6"><div class="card p-4 text-center">
+          <i class="bi bi-download fs-1 text-primary"></i><h5>تصدير البيانات</h5>
+          <button class="btn btn-primary" onclick="exportData()">تصدير JSON</button>
+        </div></div>
+        <div class="col-md-6"><div class="card p-4 text-center">
+          <i class="bi bi-upload fs-1 text-success"></i><h5>استيراد البيانات</h5>
+          <input type="file" id="importFile" class="form-control mb-2" accept=".json">
+          <button class="btn btn-success" onclick="importData()">استيراد</button>
+        </div></div>
+        <div class="col-md-12"><div class="card p-4 text-center border-danger">
+          <i class="bi bi-trash fs-1 text-danger"></i><h5>حذف كل البيانات</h5>
+          <button class="btn btn-danger" onclick="wipeData()">حذف الكل</button>
+        </div></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- نافذة القيد -->
+<!-- ═══ نافذة القيد ═══ -->
 <div class="modal fade" id="entryModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title">قيد جديد</h5>
-        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+  <div class="modal-dialog modal-lg"><div class="modal-content">
+    <div class="modal-header bg-primary text-white"><h5>قيد جديد</h5>
+      <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <div class="row g-2 mb-3">
+        <div class="col-md-4"><label class="form-label small">التاريخ</label>
+          <input type="date" id="entryDate" class="form-control form-control-sm"></div>
+        <div class="col-md-4"><label class="form-label small">المرجع</label>
+          <input id="entryRef" class="form-control form-control-sm"></div>
+        <div class="col-md-4"><label class="form-label small">البيان</label>
+          <input id="entryDesc" class="form-control form-control-sm"></div>
       </div>
-      <div class="modal-body">
-        <div class="row g-2 mb-3">
-          <div class="col-md-4"><label class="form-label">التاريخ</label>
-            <input type="date" id="entryDate" class="form-control"></div>
-          <div class="col-md-4"><label class="form-label">المرجع</label>
-            <input id="entryRef" class="form-control"></div>
-          <div class="col-md-4"><label class="form-label">البيان</label>
-            <input id="entryDesc" class="form-control"></div>
-        </div>
-        <table class="table">
-          <thead><tr><th>الحساب</th><th>البيان</th><th>مدين</th><th>دائن</th><th></th></tr></thead>
-          <tbody id="entryLines"></tbody>
-        </table>
-        <button class="btn btn-secondary btn-sm" onclick="addEntryLine()"><i class="bi bi-plus"></i> سطر</button>
-        <div class="alert alert-info mt-3 mb-0">
-          إجمالي المدين: <b id="sumDebit">0</b> |
-          إجمالي الدائن: <b id="sumCredit">0</b> |
-          <span id="balanceStatus" class="badge bg-secondary">غير متوازن</span>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-        <button class="btn btn-primary" onclick="saveEntry()">حفظ</button>
+      <table class="table table-sm"><thead><tr><th>الحساب</th><th>البيان</th><th>مدين</th><th>دائن</th><th></th></tr></thead>
+        <tbody id="entryLines"></tbody></table>
+      <button class="btn btn-secondary btn-sm" onclick="addEntryLine()"><i class="bi bi-plus"></i> سطر</button>
+      <div class="alert alert-info mt-3 mb-0 small">
+        مدين: <b id="sumDebit">0</b> | دائن: <b id="sumCredit">0</b> | <span id="balanceStatus" class="badge bg-secondary">غير متوازن</span>
       </div>
     </div>
-  </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">إلغاء</button>
+      <button class="btn btn-primary btn-sm" onclick="saveEntry()">حفظ</button>
+    </div>
+  </div></div>
 </div>
 
-<!-- نافذة الفاتورة -->
+<!-- ═══ نافذة الفاتورة ═══ -->
 <div class="modal fade" id="invoiceModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header bg-success text-white">
-        <h5 class="modal-title">فاتورة جديدة</h5>
-        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+  <div class="modal-dialog modal-xl"><div class="modal-content">
+    <div class="modal-header bg-success text-white"><h5>فاتورة جديدة</h5>
+      <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <div class="row g-2 mb-3">
+        <div class="col-md-2"><label class="form-label small">النوع</label>
+          <select id="invType" class="form-select form-select-sm" onchange="calcInvoice()">
+            <option value="sales">مبيعات</option><option value="purchase">مشتريات</option></select></div>
+        <div class="col-md-3"><label class="form-label small">الطرف</label>
+          <select id="invParty" class="form-select form-select-sm"></select></div>
+        <div class="col-md-2"><label class="form-label small">المخزن</label>
+          <select id="invWarehouse" class="form-select form-select-sm"></select></div>
+        <div class="col-md-2"><label class="form-label small">المندوب</label>
+          <select id="invSalesRep" class="form-select form-select-sm"></select></div>
+        <div class="col-md-1"><label class="form-label small">التاريخ</label>
+          <input type="date" id="invDate" class="form-control form-control-sm"></div>
+        <div class="col-md-1"><label class="form-label small">الاستحقاق</label>
+          <input type="date" id="invDue" class="form-control form-control-sm"></div>
+        <div class="col-md-1"><label class="form-label small">العملة</label>
+          <select id="invCurrency" class="form-select form-select-sm"></select></div>
       </div>
-      <div class="modal-body">
-        <div class="row g-2 mb-3">
-          <div class="col-md-3"><label class="form-label">النوع</label>
-            <select id="invType" class="form-select">
-              <option value="sales">مبيعات</option>
-              <option value="purchase">مشتريات</option>
-            </select></div>
-          <div class="col-md-3"><label class="form-label">الطرف</label>
-            <select id="invParty" class="form-select"></select></div>
-          <div class="col-md-3"><label class="form-label">التاريخ</label>
-            <input type="date" id="invDate" class="form-control"></div>
-          <div class="col-md-3"><label class="form-label">الاستحقاق</label>
-            <input type="date" id="invDue" class="form-control"></div>
-        </div>
-        <table class="table">
-          <thead><tr><th>الوصف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th><th></th></tr></thead>
-          <tbody id="invLines"></tbody>
-        </table>
-        <button class="btn btn-secondary btn-sm" onclick="addInvLine()"><i class="bi bi-plus"></i> سطر</button>
-        <div class="row g-2 mt-3">
-          <div class="col-md-4"><label class="form-label">الضريبة %</label>
-            <input type="number" id="invTax" class="form-control" value="15" oninput="calcInvoice()"></div>
-          <div class="col-md-4"><label class="form-label">الخصم</label>
-            <input type="number" id="invDiscount" class="form-control" value="0" oninput="calcInvoice()"></div>
-          <div class="col-md-4"><label class="form-label">ملاحظات</label>
-            <input id="invNotes" class="form-control"></div>
-        </div>
-        <div class="alert alert-info mt-3 mb-0">
-          المجموع: <b id="invSubtotal">0</b> |
-          الضريبة: <b id="invTaxAmount">0</b> |
-          الإجمالي: <b id="invTotal">0</b>
-        </div>
+      <table class="table table-sm"><thead><tr><th>الصنف</th><th>الكمية</th><th>الوحدة</th><th>السعر</th><th>الإجمالي</th><th></th></tr></thead>
+        <tbody id="invLines"></tbody></table>
+      <button class="btn btn-secondary btn-sm" onclick="addInvLine()"><i class="bi bi-plus"></i> سطر</button>
+      <div class="row g-2 mt-3">
+        <div class="col-md-3"><label class="form-label small">الضريبة %</label>
+          <input type="number" id="invTax" class="form-control form-control-sm" value="15" oninput="calcInvoice()"></div>
+        <div class="col-md-3"><label class="form-label small">الخصم</label>
+          <input type="number" id="invDiscount" class="form-control form-control-sm" value="0" oninput="calcInvoice()"></div>
+        <div class="col-md-6"><label class="form-label small">ملاحظات</label>
+          <input id="invNotes" class="form-control form-control-sm"></div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-        <button class="btn btn-success" onclick="saveInvoice()">حفظ</button>
+      <div class="alert alert-info mt-3 mb-0 small">
+        المجموع: <b id="invSubtotal">0</b> | الضريبة: <b id="invTaxAmount">0</b> | الإجمالي: <b id="invTotal">0</b>
       </div>
     </div>
-  </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">إلغاء</button>
+      <button class="btn btn-success btn-sm" onclick="saveInvoice()">حفظ</button>
+    </div>
+  </div></div>
 </div>
 
 <div id="toastBox" class="toast-msg"></div>
+<div id="lowStockAlert" style="display:none"></div>
+<div id="printArea" style="display:none"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// قاعدة بيانات IndexedDB
+// IndexedDB
 // ═══════════════════════════════════════════════════════════════
 let db;
-const DB_NAME = 'AccountingDB';
+const DB_NAME = 'AccountingEnterpriseDB';
 const DB_VERSION = 1;
+const STORES = ['companies','users','accounts','parties','entries','invoices','payments',
+                'warehouses','items','categories','units','currencies',
+                'stockMoves','inventories','audit'];
 
 function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = e => {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(DB_NAME, DB_VERSION);
+    r.onupgradeneeded = e => {
       const d = e.target.result;
-      if (!d.objectStoreNames.contains('accounts')) d.createObjectStore('accounts', { keyPath: 'id', autoIncrement: true });
-      if (!d.objectStoreNames.contains('parties')) d.createObjectStore('parties', { keyPath: 'id', autoIncrement: true });
-      if (!d.objectStoreNames.contains('entries')) d.createObjectStore('entries', { keyPath: 'id', autoIncrement: true });
-      if (!d.objectStoreNames.contains('invoices')) d.createObjectStore('invoices', { keyPath: 'id', autoIncrement: true });
-      if (!d.objectStoreNames.contains('audit')) d.createObjectStore('audit', { keyPath: 'id', autoIncrement: true });
+      STORES.forEach(s => {
+        if (!d.objectStoreNames.contains(s)) d.createObjectStore(s, { keyPath: 'id', autoIncrement: true });
+      });
     };
-    req.onsuccess = e => { db = e.target.result; resolve(db); };
-    req.onerror = e => reject(e);
+    r.onsuccess = e => { db = e.target.result; res(db); };
+    r.onerror = e => rej(e);
   });
 }
-
-function tx(store, mode = 'readonly') {
-  return db.transaction(store, mode).objectStore(store);
-}
-
+function tx(store, mode = 'readonly') { return db.transaction(store, mode).objectStore(store); }
 const DB = {
-  add: (s, o) => new Promise(res => { const r = tx(s, 'readwrite').add(o); r.onsuccess = () => res(r.result); }),
-  put: (s, o) => new Promise(res => { const r = tx(s, 'readwrite').put(o); r.onsuccess = () => res(r.result); }),
-  getAll: s => new Promise(res => { const r = tx(s).getAll(); r.onsuccess = () => res(r.result); }),
-  get: (s, id) => new Promise(res => { const r = tx(s).get(id); r.onsuccess = () => res(r.result); }),
-  del: (s, id) => new Promise(res => { const r = tx(s, 'readwrite').delete(id); r.onsuccess = () => res(); }),
-  clear: s => new Promise(res => { const r = tx(s, 'readwrite').clear(); r.onsuccess = () => res(); })
+  add: (s, o) => new Promise(r => { const req = tx(s,'readwrite').add(o); req.onsuccess = () => r(req.result); }),
+  put: (s, o) => new Promise(r => { const req = tx(s,'readwrite').put(o); req.onsuccess = () => r(req.result); }),
+  getAll: s => new Promise(r => { const req = tx(s).getAll(); req.onsuccess = () => r(req.result); }),
+  get: (s, id) => new Promise(r => { const req = tx(s).get(id); req.onsuccess = () => r(req.result); }),
+  del: (s, id) => new Promise(r => { const req = tx(s,'readwrite').delete(id); req.onsuccess = () => r(); }),
+  clear: s => new Promise(r => { const req = tx(s,'readwrite').clear(); req.onsuccess = () => r(); })
 };
 
 // ═══════════════════════════════════════════════════════════════
-// أدوات
+// الحالة
 // ═══════════════════════════════════════════════════════════════
-const fmt = n => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+let CURRENT_COMPANY_ID = null;
+let CURRENT_USER = null;
+const state = {
+  companies: [], users: [], accounts: [], parties: [], entries: [], invoices: [], payments: [],
+  warehouses: [], items: [], categories: [], units: [], currencies: [],
+  stockMoves: [], inventories: []
+};
+const byCompany = arr => arr.filter(x => x.companyId === CURRENT_COMPANY_ID);
+const fmt = (n, d = 2) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 const today = () => new Date().toISOString().split('T')[0];
 
+function currency(code) { return state.currencies.find(c => c.code === code) || { code, rate: 1 }; }
+function convert(a, from, to) {
+  const f = currency(from), t = currency(to);
+  return (Number(a) * Number(f.rate||1)) / Number(t.rate||1);
+}
 function toast(msg, type = 'success') {
   const el = document.createElement('div');
-  el.className = `alert alert-${type} alert-dismissible fade show`;
+  el.className = `alert alert-${type} alert-dismissible fade show shadow`;
   el.innerHTML = `${msg}<button class="btn-close" data-bs-dismiss="alert"></button>`;
   document.getElementById('toastBox').appendChild(el);
   setTimeout(() => el.remove(), 3500);
 }
-
 async function logAction(action, details = '') {
-  await DB.add('audit', { action, details, time: new Date().toISOString() });
+  await DB.add('audit', { action, details, time: new Date().toISOString(),
+    userId: CURRENT_USER?.id, username: CURRENT_USER?.username,
+    companyId: CURRENT_COMPANY_ID });
 }
 
 // ═══════════════════════════════════════════════════════════════
 // المصادقة
 // ═══════════════════════════════════════════════════════════════
-function doLogin() {
+async function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value;
-  if (u === 'admin' && p === 'Admin@123') {
-    sessionStorage.setItem('logged', '1');
-    document.getElementById('loginView').style.display = 'none';
-    document.getElementById('appView').style.display = 'block';
-    logAction('login', 'admin');
-    loadAll();
-  } else {
-    toast('بيانات الدخول غير صحيحة', 'danger');
-  }
+  const users = await DB.getAll('users');
+  const user = users.find(x => x.username === u && x.password === p && x.active !== false);
+  if (!user) { toast('بيانات غير صحيحة', 'danger'); return; }
+  CURRENT_USER = user;
+  sessionStorage.setItem('userId', user.id);
+  logAction('login', user.username);
+  document.getElementById('loginView').style.display = 'none';
+  document.getElementById('appView').style.display = 'block';
+  document.getElementById('userBadge').textContent = user.username + ' (' + user.role + ')';
+  await loadAll();
 }
 function doLogout() {
   logAction('logout');
-  sessionStorage.removeItem('logged');
+  CURRENT_USER = null; CURRENT_COMPANY_ID = null;
+  sessionStorage.clear();
   document.getElementById('appView').style.display = 'none';
   document.getElementById('loginView').style.display = 'block';
 }
@@ -395,8 +782,15 @@ function doLogout() {
 // التنقل
 // ═══════════════════════════════════════════════════════════════
 const titles = {
-  dashboard: 'لوحة التحكم', accounts: 'دليل الحسابات', journal: 'القيود اليومية',
-  invoices: 'الفواتير', parties: 'العملاء والموردون', reports: 'التقارير', audit: 'سجل التدقيق'
+  dashboard:'لوحة التحكم', accounts:'دليل الحسابات', journal:'القيود اليومية',
+  invoices:'الفواتير', payments:'المدفوعات', items:'المواد والأصناف',
+  warehouses:'المخازن', stock:'أرصدة المخزون', stockMove:'حركات المخزون',
+  inventory:'الجرد الفعلي', barcode:'الباركود', fifo:'تقييم FIFO',
+  parties:'العملاء والموردون', units:'وحدات القياس', currencies:'العملات',
+  reports:'التقارير المالية', stockReports:'تقارير المخزون', aging:'أعمار الديون',
+  statements:'كشوف الحسابات', salesTrend:'تطور المبيعات', compare:'مقارنة الفترات',
+  salesReps:'أداء المندوبين', calendar:'تقويم المستحقات',
+  companies:'الشركات', users:'المستخدمون', audit:'سجل التدقيق', backup:'النسخ الاحتياطي'
 };
 
 function showPage(name) {
@@ -407,142 +801,573 @@ function showPage(name) {
   if (nav) nav.classList.add('active');
   document.getElementById('pageTitle').textContent = titles[name] || name;
   if (name === 'reports') document.getElementById('reportContent').innerHTML = '';
+  if (name === 'stockReports') document.getElementById('stockReportContent').innerHTML = '';
+  if (name === 'aging') renderAging();
+  if (name === 'statements') renderStatementList();
+  if (name === 'salesTrend') renderSalesTrend();
+  if (name === 'compare') initCompareDates();
+  if (name === 'salesReps') initRepsDates();
+  if (name === 'calendar') renderCalendar();
+  if (name === 'fifo') {
+    document.getElementById('fifoWarehouse').innerHTML = '<option value="">كل المخازن</option>' +
+      state.warehouses.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+    document.getElementById('fifoItem').innerHTML = '<option value="">كل الأصناف</option>' +
+      state.items.map(i => `<option value="${i.id}">${i.code} - ${i.name}</option>`).join('');
+    renderFIFO();
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// الحسابات
+// الشركات
 // ═══════════════════════════════════════════════════════════════
-async function addAccount(e) {
+async function addCompany(e) {
   e.preventDefault();
   const f = e.target;
-  const acc = {
-    code: f.code.value.trim(),
-    name: f.name.value.trim(),
-    type: f.type.value,
-    isGroup: f.isGroup.checked
+  const c = { code: f.code.value.trim(), name: f.name.value.trim(),
+    taxNumber: f.taxNumber.value, currency: f.currency.value,
+    address: f.address.value, active: true, createdAt: new Date().toISOString() };
+  const id = await DB.add('companies', c);
+  logAction('إضافة شركة', c.name);
+  f.reset(); toast('تم'); await loadAll();
+  if (!CURRENT_COMPANY_ID) switchCompany(id);
+}
+async function switchCompany(id) {
+  CURRENT_COMPANY_ID = Number(id);
+  sessionStorage.setItem('companyId', id);
+  await seedCompanyDefaults();
+  await refreshAll();
+  toast('تم التبديل');
+}
+async function renderCompanies() {
+  state.companies = await DB.getAll('companies');
+  document.getElementById('companySelector').innerHTML = state.companies.map(c => 
+    `<option value="${c.id}" ${c.id === CURRENT_COMPANY_ID ? 'selected' : ''}>${c.name}</option>`).join('');
+  document.getElementById('companiesList').innerHTML = state.companies.map(c => `
+    <tr><td>${c.code}</td><td>${c.name}</td><td>${c.taxNumber || '-'}</td>
+    <td>${c.currency}</td>
+    <td><span class="badge bg-${c.active?'success':'secondary'}">${c.active?'نشطة':'موقوفة'}</span></td>
+    <td><button class="btn btn-sm btn-outline-primary" onclick="switchCompany(${c.id})">تفعيل</button>
+    <button class="btn btn-sm btn-danger" onclick="delEntity('companies',${c.id})">×</button></td>
+    </tr>`).join('') || '<tr><td colspan=6 class="text-center">لا توجد</td></tr>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// المستخدمون
+// ═══════════════════════════════════════════════════════════════
+async function addUser(e) {
+  e.preventDefault();
+  const f = e.target;
+  const u = { username: f.username.value.trim(), fullname: f.fullname.value.trim(),
+    email: f.email.value, password: f.password.value, role: f.role.value,
+    active: true, companyId: CURRENT_COMPANY_ID, createdAt: new Date().toISOString() };
+  const users = await DB.getAll('users');
+  if (users.some(x => x.username === u.username)) { toast('اسم مكرر', 'danger'); return; }
+  await DB.add('users', u);
+  logAction('إضافة مستخدم', u.username);
+  f.reset(); toast('تم'); await renderUsers();
+}
+async function renderUsers() {
+  state.users = await DB.getAll('users');
+  const roles = { admin:'مدير', accountant:'محاسب', warehouse:'أمين مخزن', sales:'مندوب', viewer:'مشاهد' };
+  document.getElementById('usersList').innerHTML = state.users.map(u => `
+    <tr><td>${u.username}</td><td>${u.fullname||'-'}</td><td>${u.email}</td>
+    <td><span class="badge bg-info">${roles[u.role]||u.role}</span></td>
+    <td><span class="badge bg-${u.active?'success':'secondary'}">${u.active?'نشط':'موقوف'}</span></td>
+    <td><button class="btn btn-sm btn-danger" onclick="delUser(${u.id})">×</button></td>
+    </tr>`).join('') || '<tr><td colspan=6 class="text-center">لا يوجد</td></tr>';
+}
+async function delUser(id) {
+  if (id === CURRENT_USER.id) { toast('لا يمكن حذف نفسك', 'danger'); return; }
+  if (!confirm('حذف المستخدم؟')) return;
+  await DB.del('users', id); await renderUsers();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// العملات
+// ═══════════════════════════════════════════════════════════════
+async function addCurrency(e) {
+  e.preventDefault();
+  const f = e.target;
+  const c = { code: f.code.value.toUpperCase(), name: f.name.value,
+    symbol: f.symbol.value, rate: Number(f.rate.value), isBase: f.isBase.checked,
+    companyId: CURRENT_COMPANY_ID };
+  if (c.isBase) {
+    const all = await DB.getAll('currencies');
+    for (const x of all) if (x.companyId === CURRENT_COMPANY_ID) { x.isBase = false; await DB.put('currencies', x); }
+  }
+  await DB.add('currencies', c);
+  logAction('عملة', c.code);
+  f.reset(); toast('تم'); await refreshAll();
+}
+async function renderCurrencies() {
+  state.currencies = byCompany(await DB.getAll('currencies'));
+  document.getElementById('currenciesList').innerHTML = state.currencies.map(c => `
+    <tr><td><b>${c.code}</b></td><td>${c.name}</td><td>${c.symbol||'-'}</td>
+    <td>${c.rate}</td><td>${c.isBase?'✅':''}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="delEntity('currencies',${c.id})">×</button></td>
+    </tr>`).join('') || '<tr><td colspan=6 class="text-center">لا يوجد</td></tr>';
+  document.getElementById('invCurrency').innerHTML = state.currencies.map(c => `<option value="${c.code}">${c.code}</option>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// الوحدات
+// ═══════════════════════════════════════════════════════════════
+async function addUnit(e) {
+  e.preventDefault();
+  const f = e.target;
+  const u = { code: f.code.value.trim(), name: f.name.value.trim(),
+    baseUnit: f.baseUnit.value, factor: Number(f.factor.value||1), companyId: CURRENT_COMPANY_ID };
+  await DB.add('units', u);
+  logAction('وحدة', u.name);
+  f.reset(); toast('تم'); await refreshAll();
+}
+async function renderUnits() {
+  state.units = byCompany(await DB.getAll('units'));
+  const opts = state.units.map(u => `<option value="${u.code}">${u.name}</option>`).join('');
+  document.getElementById('unitsList').innerHTML = state.units.map(u => `
+    <tr><td>${u.code}</td><td>${u.name}</td><td>${u.baseUnit||'-'}</td>
+    <td>${u.factor}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="delEntity('units',${u.id})">×</button></td>
+    </tr>`).join('') || '<tr><td colspan=5 class="text-center">لا يوجد</td></tr>';
+  document.getElementById('unitBase').innerHTML = '<option value="">— أساسية —</option>' + opts;
+  document.getElementById('itemUnit').innerHTML = '<option value="">اختر</option>' + opts;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// المخازن
+// ═══════════════════════════════════════════════════════════════
+async function addWarehouse(e) {
+  e.preventDefault();
+  const f = e.target;
+  const w = { code: f.code.value.trim(), name: f.name.value.trim(),
+    location: f.location.value, companyId: CURRENT_COMPANY_ID, createdAt: new Date().toISOString() };
+  await DB.add('warehouses', w);
+  logAction('مخزن', w.name);
+  f.reset(); toast('تم'); await refreshAll();
+}
+async function renderWarehouses() {
+  state.warehouses = byCompany(await DB.getAll('warehouses'));
+  const stock = await computeStock();
+  document.getElementById('warehousesList').innerHTML = state.warehouses.map(w => {
+    const cnt = Object.keys(stock).filter(k => k.startsWith(w.id+'_')).length;
+    return `<tr><td>${w.code}</td><td>${w.name}</td><td>${w.location||'-'}</td>
+    <td>${cnt}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="delEntity('warehouses',${w.id})">×</button></td></tr>`;
+  }).join('') || '<tr><td colspan=5 class="text-center">لا يوجد</td></tr>';
+  const opts = state.warehouses.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+  document.getElementById('itemOpeningWH').innerHTML = '<option value="">— بدون —</option>' + opts;
+  document.getElementById('mvWH').innerHTML = opts;
+  document.getElementById('mvToWH').innerHTML = '<option value="">— الوجهة —</option>' + opts;
+  document.getElementById('invWarehouse').innerHTML = opts;
+  document.getElementById('invWarehouse').innerHTML = opts;
+  document.getElementById('stockWarehouseFilter').innerHTML = '<option value="">كل المخازن</option>' + opts;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// الفئات
+// ═══════════════════════════════════════════════════════════════
+async function addCategory(e) {
+  e.preventDefault();
+  const f = e.target;
+  const c = { code: f.code.value.trim(), name: f.name.value.trim(), companyId: CURRENT_COMPANY_ID };
+  await DB.add('categories', c);
+  logAction('فئة', c.name);
+  f.reset(); toast('تم'); await refreshAll();
+}
+async function renderCategories() {
+  state.categories = byCompany(await DB.getAll('categories'));
+  document.getElementById('categoriesList').innerHTML = state.categories.map(c => `
+    <tr><td>${c.code}</td><td>${c.name}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="delEntity('categories',${c.id})">×</button></td></tr>`).join('')
+    || '<tr><td colspan=3 class="text-center">لا يوجد</td></tr>';
+  document.getElementById('itemCategory').innerHTML = '<option value="">— بدون —</option>' +
+    state.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// الأصناف
+// ═══════════════════════════════════════════════════════════════
+function generateBarcodeValue() {
+  return '2' + String(Date.now()).slice(-12) + String(Math.floor(Math.random()*100)).padStart(2,'0');
+}
+async function addItem(e) {
+  e.preventDefault();
+  const f = e.target;
+  const item = {
+    code: f.code.value.trim(), name: f.name.value.trim(),
+    barcode: f.barcode.value.trim() || generateBarcodeValue(),
+    categoryId: Number(f.category.value) || null,
+    baseUnit: f.baseUnit.value,
+    cost: Number(f.cost.value||0), price: Number(f.price.value||0),
+    minStock: Number(f.minStock.value||0), companyId: CURRENT_COMPANY_ID,
+    createdAt: new Date().toISOString()
   };
-  if (!acc.code || !acc.name) return;
-  await DB.add('accounts', acc);
-  logAction('إضافة حساب', `${acc.code} - ${acc.name}`);
-  f.reset();
-  toast('تم إضافة الحساب');
-  await renderAccounts();
+  const id = await DB.add('items', item);
+  const opening = Number(f.openingStock.value||0);
+  const whId = Number(f.openingWarehouse.value) || null;
+  if (opening > 0 && whId) {
+    await DB.add('stockMoves', { type:'in', itemId: id, warehouseId: whId, qty: opening,
+      cost: item.cost, date: today(), notes:'رصيد افتتاحي',
+      companyId: CURRENT_COMPANY_ID, createdAt: new Date().toISOString() });
+  }
+  logAction('صنف', item.code + ' - ' + item.name);
+  f.reset(); toast('تم'); await refreshAll();
 }
+let itemSearchTerm = '';
+function filterItems(v) { itemSearchTerm = v.toLowerCase(); renderItems(); }
+async function renderItems() {
+  state.items = byCompany(await DB.getAll('items'));
+  const stock = await computeStock();
+  const catMap = Object.fromEntries(state.categories.map(c => [c.id, c.name]));
+  const unitMap = Object.fromEntries(state.units.map(u => [u.code, u.name]));
+  const filtered = state.items.filter(it => !itemSearchTerm ||
+    it.name.toLowerCase().includes(itemSearchTerm) ||
+    it.code.toLowerCase().includes(itemSearchTerm) ||
+    (it.barcode||'').includes(itemSearchTerm));
 
-async function deleteAccount(id) {
-  if (!confirm('حذف الحساب؟')) return;
-  await DB.del('accounts', id);
-  toast('تم الحذف');
-  await renderAccounts();
-}
+  document.getElementById('itemsList').innerHTML = filtered.map(it => {
+    const total = Object.entries(stock).filter(([k]) => k.endsWith('_'+it.id))
+      .reduce((s,[,v]) => s+v, 0);
+    return `<tr><td>${it.code}</td><td>${it.name}</td>
+      <td>${catMap[it.categoryId]||'-'}</td><td>${unitMap[it.baseUnit]||it.baseUnit||'-'}</td>
+      <td>${fmt(it.cost)}</td><td>${fmt(it.price)}</td>
+      <td class="${total <= it.minStock ? 'stock-low':'stock-ok'}">${fmt(total)}</td>
+      <td><small class="barcode">${it.barcode||'-'}</small></td>
+      <td><button class="btn btn-sm btn-danger" onclick="delEntity('items',${it.id})">×</button></td>
+      </tr>`;
+  }).join('') || '<tr><td colspan=9 class="text-center">لا يوجد</td></tr>';
 
-async function renderAccounts() {
-  const list = await DB.getAll('accounts');
-  const entries = await DB.getAll('entries');
-  const balMap = {};
-  entries.forEach(e => e.lines.forEach(l => {
-    balMap[l.accountId] = (balMap[l.accountId] || 0) + (l.debit - l.credit);
-  }));
-  const typeNames = { asset: 'أصول', liability: 'خصوم', equity: 'حقوق ملكية', revenue: 'إيرادات', expense: 'مصروفات' };
-  document.getElementById('accountsList').innerHTML = list.map(a => `
-    <tr>
-      <td>${a.code}</td>
-      <td>${a.name}</td>
-      <td><span class="badge bg-info">${typeNames[a.type] || '-'}</span></td>
-      <td>${a.isGroup ? 'نعم' : 'لا'}</td>
-      <td>${fmt(balMap[a.id] || 0)}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="deleteAccount(${a.id})">×</button></td>
-    </tr>`).join('') || '<tr><td colspan=6 class="text-center">لا توجد حسابات</td></tr>';
+  const itemOpts = state.items.map(i => `<option value="${i.id}">${i.code} - ${i.name}</option>`).join('');
+  document.getElementById('mvItem').innerHTML = itemOpts;
+  document.getElementById('bcItem').innerHTML = itemOpts;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// القيود
+// المخزون
 // ═══════════════════════════════════════════════════════════════
-let entryModal;
-
-function openNewEntry() {
-  document.getElementById('entryDate').value = today();
-  document.getElementById('entryRef').value = '';
-  document.getElementById('entryDesc').value = '';
-  document.getElementById('entryLines').innerHTML = '';
-  addEntryLine(); addEntryLine();
-  updateSum();
-  entryModal.show();
-}
-
-async function addEntryLine() {
-  const accs = await DB.getAll('accounts');
-  const opts = accs.map(a => `<option value="${a.id}">${a.code} - ${a.name}</option>`).join('');
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td><select class="form-select accSel">${opts}</select></td>
-    <td><input class="form-control lineDesc"></td>
-    <td><input type="number" step="0.01" class="form-control dInput" value="0" oninput="updateSum()"></td>
-    <td><input type="number" step="0.01" class="form-control cInput" value="0" oninput="updateSum()"></td>
-    <td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove();updateSum()">×</button></td>`;
-  document.getElementById('entryLines').appendChild(tr);
-}
-
-function updateSum() {
-  let d = 0, c = 0;
-  document.querySelectorAll('#entryLines tr').forEach(tr => {
-    d += Number(tr.querySelector('.dInput').value || 0);
-    c += Number(tr.querySelector('.cInput').value || 0);
+async function computeStock() {
+  const moves = byCompany(await DB.getAll('stockMoves'));
+  const stock = {};
+  moves.forEach(m => {
+    const key = `${m.warehouseId}_${m.itemId}`;
+    if (m.type === 'in') stock[key] = (stock[key]||0) + Number(m.qty);
+    else if (m.type === 'out') stock[key] = (stock[key]||0) - Number(m.qty);
+    else if (m.type === 'adjust') stock[key] = Number(m.qty);
+    else if (m.type === 'transfer') {
+      stock[key] = (stock[key]||0) - Number(m.qty);
+      const key2 = `${m.toWarehouseId}_${m.itemId}`;
+      stock[key2] = (stock[key2]||0) + Number(m.qty);
+    }
   });
-  document.getElementById('sumDebit').textContent = fmt(d);
-  document.getElementById('sumCredit').textContent = fmt(c);
-  const b = document.getElementById('balanceStatus');
-  if (Math.abs(d - c) < 0.01 && d > 0) {
-    b.className = 'badge bg-success'; b.textContent = 'متوازن ✓';
-  } else {
-    b.className = 'badge bg-danger'; b.textContent = 'غير متوازن';
-  }
+  return stock;
 }
-
-async function saveEntry() {
-  const date = document.getElementById('entryDate').value;
-  const desc = document.getElementById('entryDesc').value;
-  const ref = document.getElementById('entryRef').value;
-  const lines = [];
-  document.querySelectorAll('#entryLines tr').forEach(tr => {
-    const accId = Number(tr.querySelector('.accSel').value);
-    const debit = Number(tr.querySelector('.dInput').value || 0);
-    const credit = Number(tr.querySelector('.cInput').value || 0);
-    const ld = tr.querySelector('.lineDesc').value;
-    if (debit || credit) lines.push({ accountId: accId, debit, credit, desc: ld });
+async function addStockMove(e) {
+  e.preventDefault();
+  const f = e.target;
+  const move = { type: f.type.value, itemId: Number(f.itemId.value),
+    warehouseId: Number(f.warehouseId.value), toWarehouseId: Number(f.toWarehouseId.value)||null,
+    qty: Number(f.qty.value||0), cost: Number(f.cost.value||0), date: f.date.value,
+    companyId: CURRENT_COMPANY_ID, createdAt: new Date().toISOString() };
+  if (!move.itemId || !move.warehouseId || !move.qty) { toast('أدخل البيانات', 'danger'); return; }
+  if (move.type === 'transfer' && !move.toWarehouseId) { toast('اختر الوجهة', 'danger'); return; }
+  await DB.add('stockMoves', move);
+  logAction('حركة', move.type);
+  f.qty.value = ''; f.cost.value = '';
+  toast('تم'); await refreshAll();
+}
+async function renderStockMoves() {
+  const moves = byCompany(await DB.getAll('stockMoves'));
+  moves.sort((a,b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
+  const im = Object.fromEntries(state.items.map(i => [i.id, i.name]));
+  const wm = Object.fromEntries(state.warehouses.map(w => [w.id, w.name]));
+  const types = { in:'إدخال', out:'إخراج', transfer:'تحويل', adjust:'تسوية' };
+  document.getElementById('stockMovesList').innerHTML = moves.slice(0,200).map(m => `
+    <tr><td>${m.date}</td>
+    <td><span class="badge bg-${m.type==='in'?'success':m.type==='out'?'danger':m.type==='transfer'?'info':'warning'}">${types[m.type]}</span></td>
+    <td>${im[m.itemId]||'-'}</td><td>${wm[m.warehouseId]||'-'}</td>
+    <td>${wm[m.toWarehouseId]||'-'}</td><td>${fmt(m.qty)}</td><td>${fmt(m.cost)}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="delEntity('stockMoves',${m.id})">×</button></td>
+    </tr>`).join('') || '<tr><td colspan=8 class="text-center">لا يوجد</td></tr>';
+}
+async function renderStock(search = '') {
+  const stock = await computeStock();
+  const whFilter = Number(document.getElementById('stockWarehouseFilter').value) || null;
+  const im = Object.fromEntries(state.items.map(i => [i.id, i]));
+  const wm = Object.fromEntries(state.warehouses.map(w => [w.id, w.name]));
+  const term = search.toLowerCase();
+  const rows = [];
+  Object.entries(stock).forEach(([k, qty]) => {
+    const [whId, itemId] = k.split('_').map(Number);
+    if (whFilter && whId !== whFilter) return;
+    if (qty === 0) return;
+    const item = im[itemId]; if (!item) return;
+    if (term && !item.name.toLowerCase().includes(term) && !item.code.toLowerCase().includes(term)) return;
+    rows.push({ whName: wm[whId], item, qty, value: qty*item.cost });
   });
-  const td = lines.reduce((s, l) => s + l.debit, 0);
-  const tc = lines.reduce((s, l) => s + l.credit, 0);
-  if (!date || lines.length < 2 || Math.abs(td - tc) > 0.01 || td === 0) {
-    toast('تحقق من التوازن والتاريخ', 'danger');
-    return;
+  document.getElementById('stockList').innerHTML = rows.map(r => {
+    const low = r.qty <= r.item.minStock;
+    return `<tr><td>${r.item.code}</td><td>${r.item.name}</td>
+      <td>${r.whName}</td><td>${r.item.baseUnit}</td>
+      <td class="${low?'stock-low':''}">${fmt(r.qty)}</td>
+      <td>${fmt(r.item.cost)}</td><td>${fmt(r.value)}</td>
+      <td>${low?'<span class="badge bg-danger">منخفض</span>':'<span class="badge bg-success">جيد</span>'}</td>
+      </tr>`;
+  }).join('') || '<tr><td colspan=8 class="text-center">لا يوجد</td></tr>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// الجرد
+// ═══════════════════════════════════════════════════════════════
+async function startInventory() {
+  const whId = Number(document.getElementById('invWarehouse').value);
+  if (!whId) { toast('اختر مخزناً', 'danger'); return; }
+  const stock = await computeStock();
+  const im = Object.fromEntries(state.items.map(i => [i.id, i]));
+  const rows = Object.entries(stock).filter(([k]) => k.startsWith(whId+'_')).map(([k, qty]) => {
+    const itemId = Number(k.split('_')[1]);
+    return { itemId, item: im[itemId], systemQty: qty };
+  }).filter(r => r.item);
+
+  document.getElementById('inventorySheet').innerHTML = `
+    <div class="card p-3"><h6>ورقة الجرد</h6>
+    <table class="table table-sm">
+    <thead><tr><th>الصنف</th><th>الوحدة</th><th>الدفتري</th><th>الفعلي</th><th>الفرق</th></tr></thead>
+    <tbody id="invSheetBody">
+    ${rows.map(r => `<tr data-item="${r.itemId}">
+      <td>${r.item.code} - ${r.item.name}</td><td>${r.item.baseUnit}</td>
+      <td class="sysQty">${fmt(r.systemQty)}</td>
+      <td><input type="number" step="0.01" class="form-control form-control-sm physQty" value="${r.systemQty}" oninput="calcInvDiff(this)"></td>
+      <td class="diff text-success">0.00</td>
+    </tr>`).join('') || '<tr><td colspan=5 class="text-center">لا يوجد</td></tr>'}
+    </tbody></table>
+    <button class="btn btn-success" onclick="saveInventory(${whId})">
+      <i class="bi bi-check2-circle"></i> حفظ الجرد</button></div>`;
+  await renderInventoryHistory();
+}
+function calcInvDiff(input) {
+  const tr = input.closest('tr');
+  const sys = Number(tr.querySelector('.sysQty').textContent.replace(/,/g, ''));
+  const phys = Number(input.value||0);
+  const diff = phys - sys;
+  const cell = tr.querySelector('.diff');
+  cell.textContent = fmt(diff);
+  cell.className = 'diff ' + (diff === 0 ? 'text-success' : diff > 0 ? 'text-info' : 'text-danger');
+}
+async function saveInventory(whId) {
+  const rows = document.querySelectorAll('#invSheetBody tr[data-item]');
+  const details = [];
+  let totalDiff = 0;
+  for (const tr of rows) {
+    const itemId = Number(tr.dataset.item);
+    const sys = Number(tr.querySelector('.sysQty').textContent.replace(/,/g, ''));
+    const phys = Number(tr.querySelector('.physQty').value||0);
+    const diff = phys - sys;
+    if (Math.abs(diff) > 0.001) {
+      details.push({ itemId, systemQty: sys, physicalQty: phys, diff });
+      totalDiff += Math.abs(diff);
+      await DB.add('stockMoves', { type:'adjust', itemId, warehouseId: whId, qty: phys,
+        cost: 0, date: today(), notes: 'تسوية جرد',
+        companyId: CURRENT_COMPANY_ID, createdAt: new Date().toISOString() });
+    }
   }
-  const entries = await DB.getAll('entries');
-  const num = `JV-${new Date().getFullYear()}-${String(entries.length + 1).padStart(5, '0')}`;
-  await DB.add('entries', { number: num, date, desc, ref, lines, totalDebit: td, totalCredit: tc, createdAt: new Date().toISOString() });
-  logAction('قيد جديد', num);
-  entryModal.hide();
-  toast('تم تسجيل القيد');
-  await loadAll();
+  await DB.add('inventories', { warehouseId: whId, date: document.getElementById('invDate').value||today(),
+    notes: document.getElementById('invNotes').value, itemCount: rows.length,
+    diffCount: details.length, totalDiff, details,
+    companyId: CURRENT_COMPANY_ID, createdAt: new Date().toISOString() });
+  logAction('جرد', `مخزن ${whId}`);
+  toast('تم'); document.getElementById('inventorySheet').innerHTML = '';
+  await refreshAll();
+}
+async function renderInventoryHistory() {
+  const invs = byCompany(await DB.getAll('inventories')).sort((a,b) => new Date(b.date)-new Date(a.date));
+  const wm = Object.fromEntries(state.warehouses.map(w => [w.id, w.name]));
+  document.getElementById('inventoryHistoryList').innerHTML = invs.map(i => `
+    <tr><td>${i.date}</td><td>${wm[i.warehouseId]||'-'}</td>
+    <td>${i.itemCount}</td><td>${i.diffCount}</td><td>${i.notes||'-'}</td></tr>
+    `).join('') || '<tr><td colspan=5 class="text-center">لا يوجد</td></tr>';
 }
 
-async function deleteEntry(id) {
-  if (!confirm('حذف القيد؟')) return;
-  await DB.del('entries', id);
-  toast('تم الحذف');
-  await loadAll();
+// ═══════════════════════════════════════════════════════════════
+// الباركود
+// ═══════════════════════════════════════════════════════════════
+async function generateBarcode() {
+  const itemId = Number(document.getElementById('bcItem').value);
+  const count = Number(document.getElementById('bcCount').value||1);
+  const type = document.getElementById('bcType').value;
+  const item = state.items.find(i => i.id === itemId);
+  if (!item) { toast('اختر صنفاً', 'danger'); return; }
+  const bc = item.barcode || generateBarcodeValue();
+  if (!item.barcode) { item.barcode = bc; await DB.put('items', item); }
+
+  let html = '<div class="row g-3">';
+  for (let i = 0; i < count; i++) {
+    html += `<div class="col-md-3"><div class="border p-2 text-center rounded">
+      <div class="small">${item.name}</div><div class="small text-muted">${item.code}</div>
+      <svg class="bc-svg" data-code="${bc}" data-type="${type}"></svg>
+      <div class="small barcode">${bc}</div>
+      <div class="small fw-bold">${fmt(item.price)}</div></div></div>`;
+  }
+  html += '</div>';
+  document.getElementById('barcodePreview').innerHTML = html;
+  document.querySelectorAll('.bc-svg').forEach(el => {
+    try { JsBarcode(el, el.dataset.code, { format: el.dataset.type, width: 1.5, height: 50, fontSize: 12 }); }
+    catch (e) { el.outerHTML = `<div class="text-danger small">خطأ</div>`; }
+  });
+}
+function printBarcodes() {
+  const w = window.open('', '', 'width=800,height=600');
+  w.document.write(`<html dir="rtl"><head><title>باركود</title>
+    <style>body{font-family:sans-serif}.row{display:flex;flex-wrap:wrap}
+    .col-md-3{width:25%;padding:8px;text-align:center;border:1px dashed #ccc}
+    .small{font-size:11px}</style></head><body>
+    ${document.getElementById('barcodePreview').innerHTML}</body></html>`);
+  w.document.close(); setTimeout(() => w.print(), 500);
+}
+async function printBarcodeSheet() {
+  const items = state.items;
+  if (!items.length) { toast('لا توجد أصناف', 'danger'); return; }
+  const sel = prompt(`أرقام الأصناف (فاصلة) أو "الكل":\n\n` +
+    items.map((it, i) => `${i+1}. ${it.code} - ${it.name}`).join('\n'), 'الكل');
+  if (sel === null) return;
+  let selected = items;
+  if (sel.trim() !== 'الكل') {
+    const nums = sel.split(',').map(n => parseInt(n.trim())-1).filter(n => n >= 0 && n < items.length);
+    selected = nums.map(n => items[n]);
+  }
+  const countEach = Number(prompt('عدد الملصقات لكل صنف؟', '6')||6);
+  let html = '<div class="label-sheet">';
+  for (const it of selected) {
+    for (let i = 0; i < countEach; i++) {
+      const code = it.barcode || generateBarcodeValue();
+      if (!it.barcode) { it.barcode = code; await DB.put('items', it); }
+      html += `<div class="label-item">
+        <div class="name">${it.name}</div><div class="price">${fmt(it.price)}</div>
+        <svg class="bc-label" data-code="${code}"></svg>
+        <div style="font-size:10px;font-family:monospace">${code}</div></div>`;
+    }
+  }
+  html += '</div>';
+  const w = window.open('', '', 'width=900,height=700');
+  w.document.write(`<html dir="rtl"><head><title>ملصقات</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"><\/script>
+    <style>@page{size:A4;margin:8mm}body{font-family:sans-serif;margin:0}
+    .label-sheet{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm}
+    .label-item{border:1px dashed #999;padding:4mm 2mm;text-align:center;page-break-inside:avoid;
+    height:30mm;display:flex;flex-direction:column;justify-content:center;align-items:center}
+    .label-item .name{font-size:11px;font-weight:bold;margin-bottom:2px;overflow:hidden;max-height:26px}
+    .label-item .price{font-size:13px;font-weight:bold;color:#1d4ed8;margin:2px 0}
+    .label-item svg{max-height:40px}</style></head><body>${html}</body></html>`);
+  w.document.close();
+  setTimeout(() => {
+    w.document.querySelectorAll('.bc-label').forEach(el => {
+      try { w.JsBarcode(el, el.dataset.code, { format: 'CODE128', width: 1.3, height: 38, fontSize: 9, margin: 0 }); } catch(e){}
+    });
+    setTimeout(() => w.print(), 400);
+  }, 500);
 }
 
-async function renderJournal() {
-  const entries = await DB.getAll('entries');
-  entries.sort((a, b) => b.id - a.id);
-  document.getElementById('journalList').innerHTML = entries.map(e => `
-    <tr>
-      <td>${e.number}</td><td>${e.date}</td><td>${e.desc || '-'}</td>
-      <td class="text-success">${fmt(e.totalDebit)}</td>
-      <td class="text-danger">${fmt(e.totalCredit)}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="deleteEntry(${e.id})">×</button></td>
-    </tr>`).join('') || '<tr><td colspan=6 class="text-center">لا توجد قيود</td></tr>';
+// ═══════════════════════════════════════════════════════════════
+// FIFO
+// ═══════════════════════════════════════════════════════════════
+async function renderFIFO() {
+  const whFilter = Number(document.getElementById('fifoWarehouse').value) || null;
+  const itemFilter = Number(document.getElementById('fifoItem').value) || null;
+  const moves = byCompany(await DB.getAll('stockMoves'));
+  moves.sort((a,b) => new Date(a.date) - new Date(b.date) || a.id - b.id);
+  const im = Object.fromEntries(state.items.map(i => [i.id, i]));
+  const wm = Object.fromEntries(state.warehouses.map(w => [w.id, w.name]));
+  const fifoStacks = {};
+
+  moves.forEach(m => {
+    if (whFilter && m.warehouseId !== whFilter && m.toWarehouseId !== whFilter) return;
+    if (itemFilter && m.itemId !== itemFilter) return;
+    const key = `${m.warehouseId}_${m.itemId}`;
+    const item = im[m.itemId];
+    const cost = Number(m.cost) || item?.cost || 0;
+
+    if (m.type === 'in') {
+      if (!fifoStacks[key]) fifoStacks[key] = [];
+      fifoStacks[key].push({ qty: Number(m.qty), cost, date: m.date });
+    } else if (m.type === 'out') {
+      let toRemove = Number(m.qty);
+      if (!fifoStacks[key]) fifoStacks[key] = [];
+      while (toRemove > 0 && fifoStacks[key].length) {
+        const b = fifoStacks[key][0];
+        if (b.qty <= toRemove) { toRemove -= b.qty; fifoStacks[key].shift(); }
+        else { b.qty -= toRemove; toRemove = 0; }
+      }
+    } else if (m.type === 'adjust') {
+      const current = (fifoStacks[key]||[]).reduce((s,b) => s+b.qty, 0);
+      const diff = Number(m.qty) - current;
+      if (diff > 0) {
+        if (!fifoStacks[key]) fifoStacks[key] = [];
+        fifoStacks[key].push({ qty: diff, cost, date: m.date });
+      } else if (diff < 0) {
+        let toRemove = -diff;
+        while (toRemove > 0 && fifoStacks[key]?.length) {
+          const b = fifoStacks[key][0];
+          if (b.qty <= toRemove) { toRemove -= b.qty; fifoStacks[key].shift(); }
+          else { b.qty -= toRemove; toRemove = 0; }
+        }
+      }
+    } else if (m.type === 'transfer') {
+      let toRemove = Number(m.qty);
+      while (toRemove > 0 && fifoStacks[key]?.length) {
+        const b = fifoStacks[key][0];
+        if (b.qty <= toRemove) { toRemove -= b.qty; fifoStacks[key].shift(); }
+        else { b.qty -= toRemove; toRemove = 0; }
+      }
+      const key2 = `${m.toWarehouseId}_${m.itemId}`;
+      if (!fifoStacks[key2]) fifoStacks[key2] = [];
+      fifoStacks[key2].push({ qty: Number(m.qty), cost, date: m.date });
+    }
+  });
+
+  const rows = [];
+  let totalValue = 0;
+  Object.entries(fifoStacks).forEach(([key, batches]) => {
+    const totalQty = batches.reduce((s,b) => s+b.qty, 0);
+    if (totalQty <= 0.001) return;
+    const [whId, itemId] = key.split('_').map(Number);
+    const item = im[itemId];
+    const value = batches.reduce((s,b) => s + b.qty*b.cost, 0);
+    const avg = value/totalQty;
+    totalValue += value;
+    rows.push({ wh: wm[whId], item: item?.name, code: item?.code,
+      qty: totalQty, avg, value, batches });
+  });
+  rows.sort((a,b) => (a.code||'').localeCompare(b.code||''));
+
+  document.getElementById('fifoResult').innerHTML = `
+    <div class="card p-3 mb-3">
+      <div class="row">
+        <div class="col-md-6"><h5>💰 تقييم المخزون FIFO</h5>
+          <p class="text-muted small mb-0">الوارد أولاً — يصرف أولاً</p></div>
+        <div class="col-md-6 text-end">
+          <small class="text-muted">القيمة الإجمالية</small>
+          <h3 class="text-success mb-0">${fmt(totalValue)}</h3></div>
+      </div>
+    </div>
+    <div class="card p-3"><table class="table table-sm table-hover">
+      <thead><tr><th>الكود</th><th>الصنف</th><th>المخزن</th>
+      <th>الكمية</th><th>متوسط التكلفة</th><th>القيمة FIFO</th><th></th></tr></thead>
+      <tbody>${rows.map((r,i) => `
+        <tr><td>${r.code}</td><td>${r.item}</td><td>${r.wh}</td>
+        <td>${fmt(r.qty)}</td><td>${fmt(r.avg,3)}</td>
+        <td class="fw-bold">${fmt(r.value)}</td>
+        <td><button class="btn btn-sm btn-outline-primary" onclick="toggleFIFO(${i})">👁</button></td></tr>
+        <tr id="fifo-d-${i}" style="display:none"><td colspan="7" class="bg-light">
+        <table class="table table-sm mb-0" style="font-size:11px">
+        <thead><tr><th>التاريخ</th><th>الكمية</th><th>التكلفة</th><th>القيمة</th></tr></thead>
+        <tbody>${r.batches.map(b => `<tr><td>${b.date}</td><td>${fmt(b.qty)}</td>
+        <td>${fmt(b.cost,3)}</td><td>${fmt(b.qty*b.cost)}</td></tr>`).join('')}
+        </tbody></table></td></tr>
+        `).join('') || '<tr><td colspan=7 class="text-center">لا يوجد</td></tr>'}
+      </tbody></table></div>`;
+}
+function toggleFIFO(i) {
+  const el = document.getElementById('fifo-d-'+i);
+  el.style.display = el.style.display === 'none' ? 'table-row' : 'none';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -551,35 +1376,117 @@ async function renderJournal() {
 async function addParty(e) {
   e.preventDefault();
   const f = e.target;
-  const p = {
-    partyType: f.partyType.value,
-    code: f.code.value.trim(),
-    name: f.name.value.trim(),
-    phone: f.phone.value, email: f.email.value
-  };
-  if (!p.code || !p.name) return;
+  const p = { partyType: f.partyType.value, code: f.code.value.trim(),
+    name: f.name.value.trim(), phone: f.phone.value, email: f.email.value,
+    companyId: CURRENT_COMPANY_ID };
   await DB.add('parties', p);
-  logAction('إضافة طرف', p.name);
-  f.reset();
-  toast('تم الإضافة');
-  await renderParties();
+  logAction('طرف', p.name);
+  f.reset(); toast('تم'); await refreshAll();
 }
-
-async function deleteParty(id) {
-  if (!confirm('حذف الطرف؟')) return;
-  await DB.del('parties', id);
-  toast('تم الحذف');
-  await renderParties();
-}
-
 async function renderParties() {
-  const list = await DB.getAll('parties');
-  document.getElementById('partiesList').innerHTML = list.map(p => `
-    <tr>
-      <td>${p.code}</td><td>${p.name}</td>
-      <td>${p.partyType === 'customer' ? 'عميل' : 'مورد'}</td>
-      <td>${p.phone || '-'}</td><td>${p.email || '-'}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="deleteParty(${p.id})">×</button></td>
+  state.parties = byCompany(await DB.getAll('parties'));
+  document.getElementById('partiesList').innerHTML = state.parties.map(p => `
+    <tr><td>${p.code}</td><td>${p.name}</td>
+    <td>${p.partyType==='customer'?'عميل':'مورد'}</td>
+    <td>${p.phone||'-'}</td><td>${p.email||'-'}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="delEntity('parties',${p.id})">×</button></td>
+    </tr>`).join('') || '<tr><td colspan=6 class="text-center">لا يوجد</td></tr>';
+  const opts = state.parties.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  document.getElementById('payParty').innerHTML = opts;
+  document.getElementById('invParty').innerHTML = opts;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// الحسابات
+// ═══════════════════════════════════════════════════════════════
+async function addAccount(e) {
+  e.preventDefault();
+  const f = e.target;
+  const a = { code: f.code.value.trim(), name: f.name.value.trim(),
+    type: f.type.value, currency: f.currency.value,
+    isGroup: f.isGroup.checked, companyId: CURRENT_COMPANY_ID };
+  await DB.add('accounts', a);
+  logAction('حساب', a.code);
+  f.reset(); toast('تم'); await refreshAll();
+}
+async function renderAccounts() {
+  state.accounts = byCompany(await DB.getAll('accounts'));
+  const entries = byCompany(await DB.getAll('entries'));
+  const bal = {};
+  entries.forEach(e => e.lines.forEach(l => { bal[l.accountId] = (bal[l.accountId]||0) + (l.debit - l.credit); }));
+  const tn = { asset:'أصول', liability:'خصوم', equity:'حقوق ملكية', revenue:'إيرادات', expense:'مصروفات' };
+  document.getElementById('accountsList').innerHTML = state.accounts.map(a => `
+    <tr><td>${a.code}</td><td>${a.name}</td>
+    <td><span class="badge bg-info">${tn[a.type]}</span></td>
+    <td>${a.currency||'-'}</td><td>${fmt(bal[a.id]||0)}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="delEntity('accounts',${a.id})">×</button></td>
+    </tr>`).join('') || '<tr><td colspan=6 class="text-center">لا يوجد</td></tr>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// القيود
+// ═══════════════════════════════════════════════════════════════
+let entryModal;
+function openNewEntry() {
+  document.getElementById('entryDate').value = today();
+  document.getElementById('entryRef').value = '';
+  document.getElementById('entryDesc').value = '';
+  document.getElementById('entryLines').innerHTML = '';
+  addEntryLine(); addEntryLine(); updateSum();
+  entryModal.show();
+}
+async function addEntryLine() {
+  const opts = state.accounts.map(a => `<option value="${a.id}">${a.code} - ${a.name}</option>`).join('');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><select class="form-select form-select-sm accSel">${opts}</select></td>
+    <td><input class="form-control form-control-sm lineDesc"></td>
+    <td><input type="number" step="0.01" class="form-control form-control-sm dInput" value="0" oninput="updateSum()"></td>
+    <td><input type="number" step="0.01" class="form-control form-control-sm cInput" value="0" oninput="updateSum()"></td>
+    <td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove();updateSum()">×</button></td>`;
+  document.getElementById('entryLines').appendChild(tr);
+}
+function updateSum() {
+  let d = 0, c = 0;
+  document.querySelectorAll('#entryLines tr').forEach(tr => {
+    d += Number(tr.querySelector('.dInput').value||0);
+    c += Number(tr.querySelector('.cInput').value||0);
+  });
+  document.getElementById('sumDebit').textContent = fmt(d);
+  document.getElementById('sumCredit').textContent = fmt(c);
+  const b = document.getElementById('balanceStatus');
+  if (Math.abs(d-c) < 0.01 && d > 0) { b.className = 'badge bg-success'; b.textContent = 'متوازن ✓'; }
+  else { b.className = 'badge bg-danger'; b.textContent = 'غير متوازن'; }
+}
+async function saveEntry() {
+  const lines = [];
+  document.querySelectorAll('#entryLines tr').forEach(tr => {
+    const accId = Number(tr.querySelector('.accSel').value);
+    const debit = Number(tr.querySelector('.dInput').value||0);
+    const credit = Number(tr.querySelector('.cInput').value||0);
+    const ld = tr.querySelector('.lineDesc').value;
+    if (debit || credit) lines.push({ accountId: accId, debit, credit, desc: ld });
+  });
+  const td = lines.reduce((s,l) => s+l.debit, 0);
+  const tc = lines.reduce((s,l) => s+l.credit, 0);
+  if (lines.length < 2 || Math.abs(td-tc) > 0.01 || td === 0) { toast('تحقق من التوازن', 'danger'); return; }
+  const entries = byCompany(await DB.getAll('entries'));
+  const num = `JV-${new Date().getFullYear()}-${String(entries.length+1).padStart(5,'0')}`;
+  await DB.add('entries', { number: num, date: document.getElementById('entryDate').value,
+    desc: document.getElementById('entryDesc').value, ref: document.getElementById('entryRef').value,
+    lines, totalDebit: td, totalCredit: tc,
+    companyId: CURRENT_COMPANY_ID, createdAt: new Date().toISOString() });
+  logAction('قيد', num);
+  entryModal.hide(); toast('تم'); await refreshAll();
+}
+async function renderJournal() {
+  const entries = byCompany(await DB.getAll('entries'));
+  entries.sort((a,b) => b.id - a.id);
+  document.getElementById('journalList').innerHTML = entries.map(e => `
+    <tr><td>${e.number}</td><td>${e.date}</td><td>${e.desc||'-'}</td>
+    <td class="text-success">${fmt(e.totalDebit)}</td>
+    <td class="text-danger">${fmt(e.totalCredit)}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="delEntity('entries',${e.id})">×</button></td>
     </tr>`).join('') || '<tr><td colspan=6 class="text-center">لا يوجد</td></tr>';
 }
 
@@ -587,289 +1494,1028 @@ async function renderParties() {
 // الفواتير
 // ═══════════════════════════════════════════════════════════════
 let invoiceModal;
-
-async function openNewInvoice() {
+function openNewInvoice() {
   document.getElementById('invDate').value = today();
-  document.getElementById('invDue').value = '';
+  document.getElementById('invDue').value = today();
   document.getElementById('invNotes').value = '';
   document.getElementById('invTax').value = 15;
   document.getElementById('invDiscount').value = 0;
   document.getElementById('invLines').innerHTML = '';
-  const parties = await DB.getAll('parties');
-  document.getElementById('invParty').innerHTML = parties.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-  addInvLine();
-  calcInvoice();
-  invoiceModal.show();
+  // المندوبون
+  const reps = state.users.filter(u => u.role === 'sales' || u.role === 'admin');
+  document.getElementById('invSalesRep').innerHTML = '<option value="">— بدون —</option>' +
+    reps.map(u => `<option value="${u.id}">${u.fullname || u.username}</option>`).join('');
+  addInvLine(); calcInvoice(); invoiceModal.show();
 }
-
-function addInvLine() {
+async function addInvLine() {
+  const itemOpts = state.items.map(i => `<option value="${i.id}" data-price="${i.price}" data-cost="${i.cost}" data-unit="${i.baseUnit}">${i.code} - ${i.name}</option>`).join('');
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td><input class="form-control iDesc"></td>
-    <td><input type="number" step="0.01" class="form-control iQty" value="1" oninput="calcInvoice()"></td>
-    <td><input type="number" step="0.01" class="form-control iPrice" value="0" oninput="calcInvoice()"></td>
+    <td><select class="form-select form-select-sm iItem" onchange="onInvItemChange(this)">${itemOpts}</select></td>
+    <td><input type="number" step="0.01" class="form-control form-control-sm iQty" value="1" oninput="calcInvoice()"></td>
+    <td><span class="iUnit"></span></td>
+    <td><input type="number" step="0.01" class="form-control form-control-sm iPrice" value="0" oninput="calcInvoice()"></td>
     <td class="iTotal">0.00</td>
     <td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove();calcInvoice()">×</button></td>`;
   document.getElementById('invLines').appendChild(tr);
+  onInvItemChange(tr.querySelector('.iItem'));
 }
-
+function onInvItemChange(sel) {
+  const opt = sel.options[sel.selectedIndex];
+  const tr = sel.closest('tr');
+  const type = document.getElementById('invType').value;
+  const price = type === 'sales' ? opt.dataset.price : opt.dataset.cost;
+  tr.querySelector('.iPrice').value = price || 0;
+  tr.querySelector('.iUnit').textContent = opt.dataset.unit || '';
+  calcInvoice();
+}
 function calcInvoice() {
   let sub = 0;
   document.querySelectorAll('#invLines tr').forEach(tr => {
-    const q = Number(tr.querySelector('.iQty').value || 0);
-    const p = Number(tr.querySelector('.iPrice').value || 0);
-    const t = q * p;
-    sub += t;
+    const q = Number(tr.querySelector('.iQty').value||0);
+    const p = Number(tr.querySelector('.iPrice').value||0);
+    const t = q*p; sub += t;
     tr.querySelector('.iTotal').textContent = fmt(t);
   });
-  const taxRate = Number(document.getElementById('invTax').value || 0);
-  const disc = Number(document.getElementById('invDiscount').value || 0);
+  const taxRate = Number(document.getElementById('invTax').value||0);
+  const disc = Number(document.getElementById('invDiscount').value||0);
   const tax = (sub - disc) * taxRate / 100;
   const total = sub - disc + tax;
   document.getElementById('invSubtotal').textContent = fmt(sub);
   document.getElementById('invTaxAmount').textContent = fmt(tax);
   document.getElementById('invTotal').textContent = fmt(total);
 }
-
 async function saveInvoice() {
   const type = document.getElementById('invType').value;
   const partyId = Number(document.getElementById('invParty').value);
-  const date = document.getElementById('invDate').value;
-  const due = document.getElementById('invDue').value;
-  const notes = document.getElementById('invNotes').value;
+  const whId = Number(document.getElementById('invWarehouse').value);
+  const repId = Number(document.getElementById('invSalesRep').value) || null;
+  const currencyCode = document.getElementById('invCurrency').value || 'SAR';
   const items = [];
   document.querySelectorAll('#invLines tr').forEach(tr => {
-    const d = tr.querySelector('.iDesc').value.trim();
-    const q = Number(tr.querySelector('.iQty').value || 0);
-    const p = Number(tr.querySelector('.iPrice').value || 0);
-    if (d) items.push({ desc: d, qty: q, price: p, total: q * p });
+    const itemId = Number(tr.querySelector('.iItem').value);
+    const qty = Number(tr.querySelector('.iQty').value||0);
+    const price = Number(tr.querySelector('.iPrice').value||0);
+    if (qty > 0) items.push({ itemId, qty, price, total: qty*price });
   });
-  if (!date || items.length === 0) { toast('أدخل البيانات', 'danger'); return; }
-  const sub = items.reduce((s, i) => s + i.total, 0);
-  const taxRate = Number(document.getElementById('invTax').value || 0);
-  const disc = Number(document.getElementById('invDiscount').value || 0);
-  const tax = (sub - disc) * taxRate / 100;
+  if (!items.length) { toast('أدخل الأصناف', 'danger'); return; }
+  const sub = items.reduce((s,i) => s+i.total, 0);
+  const taxRate = Number(document.getElementById('invTax').value||0);
+  const disc = Number(document.getElementById('invDiscount').value||0);
+  const tax = (sub-disc)*taxRate/100;
   const total = sub - disc + tax;
 
-  const invs = await DB.getAll('invoices');
-  const prefix = type === 'sales' ? 'SI' : 'PI';
-  const num = `${prefix}-${new Date().getFullYear()}-${String(invs.length + 1).padStart(5, '0')}`;
+  const invs = byCompany(await DB.getAll('invoices'));
+  const num = `${type === 'sales' ? 'SI' : 'PI'}-${new Date().getFullYear()}-${String(invs.length+1).padStart(5,'0')}`;
+  const invId = await DB.add('invoices', {
+    number: num, type, partyId, warehouseId: whId, salesRepId: repId,
+    date: document.getElementById('invDate').value,
+    due: document.getElementById('invDue').value,
+    currency: currencyCode, items, subtotal: sub, taxRate, tax, discount: disc, total,
+    status: 'unpaid', companyId: CURRENT_COMPANY_ID, createdAt: new Date().toISOString() });
 
-  await DB.add('invoices', {
-    number: num, type, partyId, date, due, notes, items,
-    subtotal: sub, taxRate, tax, discount: disc, total,
-    status: 'unpaid', createdAt: new Date().toISOString()
-  });
-  logAction('فاتورة جديدة', num);
-  invoiceModal.hide();
-  toast('تم حفظ الفاتورة');
-  await loadAll();
+  for (const it of items) {
+    const moveType = type === 'sales' ? 'out' : 'in';
+    await DB.add('stockMoves', { type: moveType, itemId: it.itemId, warehouseId: whId,
+      qty: it.qty, cost: it.price, date: document.getElementById('invDate').value,
+      notes: 'فاتورة ' + num, companyId: CURRENT_COMPANY_ID, createdAt: new Date().toISOString() });
+  }
+  logAction('فاتورة', num);
+  invoiceModal.hide(); toast('تم'); await refreshAll();
 }
-
 async function renderInvoices() {
-  const invs = await DB.getAll('invoices');
-  const parties = await DB.getAll('parties');
-  const pmap = Object.fromEntries(parties.map(p => [p.id, p.name]));
-  invs.sort((a, b) => b.id - a.id);
+  const invs = byCompany(await DB.getAll('invoices'));
+  invs.sort((a,b) => b.id - a.id);
+  const pm = Object.fromEntries(state.parties.map(p => [p.id, p.name]));
+  const um = Object.fromEntries(state.users.map(u => [u.id, u.fullname || u.username]));
   document.getElementById('invoicesList').innerHTML = invs.map(i => `
-    <tr>
-      <td>${i.number}</td><td>${i.date}</td>
-      <td>${i.type === 'sales' ? 'مبيعات' : 'مشتريات'}</td>
-      <td>${pmap[i.partyId] || '-'}</td>
-      <td>${fmt(i.total)}</td>
-      <td><span class="badge bg-${i.status === 'unpaid' ? 'danger' : 'success'}">${i.status}</span></td>
-    </tr>`).join('') || '<tr><td colspan=6 class="text-center">لا توجد فواتير</td></tr>';
+    <tr><td>${i.number}</td><td>${i.date}</td>
+    <td>${i.type==='sales'?'مبيعات':'مشتريات'}</td>
+    <td>${pm[i.partyId]||'-'}</td>
+    <td>${um[i.salesRepId]||'-'}</td>
+    <td>${fmt(i.total)} ${i.currency||''}</td>
+    <td><span class="badge bg-${i.status==='unpaid'?'danger':'success'}">${i.status}</span></td>
+    <td><button class="btn btn-sm btn-outline-primary" onclick="viewInvoice(${i.id})">👁</button>
+    <button class="btn btn-sm btn-outline-danger" onclick="printInvoicePDF(${i.id})">PDF</button>
+    <button class="btn btn-sm btn-danger" onclick="delEntity('invoices',${i.id})">×</button></td></tr>
+    `).join('') || '<tr><td colspan=8 class="text-center">لا يوجد</td></tr>';
+}
+function viewInvoice(id) {
+  DB.get('invoices', id).then(inv => {
+    const party = state.parties.find(p => p.id === inv.partyId);
+    const itemMap = Object.fromEntries(state.items.map(i => [i.id, i]));
+    const html = `<div class="modal-body">
+      <h5>فاتورة ${inv.number}</h5>
+      <p>التاريخ: ${inv.date} | الطرف: ${party?.name||'-'} | العملة: ${inv.currency}</p>
+      <table class="table table-sm"><thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
+      <tbody>${inv.items.map(it => `<tr>
+        <td>${itemMap[it.itemId]?.name||'-'}</td>
+        <td>${fmt(it.qty)}</td><td>${fmt(it.price)}</td><td>${fmt(it.total)}</td></tr>`).join('')}</tbody>
+      <tfoot>
+      <tr><td colspan=3>المجموع</td><td>${fmt(inv.subtotal)}</td></tr>
+      <tr><td colspan=3>الضريبة ${inv.taxRate}%</td><td>${fmt(inv.tax)}</td></tr>
+      <tr><td colspan=3>الخصم</td><td>${fmt(inv.discount)}</td></tr>
+      <tr class="fw-bold"><td colspan=3>الإجمالي</td><td>${fmt(inv.total)}</td></tr>
+      </tfoot></table></div>`;
+    const m = document.createElement('div');
+    m.className = 'modal fade';
+    m.innerHTML = `<div class="modal-dialog"><div class="modal-content">${html}
+      <div class="modal-footer">
+      <button class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+      <button class="btn btn-danger" onclick="printInvoicePDF(${inv.id})">📄 PDF</button>
+      <button class="btn btn-primary" onclick="window.print()">🖨 طباعة</button>
+      </div></div></div>`;
+    document.body.appendChild(m);
+    new bootstrap.Modal(m).show();
+    m.addEventListener('hidden.bs.modal', () => m.remove());
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
-// التقارير
+// PDF فاتورة
 // ═══════════════════════════════════════════════════════════════
-async function showReport(type) {
-  const accounts = await DB.getAll('accounts');
-  const entries = await DB.getAll('entries');
-  const bal = {};
-  entries.forEach(e => e.lines.forEach(l => {
-    bal[l.accountId] = (bal[l.accountId] || 0) + (l.debit - l.credit);
-  }));
-  const el = document.getElementById('reportContent');
-
-  if (type === 'trial') {
-    const rows = accounts.filter(a => !a.isGroup).map(a => {
-      const b = bal[a.id] || 0;
-      return { code: a.code, name: a.name, debit: b > 0 ? b : 0, credit: b < 0 ? -b : 0 };
-    });
-    const td = rows.reduce((s, r) => s + r.debit, 0);
-    const tc = rows.reduce((s, r) => s + r.credit, 0);
-    el.innerHTML = `<div class="card p-3">
-      <h5>ميزان المراجعة</h5>
-      <table class="table table-hover">
-        <thead><tr><th>الكود</th><th>الحساب</th><th>مدين</th><th>دائن</th></tr></thead>
-        <tbody>${rows.map(r => `<tr><td>${r.code}</td><td>${r.name}</td>
-          <td class="text-success">${fmt(r.debit)}</td>
-          <td class="text-danger">${fmt(r.credit)}</td></tr>`).join('')}
-        <tr class="table-dark"><td colspan="2"><b>الإجمالي</b></td>
-        <td><b>${fmt(td)}</b></td><td><b>${fmt(tc)}</b></td></tr></tbody>
-      </table></div>`;
-  } else if (type === 'income') {
-    const revs = accounts.filter(a => a.type === 'revenue' && !a.isGroup)
-      .map(a => ({ name: a.name, amount: -(bal[a.id] || 0) }));
-    const exps = accounts.filter(a => a.type === 'expense' && !a.isGroup)
-      .map(a => ({ name: a.name, amount: bal[a.id] || 0 }));
-    const tr = revs.reduce((s, r) => s + r.amount, 0);
-    const te = exps.reduce((s, e) => s + e.amount, 0);
-    const net = tr - te;
-    el.innerHTML = `<div class="row g-3">
-      <div class="col-md-6"><div class="card p-3">
-        <h5 class="text-success">الإيرادات</h5>
-        <table class="table"><tbody>
-        ${revs.map(r => `<tr><td>${r.name}</td><td>${fmt(r.amount)}</td></tr>`).join('')}
-        <tr class="table-success"><td><b>الإجمالي</b></td><td><b>${fmt(tr)}</b></td></tr>
-        </tbody></table></div></div>
-      <div class="col-md-6"><div class="card p-3">
-        <h5 class="text-danger">المصروفات</h5>
-        <table class="table"><tbody>
-        ${exps.map(e => `<tr><td>${e.name}</td><td>${fmt(e.amount)}</td></tr>`).join('')}
-        <tr class="table-danger"><td><b>الإجمالي</b></td><td><b>${fmt(te)}</b></td></tr>
-        </tbody></table></div></div>
-    </div>
-    <div class="card p-3 mt-3 text-center">
-      <h3>صافي الربح: <span class="text-${net >= 0 ? 'success' : 'danger'}">${fmt(net)}</span></h3>
+async function printInvoicePDF(invId) {
+  const inv = await DB.get('invoices', invId);
+  if (!inv) return;
+  const party = state.parties.find(p => p.id === inv.partyId);
+  const wh = state.warehouses.find(w => w.id === inv.warehouseId);
+  const itemMap = Object.fromEntries(state.items.map(i => [i.id, i]));
+  const company = state.companies.find(c => c.id === CURRENT_COMPANY_ID);
+  const html = `
+    <div style="font-family:'Segoe UI',Tahoma,sans-serif;direction:rtl;padding:30px;color:#111;max-width:800px;margin:auto">
+      <div style="display:flex;justify-content:space-between;border-bottom:3px solid #1d4ed8;padding-bottom:15px;margin-bottom:20px">
+        <div>
+          <h1 style="margin:0;color:#1d4ed8;font-size:26px">${company?.name || 'الشركة'}</h1>
+          <p style="margin:4px 0;font-size:12px;color:#555">${company?.address || ''}</p>
+          <p style="margin:0;font-size:12px;color:#555">الرقم الضريبي: ${company?.taxNumber || '-'}</p>
+        </div>
+        <div style="text-align:left">
+          <div style="font-size:26px;font-weight:bold;color:${inv.type==='sales'?'#16a34a':'#dc2626'}">
+            ${inv.type === 'sales' ? 'فاتورة مبيعات' : 'فاتورة مشتريات'}
+          </div>
+          <p style="margin:6px 0;font-size:13px"><b>رقم:</b> ${inv.number}</p>
+          <p style="margin:2px 0;font-size:13px"><b>التاريخ:</b> ${inv.date}</p>
+          ${inv.due ? `<p style="margin:2px 0;font-size:13px"><b>الاستحقاق:</b> ${inv.due}</p>` : ''}
+        </div>
+      </div>
+      <div style="background:#f1f5f9;padding:12px;border-radius:8px;margin-bottom:20px">
+        <p style="margin:2px 0;font-size:13px"><b>${inv.type==='sales'?'العميل':'المورد'}:</b> ${party?.name || '-'}</p>
+        <p style="margin:2px 0;font-size:13px"><b>الهاتف:</b> ${party?.phone || '-'}</p>
+        <p style="margin:2px 0;font-size:13px"><b>المخزن:</b> ${wh?.name || '-'}</p>
+        <p style="margin:2px 0;font-size:13px"><b>العملة:</b> ${inv.currency || 'SAR'}</p>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="background:#1e293b;color:#fff">
+          <th style="padding:8px;border:1px solid #333;text-align:right">#</th>
+          <th style="padding:8px;border:1px solid #333;text-align:right">الصنف</th>
+          <th style="padding:8px;border:1px solid #333;text-align:right">الوحدة</th>
+          <th style="padding:8px;border:1px solid #333;text-align:right">الكمية</th>
+          <th style="padding:8px;border:1px solid #333;text-align:right">السعر</th>
+          <th style="padding:8px;border:1px solid #333;text-align:right">الإجمالي</th>
+        </tr></thead>
+        <tbody>${inv.items.map((it, i) => {
+          const item = itemMap[it.itemId];
+          return `<tr><td style="padding:6px;border:1px solid #ccc">${i+1}</td>
+            <td style="padding:6px;border:1px solid #ccc">${item?.name||'-'}
+            <span style="color:#666;font-size:10px">(${item?.code||''})</span></td>
+            <td style="padding:6px;border:1px solid #ccc">${item?.baseUnit||'-'}</td>
+            <td style="padding:6px;border:1px solid #ccc">${fmt(it.qty)}</td>
+            <td style="padding:6px;border:1px solid #ccc">${fmt(it.price)}</td>
+            <td style="padding:6px;border:1px solid #ccc">${fmt(it.total)}</td></tr>`;
+        }).join('')}</tbody>
+      </table>
+      <div style="margin-top:20px;display:flex;justify-content:flex-end">
+        <table style="font-size:13px;min-width:280px">
+          <tr><td style="padding:6px 12px">المجموع:</td>
+          <td style="padding:6px 12px;text-align:left">${fmt(inv.subtotal)} ${inv.currency||''}</td></tr>
+          ${inv.discount ? `<tr><td style="padding:6px 12px">الخصم:</td>
+          <td style="padding:6px 12px;text-align:left">-${fmt(inv.discount)}</td></tr>` : ''}
+          <tr><td style="padding:6px 12px">الضريبة (${inv.taxRate}%):</td>
+          <td style="padding:6px 12px;text-align:left">${fmt(inv.tax)}</td></tr>
+          <tr style="background:#1d4ed8;color:#fff;font-weight:bold">
+          <td style="padding:8px 12px">الإجمالي:</td>
+          <td style="padding:8px 12px;text-align:left;font-size:16px">${fmt(inv.total)} ${inv.currency||''}</td></tr>
+        </table>
+      </div>
+      ${inv.notes ? `<div style="margin-top:20px;padding:10px;background:#fef3c7;border-radius:6px;font-size:12px">
+        <b>ملاحظات:</b> ${inv.notes}</div>` : ''}
+      <div style="margin-top:40px;display:flex;justify-content:space-between;font-size:12px;color:#666">
+        <div style="text-align:center"><div style="border-top:1px solid #999;padding-top:6px;width:180px">توقيع المستلم</div></div>
+        <div style="text-align:center"><div style="border-top:1px solid #999;padding-top:6px;width:180px">توقيع المحاسب</div></div>
+      </div>
+      <p style="text-align:center;margin-top:30px;font-size:11px;color:#999">
+        تم الإنشاء بواسطة نظام المحاسبة — ${new Date().toLocaleString('ar')}</p>
     </div>`;
-  } else if (type === 'balance') {
-    const assets = accounts.filter(a => a.type === 'asset' && !a.isGroup)
-      .map(a => ({ name: a.name, amount: bal[a.id] || 0 }));
-    const liabs = accounts.filter(a => a.type === 'liability' && !a.isGroup)
-      .map(a => ({ name: a.name, amount: -(bal[a.id] || 0) }));
-    const equity = accounts.filter(a => a.type === 'equity' && !a.isGroup)
-      .map(a => ({ name: a.name, amount: -(bal[a.id] || 0) }));
-    const ta = assets.reduce((s, a) => s + a.amount, 0);
-    const tl = liabs.reduce((s, l) => s + l.amount, 0);
-    const te = equity.reduce((s, e) => s + e.amount, 0);
-    const mkTable = (title, data, total, color) => `<div class="card p-3 mb-3">
-      <h5 class="text-${color}">${title}</h5>
-      <table class="table"><tbody>
-      ${data.map(d => `<tr><td>${d.name}</td><td>${fmt(d.amount)}</td></tr>`).join('')}
-      <tr class="table-${color}"><td><b>الإجمالي</b></td><td><b>${fmt(total)}</b></td></tr>
-      </tbody></table></div>`;
-    el.innerHTML = `<div class="row g-3">
-      <div class="col-md-6">${mkTable('الأصول', assets, ta, 'primary')}</div>
-      <div class="col-md-6">${mkTable('الخصوم', liabs, tl, 'warning')}
-      ${mkTable('حقوق الملكية', equity, te, 'success')}</div>
-    </div>
-    <div class="card p-3 text-center">
-      <h5>الأصول: ${fmt(ta)} | الخصوم + الملكية: ${fmt(tl + te)}</h5>
-      <p class="text-${Math.abs(ta - (tl + te)) < 1 ? 'success' : 'danger'}">
-      ${Math.abs(ta - (tl + te)) < 1 ? '✓ متوازنة' : '⚠ غير متوازنة'}</p></div>`;
+  const choice = confirm('موافق = تحميل PDF | إلغاء = فتح نافذة الطباعة');
+  if (choice) {
+    const opt = { margin: 0, filename: `${inv.number}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+    const el = document.createElement('div'); el.innerHTML = html;
+    toast('⏳ جاري PDF...');
+    await html2pdf().set(opt).from(el).save();
+    toast('✅ تم حفظ PDF');
+  } else {
+    const w = window.open('', '', 'width=900,height=800');
+    w.document.write(`<html dir="rtl"><head><title>${inv.number}</title></head><body>${html}</body></html>`);
+    w.document.close(); setTimeout(() => w.print(), 500);
   }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// سجل التدقيق
+// المدفوعات
 // ═══════════════════════════════════════════════════════════════
-async function renderAudit() {
-  const logs = await DB.getAll('audit');
-  logs.sort((a, b) => new Date(b.time) - new Date(a.time));
-  document.getElementById('auditList').innerHTML = logs.slice(0, 200).map(l => `
-    <tr><td>${new Date(l.time).toLocaleString('ar')}</td>
-    <td>${l.action}</td><td>${l.details || '-'}</td></tr>
-  `).join('') || '<tr><td colspan=3 class="text-center">لا يوجد</td></tr>';
+async function addPayment(e) {
+  e.preventDefault();
+  const f = e.target;
+  const p = { type: f.type.value, partyId: Number(f.partyId.value),
+    amount: Number(f.amount.value), date: f.date.value, method: f.method.value,
+    companyId: CURRENT_COMPANY_ID, createdAt: new Date().toISOString() };
+  await DB.add('payments', p);
+  logAction('دفعة', p.type);
+  f.reset(); toast('تم'); await refreshAll();
+}
+async function renderPayments() {
+  const pays = byCompany(await DB.getAll('payments'));
+  pays.sort((a,b) => new Date(b.date) - new Date(a.date));
+  const pm = Object.fromEntries(state.parties.map(p => [p.id, p.name]));
+  const methods = { cash:'نقدي', bank:'بنكي', card:'بطاقة' };
+  document.getElementById('paymentsList').innerHTML = pays.map(p => `
+    <tr><td>${p.date}</td>
+    <td><span class="badge bg-${p.type==='receipt'?'success':'danger'}">${p.type==='receipt'?'قبض':'صرف'}</span></td>
+    <td>${pm[p.partyId]||'-'}</td><td>${fmt(p.amount)}</td>
+    <td>${methods[p.method]}</td></tr>
+    `).join('') || '<tr><td colspan=5 class="text-center">لا يوجد</td></tr>';
 }
 
 // ═══════════════════════════════════════════════════════════════
 // لوحة التحكم
 // ═══════════════════════════════════════════════════════════════
 let chart;
-
 async function renderDashboard() {
-  const accounts = await DB.getAll('accounts');
-  const entries = await DB.getAll('entries');
+  const entries = byCompany(await DB.getAll('entries'));
   const bal = {};
-  entries.forEach(e => e.lines.forEach(l => {
-    bal[l.accountId] = (bal[l.accountId] || 0) + (l.debit - l.credit);
-  }));
-  const sumType = t => accounts.filter(a => a.type === t && !a.isGroup)
-    .reduce((s, a) => s + (bal[a.id] || 0), 0);
-  const assets = sumType('asset');
-  const liab = -sumType('liability');
-  const rev = -sumType('revenue');
-  const exp = sumType('expense');
-  const net = rev - exp;
-
+  entries.forEach(e => e.lines.forEach(l => { bal[l.accountId] = (bal[l.accountId]||0) + (l.debit - l.credit); }));
+  const st = t => state.accounts.filter(a => a.type === t && !a.isGroup).reduce((s,a) => s + (bal[a.id]||0), 0);
+  const assets = st('asset'), liab = -st('liability'), rev = -st('revenue'), exp = st('expense'), net = rev-exp;
   document.getElementById('stAssets').textContent = fmt(assets);
   document.getElementById('stLiab').textContent = fmt(liab);
   document.getElementById('stRev').textContent = fmt(rev);
   document.getElementById('stNet').textContent = fmt(net);
 
-  const recent = entries.slice().sort((a, b) => b.id - a.id).slice(0, 5);
+  const stock = await computeStock();
+  let stockValue = 0, lowCount = 0;
+  state.items.forEach(it => {
+    const qty = Object.entries(stock).filter(([k]) => k.endsWith('_'+it.id)).reduce((s,[,v]) => s+v, 0);
+    stockValue += qty * it.cost;
+    if (qty <= it.minStock) lowCount++;
+  });
+  document.getElementById('stItems').textContent = state.items.length;
+  document.getElementById('stStockValue').textContent = fmt(stockValue);
+  document.getElementById('stLowStock').textContent = lowCount;
+  document.getElementById('stParties').textContent = state.parties.length;
+
+  const recent = entries.slice().sort((a,b) => b.id-a.id).slice(0,5);
   document.getElementById('recentEntries').innerHTML = recent.map(e => `
-    <tr><td>${e.number}</td><td>${e.date}</td><td>${e.desc || '-'}</td>
+    <tr><td>${e.number}</td><td>${e.date}</td><td>${e.desc||'-'}</td>
     <td class="text-success">${fmt(e.totalDebit)}</td>
     <td class="text-danger">${fmt(e.totalCredit)}</td></tr>
-  `).join('') || '<tr><td colspan=5 class="text-center">لا توجد قيود</td></tr>';
+    `).join('') || '<tr><td colspan=5 class="text-center">لا يوجد</td></tr>';
 
   const ctx = document.getElementById('chartOverview');
   if (chart) chart.destroy();
-  chart = new Chart(ctx, {
+  chart = new Chart(ctx, { type:'bar',
+    data:{ labels:['أصول','خصوم','إيرادات','مصروفات','صافي'],
+      datasets:[{ data:[assets, liab, rev, exp, net],
+        backgroundColor:['#3b82f6','#f59e0b','#10b981','#ef4444', net>=0?'#047857':'#b91c1c'] }] },
+    options:{ plugins:{ legend:{display:false} }, scales:{ y:{beginAtZero:true} } } });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// التقارير المالية
+// ═══════════════════════════════════════════════════════════════
+async function showReport(type) {
+  const accounts = state.accounts;
+  const entries = byCompany(await DB.getAll('entries'));
+  const bal = {};
+  entries.forEach(e => e.lines.forEach(l => { bal[l.accountId] = (bal[l.accountId]||0) + (l.debit - l.credit); }));
+  const el = document.getElementById('reportContent');
+  if (type === 'trial') {
+    const rows = accounts.filter(a => !a.isGroup).map(a => {
+      const b = bal[a.id]||0;
+      return { code:a.code, name:a.name, debit:b>0?b:0, credit:b<0?-b:0 };
+    });
+    const td = rows.reduce((s,r) => s+r.debit, 0);
+    const tc = rows.reduce((s,r) => s+r.credit, 0);
+    el.innerHTML = `<div class="card p-3"><h6>ميزان المراجعة</h6>
+      <table class="table table-sm table-hover">
+      <thead><tr><th>الكود</th><th>الحساب</th><th>مدين</th><th>دائن</th></tr></thead>
+      <tbody>${rows.map(r => `<tr><td>${r.code}</td><td>${r.name}</td>
+        <td class="text-success">${fmt(r.debit)}</td>
+        <td class="text-danger">${fmt(r.credit)}</td></tr>`).join('')}
+      <tr class="table-dark"><td colspan=2><b>الإجمالي</b></td>
+      <td><b>${fmt(td)}</b></td><td><b>${fmt(tc)}</b></td></tr></tbody></table></div>`;
+  } else if (type === 'income') {
+    const revs = accounts.filter(a => a.type==='revenue' && !a.isGroup).map(a => ({ name:a.name, amount:-(bal[a.id]||0) }));
+    const exps = accounts.filter(a => a.type==='expense' && !a.isGroup).map(a => ({ name:a.name, amount:bal[a.id]||0 }));
+    const tr = revs.reduce((s,r) => s+r.amount, 0);
+    const te = exps.reduce((s,e) => s+e.amount, 0);
+    const cogs = exps.filter(e => e.name.includes('تكلفة')).reduce((s,e) => s+e.amount, 0);
+    const gross = tr - cogs;
+    const net = tr - te;
+    el.innerHTML = `<div class="row g-3">
+      <div class="col-md-6"><div class="card p-3"><h6 class="text-success">الإيرادات</h6>
+      <table class="table table-sm"><tbody>
+      ${revs.map(r => `<tr><td>${r.name}</td><td>${fmt(r.amount)}</td></tr>`).join('')}
+      <tr class="table-success"><td><b>الإجمالي</b></td><td><b>${fmt(tr)}</b></td></tr>
+      </tbody></table></div></div>
+      <div class="col-md-6"><div class="card p-3"><h6 class="text-danger">المصروفات</h6>
+      <table class="table table-sm"><tbody>
+      ${exps.map(e => `<tr><td>${e.name}</td><td>${fmt(e.amount)}</td></tr>`).join('')}
+      <tr class="table-danger"><td><b>الإجمالي</b></td><td><b>${fmt(te)}</b></td></tr>
+      </tbody></table></div></div></div>
+      <div class="card p-3 mt-3"><div class="row text-center">
+        <div class="col-md-4"><small>إجمالي الربح</small><h4 class="text-primary">${fmt(gross)}</h4></div>
+        <div class="col-md-4"><small>صافي الربح</small><h4 class="text-${net>=0?'success':'danger'}">${fmt(net)}</h4></div>
+        <div class="col-md-4"><small>هامش الربح</small><h4>${tr ? ((net/tr)*100).toFixed(1) : 0}%</h4></div>
+      </div></div>`;
+  } else if (type === 'balance') {
+    const assets = accounts.filter(a => a.type==='asset' && !a.isGroup).map(a => ({ name:a.name, amount:bal[a.id]||0 }));
+    const liabs = accounts.filter(a => a.type==='liability' && !a.isGroup).map(a => ({ name:a.name, amount:-(bal[a.id]||0) }));
+    const equity = accounts.filter(a => a.type==='equity' && !a.isGroup).map(a => ({ name:a.name, amount:-(bal[a.id]||0) }));
+    const ta = assets.reduce((s,a) => s+a.amount, 0);
+    const tl = liabs.reduce((s,l) => s+l.amount, 0);
+    const te = equity.reduce((s,e) => s+e.amount, 0);
+    const mk = (title, data, total, color) => `<div class="card p-3 mb-3">
+      <h6 class="text-${color}">${title}</h6><table class="table table-sm"><tbody>
+      ${data.map(d => `<tr><td>${d.name}</td><td>${fmt(d.amount)}</td></tr>`).join('')}
+      <tr class="table-${color}"><td><b>الإجمالي</b></td><td><b>${fmt(total)}</b></td></tr>
+      </tbody></table></div>`;
+    el.innerHTML = `<div class="row g-3">
+      <div class="col-md-6">${mk('الأصول', assets, ta, 'primary')}</div>
+      <div class="col-md-6">${mk('الخصوم', liabs, tl, 'warning')}${mk('حقوق الملكية', equity, te, 'success')}</div></div>
+      <div class="card p-3 text-center">
+      <h5>الأصول: ${fmt(ta)} | الخصوم+الملكية: ${fmt(tl+te)}</h5>
+      <p class="text-${Math.abs(ta-(tl+te))<1?'success':'danger'}">
+      ${Math.abs(ta-(tl+te))<1?'✓ متوازنة':'⚠ غير متوازنة'}</p></div>`;
+  } else if (type === 'cashflow') {
+    const payments = byCompany(await DB.getAll('payments'));
+    const receipts = payments.filter(p => p.type==='receipt').reduce((s,p) => s+p.amount, 0);
+    const disburs = payments.filter(p => p.type==='payment').reduce((s,p) => s+p.amount, 0);
+    el.innerHTML = `<div class="card p-3"><h6>التدفقات النقدية</h6>
+      <table class="table"><tbody>
+      <tr><td>مقبوضات</td><td class="text-success">${fmt(receipts)}</td></tr>
+      <tr><td>مدفوعات</td><td class="text-danger">${fmt(disburs)}</td></tr>
+      <tr class="table-dark"><td><b>الصافي</b></td><td><b>${fmt(receipts-disburs)}</b></td></tr>
+      </tbody></table></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// تقارير المخزون
+// ═══════════════════════════════════════════════════════════════
+async function stockReport(type) {
+  const stock = await computeStock();
+  const im = Object.fromEntries(state.items.map(i => [i.id, i]));
+  const wm = Object.fromEntries(state.warehouses.map(w => [w.id, w.name]));
+  const el = document.getElementById('stockReportContent');
+
+  if (type === 'valuation') {
+    const rows = []; let tv = 0;
+    Object.entries(stock).forEach(([k, qty]) => {
+      if (qty === 0) return;
+      const [whId, itemId] = k.split('_').map(Number);
+      const item = im[itemId]; if (!item) return;
+      const v = qty*item.cost; tv += v;
+      rows.push({ wh: wm[whId], item: item.name, code: item.code, qty, cost: item.cost, value: v });
+    });
+    el.innerHTML = `<div class="card p-3"><h6>تقييم المخزون — الإجمالي: ${fmt(tv)}</h6>
+      <table class="table table-sm table-hover"><thead><tr>
+      <th>الكود</th><th>الصنف</th><th>المخزن</th><th>الكمية</th><th>التكلفة</th><th>القيمة</th>
+      </tr></thead><tbody>${rows.map(r => `<tr><td>${r.code}</td><td>${r.item}</td><td>${r.wh}</td>
+        <td>${fmt(r.qty)}</td><td>${fmt(r.cost)}</td><td>${fmt(r.value)}</td></tr>`).join('')}
+      </tbody></table></div>`;
+  } else if (type === 'low') {
+    const is = {};
+    Object.entries(stock).forEach(([k, qty]) => {
+      const itemId = Number(k.split('_')[1]);
+      is[itemId] = (is[itemId]||0) + qty;
+    });
+    const low = state.items.filter(it => (is[it.id]||0) <= it.minStock);
+    el.innerHTML = `<div class="card p-3"><h6>أصناف منخفضة (${low.length})</h6>
+      <table class="table table-sm table-hover"><thead><tr>
+      <th>الكود</th><th>الصنف</th><th>الرصيد</th><th>حد الطلب</th><th>النقص</th>
+      </tr></thead><tbody>${low.map(it => `<tr class="table-warning">
+        <td>${it.code}</td><td>${it.name}</td>
+        <td>${fmt(is[it.id]||0)}</td><td>${fmt(it.minStock)}</td>
+        <td class="text-danger">${fmt(it.minStock-(is[it.id]||0))}</td></tr>`).join('')
+        || '<tr><td colspan=5 class="text-center">لا يوجد</td></tr>'}</tbody></table></div>`;
+  } else if (type === 'movement') {
+    const moves = byCompany(await DB.getAll('stockMoves'));
+    moves.sort((a,b) => new Date(b.date)-new Date(a.date));
+    el.innerHTML = `<div class="card p-3"><h6>حركة الأصناف</h6>
+      <table class="table table-sm table-hover"><thead><tr>
+      <th>التاريخ</th><th>النوع</th><th>الصنف</th><th>المخزن</th><th>الكمية</th><th>ملاحظات</th>
+      </tr></thead><tbody>${moves.map(m => `<tr>
+        <td>${m.date}</td><td>${m.type}</td>
+        <td>${im[m.itemId]?.name||'-'}</td><td>${wm[m.warehouseId]||'-'}</td>
+        <td>${fmt(m.qty)}</td><td>${m.notes||'-'}</td></tr>`).join('')}
+      </tbody></table></div>`;
+  } else if (type === 'profit') {
+    const invs = byCompany(await DB.getAll('invoices')).filter(i => i.type === 'sales');
+    const profit = {};
+    invs.forEach(inv => inv.items.forEach(it => {
+      const cost = (im[it.itemId]?.cost||0) * it.qty;
+      if (!profit[it.itemId]) profit[it.itemId] = { name: im[it.itemId]?.name, sales: 0, cost: 0, qty: 0 };
+      profit[it.itemId].sales += it.total;
+      profit[it.itemId].cost += cost;
+      profit[it.itemId].qty += it.qty;
+    }));
+    const rows = Object.values(profit);
+    const tS = rows.reduce((s,r) => s+r.sales, 0);
+    const tC = rows.reduce((s,r) => s+r.cost, 0);
+    el.innerHTML = `<div class="card p-3"><h6>ربحية الأصناف</h6>
+      <table class="table table-sm table-hover"><thead><tr>
+      <th>الصنف</th><th>الكمية المباعة</th><th>المبيعات</th><th>التكلفة</th><th>الربح</th><th>الهامش %</th>
+      </tr></thead><tbody>${rows.map(r => {
+        const p = r.sales - r.cost;
+        const m = r.sales ? (p/r.sales*100).toFixed(1) : 0;
+        return `<tr><td>${r.name}</td><td>${fmt(r.qty)}</td>
+          <td>${fmt(r.sales)}</td><td>${fmt(r.cost)}</td>
+          <td class="text-${p>=0?'success':'danger'}">${fmt(p)}</td><td>${m}%</td></tr>`;
+      }).join('')}
+      <tr class="table-dark"><td colspan=2><b>الإجمالي</b></td>
+      <td><b>${fmt(tS)}</b></td><td><b>${fmt(tC)}</b></td>
+      <td><b>${fmt(tS-tC)}</b></td><td></td></tr></tbody></table></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// أعمار الديون
+// ═══════════════════════════════════════════════════════════════
+async function renderAging() {
+  const type = document.getElementById('agingType').value;
+  const asOf = document.getElementById('agingAsOf').value || today();
+  document.getElementById('agingAsOf').value = asOf;
+  const asOfDate = new Date(asOf);
+  const invoices = byCompany(await DB.getAll('invoices')).filter(i => 
+    (type === 'customer' && i.type === 'sales') || (type === 'supplier' && i.type === 'purchase'));
+  const payments = byCompany(await DB.getAll('payments'));
+  const partyBal = {};
+  invoices.forEach(inv => {
+    if (!inv.partyId) return;
+    if (!partyBal[inv.partyId]) partyBal[inv.partyId] = [];
+    const ref = new Date(inv.due || inv.date);
+    const days = Math.floor((asOfDate - ref) / (1000*60*60*24));
+    partyBal[inv.partyId].push({ total: inv.total, days: Math.max(0, days) });
+  });
+  const paidByParty = {};
+  payments.forEach(p => {
+    if (p.type === (type === 'customer' ? 'receipt' : 'payment')) {
+      paidByParty[p.partyId] = (paidByParty[p.partyId]||0) + p.amount;
+    }
+  });
+  const buckets = { b0:0, b30:0, b60:0, b90:0, b180:0, bMax:0 };
+  const rows = [];
+  const pm = Object.fromEntries(state.parties.map(p => [p.id, p.name]));
+  Object.entries(partyBal).forEach(([pid, invs]) => {
+    const pidN = Number(pid);
+    let remaining = invs.reduce((s,x) => s+x.total, 0) - (paidByParty[pidN]||0);
+    if (remaining <= 0.01) return;
+    const row = { party: pm[pidN]||'-', total:0, b0:0, b30:0, b60:0, b90:0, b180:0, bMax:0 };
+    invs.sort((a,b) => b.days - a.days);
+    for (const x of invs) {
+      if (remaining <= 0.01) break;
+      const alloc = Math.min(x.total, remaining);
+      remaining -= alloc;
+      if (x.days <= 30) row.b0 += alloc;
+      else if (x.days <= 60) row.b30 += alloc;
+      else if (x.days <= 90) row.b60 += alloc;
+      else if (x.days <= 180) row.b90 += alloc;
+      else if (x.days <= 360) row.b180 += alloc;
+      else row.bMax += alloc;
+      row.total += alloc;
+    }
+    rows.push(row);
+    buckets.b0 += row.b0; buckets.b30 += row.b30; buckets.b60 += row.b60;
+    buckets.b90 += row.b90; buckets.b180 += row.b180; buckets.bMax += row.bMax;
+  });
+  const total = Object.values(buckets).reduce((s,v) => s+v, 0);
+  document.getElementById('agingSummary').innerHTML = `
+    <div class="col-md-2"><div class="stat-card bg-grad-blue"><small>الإجمالي</small><h5>${fmt(total)}</h5></div></div>
+    <div class="col-md-2"><div class="stat-card bg-grad-green"><small>0-30</small><h5>${fmt(buckets.b0)}</h5></div></div>
+    <div class="col-md-2"><div class="stat-card bg-grad-teal"><small>31-60</small><h5>${fmt(buckets.b30)}</h5></div></div>
+    <div class="col-md-2"><div class="stat-card bg-grad-orange"><small>61-90</small><h5>${fmt(buckets.b60)}</h5></div></div>
+    <div class="col-md-2"><div class="stat-card bg-grad-red"><small>91-180</small><h5>${fmt(buckets.b90+buckets.b180)}</h5></div></div>
+    <div class="col-md-2"><div class="stat-card" style="background:linear-gradient(135deg,#7f1d1d,#450a0a)"><small>+180</small><h5>${fmt(buckets.bMax)}</h5></div></div>`;
+  document.getElementById('agingList').innerHTML = rows.map(r => `
+    <tr><td><b>${r.party}</b></td><td class="fw-bold">${fmt(r.total)}</td>
+    <td>${fmt(r.b0)}</td><td>${fmt(r.b30)}</td><td>${fmt(r.b60)}</td>
+    <td>${fmt(r.b90+r.b180)}</td><td class="text-danger">${fmt(r.bMax)}</td></tr>
+    `).join('') || '<tr><td colspan=7 class="text-center">لا يوجد</td></tr>';
+}
+function printAging() {
+  const asOf = document.getElementById('agingAsOf').value;
+  const type = document.getElementById('agingType').value === 'customer' ? 'العملاء' : 'الموردين';
+  const content = `<div style="font-family:'Segoe UI',sans-serif;direction:rtl;padding:20px">
+    <h2 style="text-align:center;color:#1d4ed8">تقرير أعمار الديون - ${type}</h2>
+    <p style="text-align:center;color:#666">كما في: ${asOf}</p>
+    ${document.getElementById('agingSummary').outerHTML}
+    <div style="margin-top:20px">${document.querySelector('#page-aging table').outerHTML}</div></div>`;
+  const w = window.open('', '', 'width=900,height=700');
+  w.document.write(`<html dir="rtl"><head><title>أعمار الديون</title></head><body>${content}</body></html>`);
+  w.document.close(); setTimeout(() => w.print(), 500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// كشف حساب
+// ═══════════════════════════════════════════════════════════════
+function renderStatementList() {
+  document.getElementById('stmtParty').innerHTML =
+    '<option value="">— اختر طرفاً —</option>' +
+    state.parties.map(p => `<option value="${p.id}">${p.name} (${p.partyType==='customer'?'عميل':'مورد'})</option>`).join('');
+  document.getElementById('stmtFrom').value = document.getElementById('stmtFrom').value || today();
+  document.getElementById('stmtTo').value = document.getElementById('stmtTo').value || today();
+}
+async function renderStatement() {
+  const partyId = Number(document.getElementById('stmtParty').value);
+  if (!partyId) { document.getElementById('statementContent').innerHTML = '<div class="alert alert-info">اختر طرفاً</div>'; return; }
+  const from = document.getElementById('stmtFrom').value;
+  const to = document.getElementById('stmtTo').value;
+  const party = state.parties.find(p => p.id === partyId);
+  const invoices = byCompany(await DB.getAll('invoices')).filter(i => 
+    i.partyId === partyId && i.date >= from && i.date <= to);
+  const payments = byCompany(await DB.getAll('payments')).filter(p => 
+    p.partyId === partyId && p.date >= from && p.date <= to);
+  
+  const events = [];
+  invoices.forEach(i => events.push({ date: i.date, type: 'invoice', desc: `فاتورة ${i.number}`, 
+    debit: i.type==='sales'?i.total:0, credit: i.type==='purchase'?i.total:0 }));
+  payments.forEach(p => events.push({ date: p.date, type: 'payment', 
+    desc: p.type === 'receipt' ? 'سند قبض' : 'سند صرف',
+    debit: p.type==='payment'?p.amount:0, credit: p.type==='receipt'?p.amount:0 }));
+  events.sort((a,b) => new Date(a.date) - new Date(b.date));
+  
+  let balance = 0;
+  let rowsHtml = events.map(e => {
+    balance += e.debit - e.credit;
+    return `<tr><td>${e.date}</td><td>${e.desc}</td>
+      <td class="text-success">${e.debit?fmt(e.debit):'-'}</td>
+      <td class="text-danger">${e.credit?fmt(e.credit):'-'}</td>
+      <td class="fw-bold">${fmt(balance)}</td></tr>`;
+  }).join('');
+
+  document.getElementById('statementContent').innerHTML = `
+    <div class="card p-3">
+      <h5>كشف حساب: ${party.name}</h5>
+      <p class="text-muted small">الفترة: ${from} → ${to}</p>
+      <table class="table table-sm table-hover"><thead><tr>
+        <th>التاريخ</th><th>البيان</th><th>مدين</th><th>دائن</th><th>الرصيد</th>
+      </tr></thead><tbody>${rowsHtml || '<tr><td colspan=5 class="text-center">لا يوجد حركات</td></tr>'}</tbody>
+      <tfoot><tr class="table-dark"><td colspan=4><b>الرصيد النهائي</b></td>
+      <td><b>${fmt(balance)}</b></td></tr></tfoot></table></div>`;
+}
+function printStatement() {
+  const content = document.getElementById('statementContent').innerHTML;
+  const w = window.open('', '', 'width=900,height=700');
+  w.document.write(`<html dir="rtl"><head><title>كشف حساب</title>
+    <style>body{font-family:'Segoe UI',sans-serif;padding:20px}
+    table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:6px}</style></head>
+    <body>${content}</body></html>`);
+  w.document.close(); setTimeout(() => w.print(), 500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// تطور المبيعات
+// ═══════════════════════════════════════════════════════════════
+let chartSalesTrend, chartMonthlyCompare;
+async function renderSalesTrend() {
+  const year = Number(document.getElementById('trendYear').value) || new Date().getFullYear();
+  document.getElementById('trendYear').value = year;
+  const invs = byCompany(await DB.getAll('invoices')).filter(i => 
+    i.type === 'sales' && i.date.startsWith(String(year)));
+  const months = Array.from({length:12}, (_,i) => 0);
+  invs.forEach(i => { const m = Number(i.date.split('-')[1]) - 1; months[m] += i.total; });
+  const total = months.reduce((s,v) => s+v, 0);
+  const count = invs.length;
+  const avg = count ? total / count : 0;
+  const bestIdx = months.indexOf(Math.max(...months));
+  const monthNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  
+  document.getElementById('trendTotalSales').textContent = fmt(total);
+  document.getElementById('trendCount').textContent = count;
+  document.getElementById('trendAvg').textContent = fmt(avg);
+  document.getElementById('trendBest').textContent = monthNames[bestIdx] + ' (' + fmt(months[bestIdx]) + ')';
+
+  if (chartSalesTrend) chartSalesTrend.destroy();
+  chartSalesTrend = new Chart(document.getElementById('chartSalesTrend'), {
+    type: 'line',
+    data: { labels: monthNames, datasets: [{ label: `مبيعات ${year}`, data: months,
+      borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,.15)', fill: true, tension: .3 }] },
+    options: { responsive: true, plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } } }
+  });
+
+  // مقارنة شهرية بين هذه السنة والسابقة
+  const prevYear = year - 1;
+  const prevInvs = byCompany(await DB.getAll('invoices')).filter(i => 
+    i.type === 'sales' && i.date.startsWith(String(prevYear)));
+  const prevMonths = Array.from({length:12}, (_,i) => 0);
+  prevInvs.forEach(i => { const m = Number(i.date.split('-')[1]) - 1; prevMonths[m] += i.total; });
+
+  if (chartMonthlyCompare) chartMonthlyCompare.destroy();
+  chartMonthlyCompare = new Chart(document.getElementById('chartMonthlyCompare'), {
     type: 'bar',
-    data: {
-      labels: ['أصول', 'خصوم', 'إيرادات', 'مصروفات', 'صافي'],
-      datasets: [{
-        data: [assets, liab, rev, exp, net],
-        backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', net >= 0 ? '#047857' : '#b91c1c']
-      }]
-    },
-    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    data: { labels: monthNames, datasets: [
+      { label: String(year), data: months, backgroundColor: '#3b82f6' },
+      { label: String(prevYear), data: prevMonths, backgroundColor: '#94a3b8' }
+    ] },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
   });
 }
 
 // ═══════════════════════════════════════════════════════════════
-// التشغيل
+// مقارنة الفترات
 // ═══════════════════════════════════════════════════════════════
-async function loadAll() {
+function initCompareDates() {
+  const t = today();
+  const y = new Date(); y.setMonth(y.getMonth() - 1);
+  const lastMonthStart = y.toISOString().split('T')[0];
+  if (!document.getElementById('cmpFrom1').value) {
+    document.getElementById('cmpFrom1').value = t;
+    document.getElementById('cmpTo1').value = t;
+    document.getElementById('cmpFrom2').value = lastMonthStart;
+    document.getElementById('cmpTo2').value = lastMonthStart;
+  }
+}
+async function renderCompare() {
+  const f1 = document.getElementById('cmpFrom1').value;
+  const t1 = document.getElementById('cmpTo1').value;
+  const f2 = document.getElementById('cmpFrom2').value;
+  const t2 = document.getElementById('cmpTo2').value;
+  const invs = byCompany(await DB.getAll('invoices'));
+  const period1 = invs.filter(i => i.date >= f1 && i.date <= t1);
+  const period2 = invs.filter(i => i.date >= f2 && i.date <= t2);
+  const sum = (arr, type) => arr.filter(i => i.type === type).reduce((s,i) => s+i.total, 0);
+  
+  const cmpRow = (label, v1, v2) => {
+    const diff = v1 - v2;
+    const pct = v2 ? ((diff/v2)*100).toFixed(1) : 0;
+    const cls = diff > 0 ? 'success' : diff < 0 ? 'danger' : 'secondary';
+    const arrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '=';
+    return `<tr><td>${label}</td><td class="fw-bold">${fmt(v1)}</td>
+      <td class="fw-bold">${fmt(v2)}</td>
+      <td class="text-${cls}">${arrow} ${fmt(diff)} (${pct}%)</td></tr>`;
+  };
+
+  document.getElementById('compareContent').innerHTML = `
+    <div class="card p-3">
+      <table class="table table-hover">
+        <thead><tr><th>البند</th>
+        <th>${f1} → ${t1}</th>
+        <th>${f2} → ${t2}</th>
+        <th>الفرق</th></tr></thead>
+        <tbody>
+          ${cmpRow('المبيعات', sum(period1,'sales'), sum(period2,'sales'))}
+          ${cmpRow('المشتريات', sum(period1,'purchase'), sum(period2,'purchase'))}
+          ${cmpRow('عدد الفواتير', period1.length, period2.length)}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// أداء المندوبين
+// ═══════════════════════════════════════════════════════════════
+function initRepsDates() {
+  if (!document.getElementById('repFrom').value) {
+    const d = new Date(); d.setDate(1);
+    document.getElementById('repFrom').value = d.toISOString().split('T')[0];
+    document.getElementById('repTo').value = today();
+  }
+}
+async function renderSalesReps() {
+  const from = document.getElementById('repFrom').value;
+  const to = document.getElementById('repTo').value;
+  const invs = byCompany(await DB.getAll('invoices')).filter(i => 
+    i.type === 'sales' && i.salesRepId && i.date >= from && i.date <= to);
+  const um = Object.fromEntries(state.users.map(u => [u.id, u.fullname || u.username]));
+  
+  const reps = {};
+  invs.forEach(i => {
+    if (!reps[i.salesRepId]) reps[i.salesRepId] = { name: um[i.salesRepId]||'?', count: 0, total: 0, items: 0, invs: [] };
+    reps[i.salesRepId].count++;
+    reps[i.salesRepId].total += i.total;
+    reps[i.salesRepId].items += i.items.reduce((s,it) => s+it.qty, 0);
+    reps[i.salesRepId].invs.push(i);
+  });
+
+  const rows = Object.values(reps).sort((a,b) => b.total - a.total);
+  const grandTotal = rows.reduce((s,r) => s+r.total, 0);
+  const maxTotal = rows[0]?.total || 1;
+
+  document.getElementById('repsContent').innerHTML = `
+    <div class="card p-3 mb-3">
+      <div class="row text-center">
+        <div class="col-md-3"><div class="kpi-mini"><h6>إجمالي المبيعات</h6>
+          <div class="val text-success">${fmt(grandTotal)}</div></div></div>
+        <div class="col-md-3"><div class="kpi-mini"><h6>عدد المندوبين</h6>
+          <div class="val">${rows.length}</div></div></div>
+        <div class="col-md-3"><div class="kpi-mini"><h6>عدد الفواتير</h6>
+          <div class="val">${invs.length}</div></div></div>
+        <div class="col-md-3"><div class="kpi-mini"><h6>أفضل مندوب</h6>
+          <div class="val text-primary">${rows[0]?.name || '-'}</div></div></div>
+      </div>
+    </div>
+    <div class="card p-3">
+      <table class="table table-hover">
+        <thead><tr><th>المندوب</th><th>عدد الفواتير</th><th>عدد الأصناف</th>
+        <th>إجمالي المبيعات</th><th>متوسط الفاتورة</th><th>النسبة %</th><th>الأداء</th></tr></thead>
+        <tbody>${rows.map(r => {
+          const pct = grandTotal ? (r.total/grandTotal*100).toFixed(1) : 0;
+          const avg = r.count ? r.total/r.count : 0;
+          const bar = Math.round((r.total / maxTotal) * 100);
+          return `<tr>
+            <td><b>${r.name}</b></td><td>${r.count}</td><td>${fmt(r.items)}</td>
+            <td class="fw-bold text-success">${fmt(r.total)}</td>
+            <td>${fmt(avg)}</td><td>${pct}%</td>
+            <td><div class="progress" style="height:8px"><div class="progress-bar bg-success" style="width:${bar}%"></div></div></td>
+          </tr>`;
+        }).join('') || '<tr><td colspan=7 class="text-center">لا يوجد بيانات</td></tr>'}</tbody>
+      </table>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// تقويم المستحقات
+// ═══════════════════════════════════════════════════════════════
+async function renderCalendar() {
+  const monthInput = document.getElementById('calMonth');
+  if (!monthInput.value) monthInput.value = today().slice(0,7);
+  const month = monthInput.value;
+  const invs = byCompany(await DB.getAll('invoices')).filter(i => 
+    i.type === 'sales' && i.due && i.due.startsWith(month));
+  const pm = Object.fromEntries(state.parties.map(p => [p.id, p.name]));
+  
+  // تجميع حسب اليوم
+  const byDay = {};
+  invs.forEach(i => {
+    const day = i.due.split('-')[2];
+    if (!byDay[day]) byDay[day] = [];
+    byDay[day].push(i);
+  });
+
+  const todayStr = today();
+  const days = Object.keys(byDay).sort();
+  
+  let html = '<div class="card p-3"><h6>المستحقات الشهرية</h6>';
+  if (!days.length) {
+    html += '<p class="text-center text-muted">لا توجد مستحقات هذا الشهر</p>';
+  } else {
+    days.forEach(d => {
+      const dateStr = `${month}-${d}`;
+      const isPast = dateStr < todayStr;
+      const isToday = dateStr === todayStr;
+      const total = byDay[d].reduce((s,i) => s+i.total, 0);
+      html += `<div class="timeline-item ${isPast?'overdue':isToday?'warning':''}">
+        <div class="d-flex justify-content-between align-items-center">
+          <div><b>${dateStr}</b> ${isPast?'🔴 متأخر':isToday?'🟡 اليوم':''}</div>
+          <div class="fw-bold">${fmt(total)}</div>
+        </div>
+        <ul class="mb-0 small">${byDay[d].map(i => 
+          `<li>${i.number} - ${pm[i.partyId]||'-'} - ${fmt(i.total)}</li>`).join('')}</ul>
+      </div>`;
+    });
+  }
+  html += '</div>';
+  document.getElementById('calendarContent').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// إشعارات الأصناف المنخفضة
+// ═══════════════════════════════════════════════════════════════
+async function checkLowStock() {
+  const stock = await computeStock();
+  const is = {};
+  Object.entries(stock).forEach(([k, qty]) => {
+    const itemId = Number(k.split('_')[1]);
+    is[itemId] = (is[itemId]||0) + qty;
+  });
+  const lowItems = state.items.filter(it => (is[it.id]||0) <= it.minStock);
+  const el = document.getElementById('lowStockAlert');
+  if (!lowItems.length) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = `<div class="card p-3">
+    <div class="d-flex justify-content-between align-items-start mb-2">
+      <h6 class="mb-0 text-danger"><i class="bi bi-exclamation-triangle-fill"></i> 
+        ${lowItems.length} صنف منخفض</h6>
+      <button class="btn btn-sm btn-close" onclick="this.closest('#lowStockAlert').style.display='none'"></button>
+    </div>
+    <div style="max-height:220px;overflow-y:auto">
+      <table class="table table-sm mb-0" style="font-size:12px">
+        <thead><tr><th>الصنف</th><th>الرصيد</th><th>الحد</th></tr></thead>
+        <tbody>${lowItems.slice(0, 15).map(it => `
+          <tr><td>${it.name}</td>
+          <td class="text-danger fw-bold">${fmt(is[it.id]||0)}</td>
+          <td>${fmt(it.minStock)}</td></tr>`).join('')}
+        </tbody></table>
+    </div>
+    ${lowItems.length > 15 ? `<small class="text-muted">و ${lowItems.length-15} آخر...</small>` : ''}
+    <button class="btn btn-sm btn-outline-danger w-100 mt-2" 
+      onclick="showPage('stockReports');stockReport('low')">عرض التقرير</button></div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// سجل التدقيق + النسخ الاحتياطي
+// ═══════════════════════════════════════════════════════════════
+async function renderAudit() {
+  const logs = await DB.getAll('audit');
+  logs.sort((a,b) => new Date(b.time) - new Date(a.time));
+  document.getElementById('auditList').innerHTML = logs.slice(0,300).map(l => `
+    <tr><td>${new Date(l.time).toLocaleString('ar')}</td>
+    <td>${l.username||'-'}</td><td>${l.action}</td><td>${l.details||'-'}</td></tr>
+    `).join('') || '<tr><td colspan=4 class="text-center">لا يوجد</td></tr>';
+}
+async function exportData() {
+  const dump = {};
+  for (const s of STORES) dump[s] = await DB.getAll(s);
+  const blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `backup_${today()}.json`;
+  a.click();
+  logAction('تصدير');
+}
+async function importData() {
+  const file = document.getElementById('importFile').files[0];
+  if (!file) { toast('اختر ملفاً', 'danger'); return; }
+  if (!confirm('سيتم استبدال كل البيانات؟')) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      for (const s of STORES) {
+        await DB.clear(s);
+        if (data[s]) for (const rec of data[s]) await DB.add(s, rec);
+      }
+      logAction('استيراد');
+      toast('تم');
+      await loadAll();
+    } catch (err) { toast('ملف غير صالح', 'danger'); }
+  };
+  reader.readAsText(file);
+}
+async function wipeData() {
+  if (!confirm('⚠️ حذف كل شيء نهائياً؟')) return;
+  if (!confirm('متأكد 100%؟')) return;
+  for (const s of STORES) await DB.clear(s);
+  await seedDefaults();
+  toast('تم');
+  await loadAll();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// البذور
+// ═══════════════════════════════════════════════════════════════
+async function seedDefaults() {
+  const users = await DB.getAll('users');
+  if (!users.length) {
+    await DB.add('users', { username: 'admin', fullname: 'مدير النظام',
+      email: 'admin@system.com', password: 'Admin@123', role: 'admin', active: true });
+  }
+  const comps = await DB.getAll('companies');
+  if (!comps.length) {
+    await DB.add('companies', { code: 'C001', name: 'الشركة الافتراضية',
+      taxNumber: '', currency: 'SAR', address: '', active: true, createdAt: new Date().toISOString() });
+  }
+}
+async function seedCompanyDefaults() {
+  if (!CURRENT_COMPANY_ID) return;
+  const cur = await DB.getAll('currencies');
+  if (!cur.some(c => c.companyId === CURRENT_COMPANY_ID)) {
+    await DB.add('currencies', { code:'SAR', name:'ريال سعودي', symbol:'ر.س', rate:1, isBase:true, companyId: CURRENT_COMPANY_ID });
+    await DB.add('currencies', { code:'USD', name:'دولار أمريكي', symbol:'$', rate:3.75, isBase:false, companyId: CURRENT_COMPANY_ID });
+    await DB.add('currencies', { code:'EUR', name:'يورو', symbol:'€', rate:4.10, isBase:false, companyId: CURRENT_COMPANY_ID });
+  }
+  const units = await DB.getAll('units');
+  if (!units.some(u => u.companyId === CURRENT_COMPANY_ID)) {
+    const defaults = [
+      { code:'PCS', name:'قطعة', baseUnit:'', factor:1 },
+      { code:'BOX', name:'علبة', baseUnit:'PCS', factor:12 },
+      { code:'CTN', name:'كرتون', baseUnit:'PCS', factor:144 },
+      { code:'KG', name:'كيلوغرام', baseUnit:'', factor:1 },
+      { code:'GM', name:'غرام', baseUnit:'KG', factor:0.001 },
+      { code:'TN', name:'طن', baseUnit:'KG', factor:1000 },
+      { code:'L', name:'لتر', baseUnit:'', factor:1 },
+      { code:'ML', name:'مليلتر', baseUnit:'L', factor:0.001 },
+      { code:'M', name:'متر', baseUnit:'', factor:1 },
+      { code:'CM', name:'سنتيمتر', baseUnit:'M', factor:0.01 },
+      { code:'M2', name:'متر مربع', baseUnit:'', factor:1 },
+      { code:'M3', name:'متر مكعب', baseUnit:'', factor:1 },
+    ];
+    for (const u of defaults) await DB.add('units', { ...u, companyId: CURRENT_COMPANY_ID });
+  }
+  const accs = await DB.getAll('accounts');
+  if (!accs.some(a => a.companyId === CURRENT_COMPANY_ID)) {
+    const defaults = [
+      ['1000','الأصول','asset',true], ['1100','النقدية','asset',false],
+      ['1110','الصندوق','asset',false], ['1120','البنك','asset',false],
+      ['1200','العملاء المدينون','asset',false], ['1300','المخزون','asset',false],
+      ['2000','الخصوم','liability',true], ['2100','الموردون الدائنون','liability',false],
+      ['2200','ضريبة القيمة المضافة','liability',false],
+      ['3000','حقوق الملكية','equity',true], ['3100','رأس المال','equity',false],
+      ['3200','الأرباح المحتجزة','equity',false],
+      ['4000','الإيرادات','revenue',true], ['4100','إيرادات المبيعات','revenue',false],
+      ['5000','المصروفات','expense',true], ['5100','تكلفة البضاعة المباعة','expense',false],
+      ['5200','مصروفات رواتب','expense',false], ['5300','مصروفات إيجار','expense',false],
+      ['5400','مصروفات عمومية','expense',false],
+    ];
+    for (const [code, name, type, isGroup] of defaults) {
+      await DB.add('accounts', { code, name, type, currency:'SAR', isGroup, companyId: CURRENT_COMPANY_ID });
+    }
+  }
+  const whs = await DB.getAll('warehouses');
+  if (!whs.some(w => w.companyId === CURRENT_COMPANY_ID)) {
+    await DB.add('warehouses', { code:'WH01', name:'المخزن الرئيسي', location:'المركز',
+      companyId: CURRENT_COMPANY_ID, createdAt: new Date().toISOString() });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// التحميل الشامل
+// ═══════════════════════════════════════════════════════════════
+async function refreshAll() {
+  state.accounts = byCompany(await DB.getAll('accounts'));
+  state.parties = byCompany(await DB.getAll('parties'));
+  state.entries = byCompany(await DB.getAll('entries'));
+  state.invoices = byCompany(await DB.getAll('invoices'));
+  state.payments = byCompany(await DB.getAll('payments'));
+  state.warehouses = byCompany(await DB.getAll('warehouses'));
+  state.items = byCompany(await DB.getAll('items'));
+  state.categories = byCompany(await DB.getAll('categories'));
+  state.units = byCompany(await DB.getAll('units'));
+  state.currencies = byCompany(await DB.getAll('currencies'));
+
   await renderDashboard();
   await renderAccounts();
   await renderJournal();
   await renderInvoices();
+  await renderPayments();
+  await renderItems();
+  await renderWarehouses();
+  await renderCategories();
+  await renderUnits();
+  await renderCurrencies();
   await renderParties();
+  await renderStock();
+  await renderStockMoves();
+  await renderInventoryHistory();
   await renderAudit();
+  await checkLowStock();
+}
+async function loadAll() {
+  state.companies = await DB.getAll('companies');
+  if (!CURRENT_COMPANY_ID) {
+    const saved = sessionStorage.getItem('companyId');
+    CURRENT_COMPANY_ID = saved ? Number(saved) : (state.companies[0]?.id || null);
+  }
+  await seedCompanyDefaults();
+  await renderCompanies();
+  await renderUsers();
+  await refreshAll();
+}
+async function delEntity(store, id) {
+  if (!confirm('تأكيد الحذف؟')) return;
+  await DB.del(store, id);
+  logAction('حذف', `${store}#${id}`);
+  toast('تم'); await loadAll();
 }
 
-async function seedData() {
-  const accs = await DB.getAll('accounts');
-  if (accs.length > 0) return;
-  const defaultAccs = [
-    { code: '1000', name: 'الأصول', type: 'asset', isGroup: true },
-    { code: '1100', name: 'النقدية', type: 'asset', isGroup: false },
-    { code: '1110', name: 'الصندوق', type: 'asset', isGroup: false },
-    { code: '1120', name: 'البنك', type: 'asset', isGroup: false },
-    { code: '1200', name: 'العملاء المدينون', type: 'asset', isGroup: false },
-    { code: '1300', name: 'المخزون', type: 'asset', isGroup: false },
-    { code: '2000', name: 'الخصوم', type: 'liability', isGroup: true },
-    { code: '2100', name: 'الموردون الدائنون', type: 'liability', isGroup: false },
-    { code: '2200', name: 'ضريبة القيمة المضافة', type: 'liability', isGroup: false },
-    { code: '3000', name: 'حقوق الملكية', type: 'equity', isGroup: true },
-    { code: '3100', name: 'رأس المال', type: 'equity', isGroup: false },
-    { code: '3200', name: 'الأرباح المحتجزة', type: 'equity', isGroup: false },
-    { code: '4000', name: 'الإيرادات', type: 'revenue', isGroup: true },
-    { code: '4100', name: 'إيرادات المبيعات', type: 'revenue', isGroup: false },
-    { code: '5000', name: 'المصروفات', type: 'expense', isGroup: true },
-    { code: '5100', name: 'تكلفة البضاعة المباعة', type: 'expense', isGroup: false },
-    { code: '5200', name: 'مصروفات رواتب', type: 'expense', isGroup: false },
-    { code: '5300', name: 'مصروفات إيجار', type: 'expense', isGroup: false },
-    { code: '5400', name: 'مصروفات عمومية', type: 'expense', isGroup: false }
-  ];
-  for (const a of defaultAccs) await DB.add('accounts', a);
-}
-
+// ═══════════════════════════════════════════════════════════════
+// تشغيل
+// ═══════════════════════════════════════════════════════════════
 window.addEventListener('load', async () => {
   await openDB();
-  await seedData();
+  await seedDefaults();
   entryModal = new bootstrap.Modal(document.getElementById('entryModal'));
   invoiceModal = new bootstrap.Modal(document.getElementById('invoiceModal'));
-  if (sessionStorage.getItem('logged') === '1') {
-    document.getElementById('loginView').style.display = 'none';
-    document.getElementById('appView').style.display = 'block';
-    loadAll();
+  document.getElementById('invDate').value = today();
+  document.getElementById('invDue').value = today();
+  document.getElementById('agingAsOf').value = today();
+  document.getElementById('trendYear').value = new Date().getFullYear();
+  document.getElementById('calMonth').value = today().slice(0,7);
+
+  const savedUserId = sessionStorage.getItem('userId');
+  if (savedUserId) {
+    const u = await DB.get('users', Number(savedUserId));
+    if (u) {
+      CURRENT_USER = u;
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('appView').style.display = 'block';
+      document.getElementById('userBadge').textContent = u.username + ' (' + u.role + ')';
+      await loadAll();
+    }
   }
   document.getElementById('loginPass').addEventListener('keypress', e => {
     if (e.key === 'Enter') doLogin();
