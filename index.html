@@ -2,162 +2,296 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1a73e8">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>ملاحة سوريا</title>
 
-<!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; overflow: hidden; }
+  html, body { height: 100%; font-family: -apple-system, 'Segoe UI', Tahoma, Arial, sans-serif; overflow: hidden; background: #e8eaed; }
 
   #map { position: absolute; inset: 0; z-index: 1; }
 
-  /* شريط البحث العلوي */
+  /* ============ شريط البحث ============ */
   #searchBar {
-    position: absolute; top: 10px; left: 10px; right: 10px;
+    position: absolute; top: calc(10px + env(safe-area-inset-top)); left: 10px; right: 10px;
     z-index: 1000; display: flex; gap: 8px; align-items: center;
-    background: #fff; border-radius: 12px; padding: 8px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    background: #fff; border-radius: 14px; padding: 6px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08);
   }
   #searchInput {
-    flex: 1; border: none; outline: none; padding: 10px;
-    font-size: 15px; border-radius: 8px; background: #f5f5f5;
-    font-family: inherit;
+    flex: 1; border: none; outline: none; padding: 12px 14px;
+    font-size: 15px; border-radius: 10px; background: #f1f3f4;
+    font-family: inherit; color: #202124;
   }
-  #searchBtn, #locBtn {
-    background: #1a73e8; color: #fff; border: none;
-    width: 42px; height: 42px; border-radius: 10px;
-    font-size: 18px; cursor: pointer; display: flex;
-    align-items: center; justify-content: center;
+  #searchInput::placeholder { color: #5f6368; }
+
+  .icon-btn {
+    background: transparent; border: none; cursor: pointer;
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
     transition: background 0.2s;
   }
-  #searchBtn:hover, #locBtn:hover { background: #1557b0; }
+  .icon-btn:hover { background: #f1f3f4; }
+  .icon-btn:active { background: #e8eaed; }
+  .icon-btn svg { width: 22px; height: 22px; }
 
-  /* نتائج البحث */
+  #searchBtn svg { fill: #1a73e8; }
+  #locBtn svg { fill: #1a73e8; }
+
+  /* ============ نتائج البحث ============ */
   #results {
-    position: absolute; top: 70px; left: 10px; right: 10px;
-    z-index: 1000; background: #fff; border-radius: 12px;
-    max-height: 50vh; overflow-y: auto; display: none;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    position: absolute; top: calc(70px + env(safe-area-inset-top)); left: 10px; right: 10px;
+    z-index: 1000; background: #fff; border-radius: 14px;
+    max-height: 55vh; overflow-y: auto; display: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
   }
   .result-item {
-    padding: 12px 14px; border-bottom: 1px solid #eee;
-    cursor: pointer; font-size: 14px; color: #333;
+    padding: 14px 16px; border-bottom: 1px solid #f1f3f4;
+    cursor: pointer; font-size: 14px; color: #202124;
+    display: flex; gap: 12px; align-items: center;
+    transition: background 0.15s;
   }
   .result-item:last-child { border-bottom: none; }
-  .result-item:hover { background: #f0f7ff; }
+  .result-item:hover, .result-item:active { background: #f8f9fa; }
+  .result-item .pin { flex-shrink: 0; }
+  .result-item .pin svg { width: 20px; height: 20px; fill: #ea4335; }
+  .result-item .text { flex: 1; line-height: 1.4; }
+  .result-item .title { font-weight: 500; }
+  .result-item .sub { font-size: 12px; color: #5f6368; margin-top: 2px; }
 
-  /* لوحة التوجيهات السفلية */
+  /* ============ لوحة التوجيهات السفلية ============ */
   #navPanel {
     position: absolute; bottom: 0; left: 0; right: 0;
     z-index: 1000; background: #fff;
-    border-radius: 18px 18px 0 0;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-    padding: 14px 16px 20px; display: none;
-    max-height: 45vh; overflow-y: auto;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+    padding: 16px 18px calc(20px + env(safe-area-inset-bottom));
+    display: none;
+    max-height: 50vh; overflow-y: auto;
+    animation: slideUp 0.3s ease-out;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
   }
   #navHeader {
     display: flex; justify-content: space-between;
-    align-items: center; margin-bottom: 10px;
+    align-items: center; margin-bottom: 14px;
+    padding-bottom: 12px; border-bottom: 1px solid #f1f3f4;
   }
   #navDistance {
-    font-size: 18px; font-weight: bold; color: #1a73e8;
+    font-size: 20px; font-weight: 700; color: #1a73e8;
+    display: flex; align-items: center; gap: 8px;
   }
+  #navDistance svg { width: 20px; height: 20px; fill: #1a73e8; }
   #stopBtn {
-    background: #e53935; color: #fff; border: none;
-    padding: 8px 16px; border-radius: 8px;
-    font-size: 14px; cursor: pointer; font-family: inherit;
+    background: #fce8e6; color: #c5221f; border: none;
+    padding: 10px 18px; border-radius: 10px;
+    font-size: 14px; font-weight: 500; cursor: pointer;
+    font-family: inherit; transition: background 0.2s;
   }
+  #stopBtn:hover { background: #f8d7d5; }
+
   #steps { list-style: none; }
   #steps li {
-    padding: 10px 12px; border-bottom: 1px solid #f0f0f0;
-    font-size: 14px; color: #333; display: flex;
-    gap: 10px; align-items: flex-start;
+    padding: 12px 14px; border-bottom: 1px solid #f8f9fa;
+    font-size: 14px; color: #202124; display: flex;
+    gap: 12px; align-items: flex-start;
+    border-radius: 10px; transition: background 0.2s;
   }
   #steps li.current {
-    background: #e3f2fd; color: #0d47a1; font-weight: bold;
-    border-radius: 8px; border-bottom: none;
+    background: #e8f0fe; color: #0d47a1; font-weight: 600;
+    border-bottom: none;
   }
-  #steps .icon { font-size: 18px; min-width: 24px; text-align: center; }
-  #steps .dist { color: #666; font-size: 12px; margin-top: 2px; }
+  #steps .icon {
+    min-width: 32px; height: 32px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: #f1f3f4; border-radius: 8px;
+  }
+  #steps li.current .icon { background: #1a73e8; }
+  #steps .icon svg { width: 20px; height: 20px; fill: #5f6368; }
+  #steps li.current .icon svg { fill: #fff; }
+  #steps .info { flex: 1; }
+  #steps .dist { color: #5f6368; font-size: 12px; margin-top: 3px; font-weight: 400; }
 
-  /* زر بدء التوجيه */
+  /* ============ زر بدء التوجيه ============ */
   #startBtn {
-    position: absolute; bottom: 20px; left: 50%;
-    transform: translateX(-50%); z-index: 1000;
+    position: absolute; bottom: calc(20px + env(safe-area-inset-bottom));
+    left: 50%; transform: translateX(-50%);
+    z-index: 1000;
     background: #1a73e8; color: #fff; border: none;
-    padding: 14px 32px; border-radius: 50px;
-    font-size: 16px; font-weight: bold; cursor: pointer;
+    padding: 14px 28px 14px 22px; border-radius: 50px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
     box-shadow: 0 6px 20px rgba(26,115,232,0.4);
     display: none; font-family: inherit;
+    align-items: center; gap: 8px;
+    transition: transform 0.15s, background 0.2s;
   }
   #startBtn:hover { background: #1557b0; }
+  #startBtn:active { transform: translateX(-50%) scale(0.97); }
+  #startBtn svg { width: 20px; height: 20px; fill: #fff; }
 
-  /* حالة التحميل */
+  /* ============ حالة التحميل ============ */
   #loading {
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%,-50%); z-index: 2000;
-    background: rgba(0,0,0,0.75); color: #fff;
-    padding: 14px 24px; border-radius: 10px;
-    font-size: 15px; display: none;
+    background: rgba(32,33,36,0.92); color: #fff;
+    padding: 16px 24px; border-radius: 14px;
+    font-size: 14px; display: none;
+    align-items: center; gap: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   }
+  #loading.show { display: flex; }
+  .spinner {
+    width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ============ مؤشر GPS ============ */
+  #gpsStatus {
+    position: absolute; top: calc(70px + env(safe-area-inset-top)); right: 10px;
+    z-index: 999; background: rgba(255,255,255,0.95);
+    padding: 8px 12px; border-radius: 20px;
+    font-size: 12px; color: #5f6368; display: none;
+    align-items: center; gap: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    backdrop-filter: blur(8px);
+  }
+  #gpsStatus.show { display: flex; }
+  #gpsStatus .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #ea4335;
+    animation: pulse 1.5s infinite;
+  }
+  #gpsStatus.active .dot { background: #34a853; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ============ أيقونة موقع المستخدم ============ */
+  .user-location-icon {
+    position: relative;
+    width: 24px; height: 24px;
+  }
+  .user-location-icon .pulse {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: rgba(26,115,232,0.3);
+    animation: pulseRing 2s ease-out infinite;
+  }
+  @keyframes pulseRing {
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(3); opacity: 0; }
+  }
+  .user-location-icon .core {
+    position: absolute; inset: 4px; border-radius: 50%;
+    background: #1a73e8; border: 3px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  /* ============ أيقونة السيارة المتحركة ============ */
+  .car-icon {
+    width: 40px; height: 40px;
+    transition: transform 0.4s ease-out;
+  }
+  .car-icon svg { width: 100%; height: 100%; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35)); }
 
   /* إخفاء لوحة Leaflet الافتراضية */
   .leaflet-routing-container { display: none !important; }
+  .leaflet-control-attribution { font-size: 10px; }
 </style>
 </head>
 <body>
 
 <div id="map"></div>
 
+<!-- شريط البحث -->
 <div id="searchBar">
-  <button id="locBtn" title="موقعي">📍</button>
+  <button id="locBtn" class="icon-btn" title="موقعي الحالي">
+    <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+  </button>
   <input id="searchInput" type="text" placeholder="ابحث عن مكان في سوريا..." />
-  <button id="searchBtn" title="بحث">🔍</button>
+  <button id="searchBtn" class="icon-btn" title="بحث">
+    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+  </button>
 </div>
 
+<!-- حالة GPS -->
+<div id="gpsStatus"><span class="dot"></span><span id="gpsText">جاري الاتصال بـ GPS...</span></div>
+
+<!-- نتائج البحث -->
 <div id="results"></div>
 
-<button id="startBtn">🚗 ابدأ التوجيه</button>
+<!-- زر بدء التوجيه -->
+<button id="startBtn">
+  <svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+  ابدأ التوجيه
+</button>
 
+<!-- لوحة التوجيهات -->
 <div id="navPanel">
   <div id="navHeader">
-    <span id="navDistance">—</span>
-    <button id="stopBtn">إيقاف</button>
+    <span id="navDistance">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      <span id="navDistanceText">—</span>
+    </span>
+    <button id="stopBtn">إنهاء</button>
   </div>
   <ul id="steps"></ul>
 </div>
 
-<div id="loading">⏳ جاري حساب المسار...</div>
+<!-- حالة التحميل -->
+<div id="loading"><div class="spinner"></div><span id="loadingText">جاري المعالجة...</span></div>
 
-<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
 <script>
-// ===================== إعداد الخريطة =====================
-// مركز دمشق
+// ============================================================
+// مكتبة أيقونات SVG متناسقة (Material Design)
+// ============================================================
+const ICONS = {
+  straight:   '<svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)"/></svg>',
+  turnLeft:   '<svg viewBox="0 0 24 24"><path d="M20 11v2H8l-5.5-5.5L4 6l4.5 4.5H18V7l4 4-4 4v-4h2z" transform="scale(-1,1) translate(-24,0)"/></svg>',
+  turnRight:  '<svg viewBox="0 0 24 24"><path d="M20 11v2H8l-5.5-5.5L4 6l4.5 4.5H18V7l4 4-4 4v-4h2z"/></svg>',
+  slightLeft: '<svg viewBox="0 0 24 24"><path d="M10 9l4-4 4 4h-3v7c0 1.1-.9 2-2 2H5v-2h8V9h-3z" transform="scale(-1,1) translate(-24,0)"/></svg>',
+  slightRight:'<svg viewBox="0 0 24 24"><path d="M10 9l4-4 4 4h-3v7c0 1.1-.9 2-2 2H5v-2h8V9h-3z"/></svg>',
+  sharpLeft:  '<svg viewBox="0 0 24 24"><path d="M6 6l6 6-1.4 1.4L7 9.8V19H5V6h1z" transform="scale(-1,1) translate(-24,0)"/></svg>',
+  sharpRight: '<svg viewBox="0 0 24 24"><path d="M6 6l6 6-1.4 1.4L7 9.8V19H5V6h1z"/></svg>',
+  roundabout: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-13h-2v5l4.28 2.54.72-1.21-3-1.8V7z"/></svg>',
+  arrive:     '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>',
+  depart:     '<svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>',
+  waypoint:   '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>',
+  car:        '<svg viewBox="0 0 24 24" fill="#1a73e8"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>'
+};
+
+// ============================================================
+// إعداد الخريطة
+// ============================================================
 const DAMASCUS = [33.5138, 36.2765];
 
 const map = L.map('map', {
   zoomControl: false,
-  attributionControl: false
+  attributionControl: true
 }).setView(DAMASCUS, 13);
 
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-// طبقة OpenStreetMap
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
-  subdomains: 'abc'
+  subdomains: 'abc',
+  attribution: '© OpenStreetMap'
 }).addTo(map);
 
-// ===================== المتغيرات العامة =====================
-let currentMarker = null;
+// ============================================================
+// المتغيرات العامة
+// ============================================================
 let destMarker = null;
 let routingControl = null;
 let currentSteps = [];
@@ -168,21 +302,24 @@ let lastSpokenStep = -1;
 let userLocation = null;
 let userMarker = null;
 let userCircle = null;
+let carMarker = null;
+let lastHeading = 0;
+let gpsFirstFix = false;
 
-// ===================== التوجيه الصوتي =====================
+// ============================================================
+// التوجيه الصوتي (عربي)
+// ============================================================
 const synth = window.speechSynthesis;
 let arabicVoice = null;
 
 function pickArabicVoice() {
   const voices = synth.getVoices();
-  arabicVoice = voices.find(v => v.lang.startsWith('ar')) ||
-                voices.find(v => v.lang.includes('AR')) ||
+  arabicVoice = voices.find(v => v.lang === 'ar-SA') ||
+                voices.find(v => v.lang.startsWith('ar')) ||
                 null;
 }
 pickArabicVoice();
-if (speechSynthesis.onvoiceschanged !== undefined) {
-  speechSynthesis.onvoiceschanged = pickArabicVoice;
-}
+if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = pickArabicVoice;
 
 function speak(text) {
   if (!text) return;
@@ -195,8 +332,9 @@ function speak(text) {
   synth.speak(u);
 }
 
-// ===================== البحث عن الأماكن =====================
-// استخدام Nominatim (OpenStreetMap) مع تحديد سوريا
+// ============================================================
+// البحث عن الأماكن (Nominatim)
+// ============================================================
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
 const resultsBox = document.getElementById('results');
@@ -204,18 +342,15 @@ const resultsBox = document.getElementById('results');
 async function searchPlaces(query) {
   if (!query.trim()) return;
   resultsBox.style.display = 'block';
-  resultsBox.innerHTML = '<div class="result-item">⏳ جاري البحث...</div>';
+  resultsBox.innerHTML = '<div class="result-item"><div class="text">⏳ جاري البحث...</div></div>';
 
   try {
-    // countrycodes=sy لتحديد سوريا
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=sy&limit=8&accept-language=ar`;
-    const res = await fetch(url, {
-      headers: { 'User-Agent': 'SyriaNavigationApp/1.0' }
-    });
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=sy&limit=8&accept-language=ar&addressdetails=1`;
+    const res = await fetch(url, { headers: { 'User-Agent': 'SyriaNavigationApp/1.0' } });
     const data = await res.json();
 
     if (!data.length) {
-      resultsBox.innerHTML = '<div class="result-item">❌ لا توجد نتائج</div>';
+      resultsBox.innerHTML = '<div class="result-item"><div class="text">لا توجد نتائج مطابقة</div></div>';
       return;
     }
 
@@ -223,97 +358,207 @@ async function searchPlaces(query) {
     data.forEach(place => {
       const div = document.createElement('div');
       div.className = 'result-item';
-      div.textContent = '📍 ' + place.display_name;
+      const parts = place.display_name.split(',');
+      const title = parts[0].trim();
+      const sub = parts.slice(1, 3).join(',').trim();
+      div.innerHTML = `
+        <div class="pin">${ICONS.arrive}</div>
+        <div class="text">
+          <div class="title">${title}</div>
+          <div class="sub">${sub}</div>
+        </div>`;
       div.onclick = () => {
-        const lat = parseFloat(place.lat);
-        const lon = parseFloat(place.lon);
         resultsBox.style.display = 'none';
-        searchInput.value = place.display_name.split(',')[0];
-        setDestination([lat, lon]);
+        searchInput.value = title;
+        setDestination([parseFloat(place.lat), parseFloat(place.lon)]);
       };
       resultsBox.appendChild(div);
     });
   } catch (e) {
-    resultsBox.innerHTML = '<div class="result-item">⚠️ خطأ في الاتصال</div>';
+    resultsBox.innerHTML = '<div class="result-item"><div class="text">خطأ في الاتصال</div></div>';
   }
 }
 
 searchBtn.onclick = () => searchPlaces(searchInput.value);
-searchInput.addEventListener('keypress', e => {
-  if (e.key === 'Enter') searchPlaces(searchInput.value);
-});
-
-// إخفاء النتائج عند النقر خارجها
+searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchPlaces(searchInput.value); });
 document.addEventListener('click', e => {
-  if (!resultsBox.contains(e.target) && e.target !== searchInput && e.target !== searchBtn) {
+  if (!resultsBox.contains(e.target) && e.target !== searchInput && e.target !== searchBtn && !searchBtn.contains(e.target)) {
     resultsBox.style.display = 'none';
   }
 });
 
-// ===================== تحديد الموقع =====================
+// ============================================================
+// GPS: تحديد الموقع الحقيقي + تتبع مستمر
+// ============================================================
+const gpsStatus = document.getElementById('gpsStatus');
+const gpsText = document.getElementById('gpsText');
+const loading = document.getElementById('loading');
+const loadingText = document.getElementById('loadingText');
+
+function showLoading(msg) {
+  loadingText.textContent = msg;
+  loading.classList.add('show');
+}
+function hideLoading() { loading.classList.remove('show'); }
+
+function startGpsTracking() {
+  if (!navigator.geolocation) {
+    gpsText.textContent = 'GPS غير مدعوم';
+    gpsStatus.classList.add('show');
+    return;
+  }
+
+  gpsStatus.classList.add('show');
+
+  // دقة عالية + متابعة مستمرة
+  watchId = navigator.geolocation.watchPosition(
+    pos => {
+      const loc = [pos.coords.latitude, pos.coords.longitude];
+      const accuracy = pos.coords.accuracy;
+      const heading = pos.coords.heading;
+
+      // أول تحديد للموقع → حرّك الخريطة إليه
+      if (!gpsFirstFix) {
+        gpsFirstFix = true;
+        map.setView(loc, 16, { animate: true });
+        speak('تم تحديد موقعك');
+      }
+
+      updateUserLocation(loc, accuracy, heading);
+
+      gpsStatus.classList.add('active');
+      gpsText.textContent = `GPS نشط · دقة ${Math.round(accuracy)}م`;
+
+      if (navigationActive) checkProgress(loc);
+    },
+    err => {
+      gpsStatus.classList.remove('active');
+      gpsText.textContent = 'تعذر تحديد الموقع';
+      console.warn('GPS error:', err);
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 1000,
+      timeout: 20000
+    }
+  );
+}
+
+// زر "موقعي" → تشغيل GPS يدوياً عند الطلب
 document.getElementById('locBtn').onclick = () => {
   if (!navigator.geolocation) {
     alert('المتصفح لا يدعم تحديد الموقع');
     return;
   }
-  document.getElementById('loading').textContent = '📍 جاري تحديد موقعك...';
-  document.getElementById('loading').style.display = 'block';
+  showLoading('جاري تحديد موقعك...');
 
   navigator.geolocation.getCurrentPosition(
     pos => {
-      document.getElementById('loading').style.display = 'none';
+      hideLoading();
       const loc = [pos.coords.latitude, pos.coords.longitude];
-      map.setView(loc, 15);
-      updateUserMarker(loc, pos.coords.accuracy);
+      map.setView(loc, 16, { animate: true });
+      updateUserLocation(loc, pos.coords.accuracy, pos.coords.heading);
       speak('تم تحديد موقعك');
+
+      // ابدأ التتبع المستمر إن لم يكن يعمل
+      if (watchId === null) startGpsTracking();
     },
     err => {
-      document.getElementById('loading').style.display = 'none';
-      alert('تعذر تحديد الموقع: ' + err.message);
+      hideLoading();
+      alert('تعذر تحديد الموقع: ' + err.message + '\nتأكد من تفعيل GPS والسماح للمتصفح بالوصول.');
     },
-    { enableHighAccuracy: true, timeout: 15000 }
+    { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
   );
 };
 
-function updateUserMarker(loc, accuracy) {
+// ============================================================
+// تحديث أيقونة المستخدم (نقطة زرقاء نابضة)
+// ============================================================
+function updateUserLocation(loc, accuracy, heading) {
   userLocation = loc;
-  if (userMarker) map.removeLayer(userMarker);
-  if (userCircle) map.removeLayer(userCircle);
 
+  // دائرة الدقة
+  if (userCircle) map.removeLayer(userCircle);
   userCircle = L.circle(loc, {
-    radius: accuracy || 20,
+    radius: Math.max(accuracy || 20, 10),
     color: '#1a73e8',
     fillColor: '#1a73e8',
-    fillOpacity: 0.15,
-    weight: 1
+    fillOpacity: 0.12,
+    weight: 1,
+    opacity: 0.4
   }).addTo(map);
 
-  userMarker = L.marker(loc, {
-    icon: L.divIcon({
-      className: '',
-      html: '<div style="width:18px;height:18px;background:#1a73e8;border:3px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(26,115,232,0.8);"></div>',
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
-    })
-  }).addTo(map);
+  // الأيقونة النابضة
+  const iconHtml = `
+    <div class="user-location-icon">
+      <div class="pulse"></div>
+      <div class="core"></div>
+    </div>`;
+
+  const icon = L.divIcon({
+    className: '',
+    html: iconHtml,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+  });
+
+  if (userMarker) {
+    userMarker.setLatLng(loc);
+    userMarker.setIcon(icon);
+  } else {
+    userMarker = L.marker(loc, { icon, zIndexOffset: 1000 }).addTo(map);
+  }
 }
 
-// ===================== تعيين الوجهة وحساب المسار =====================
+// ============================================================
+// أيقونة السيارة المتحركة (تتبع الاتجاه)
+// ============================================================
+function updateCarMarker(loc, heading) {
+  if (heading === null || heading === undefined || isNaN(heading)) heading = lastHeading;
+  lastHeading = heading;
+
+  const iconHtml = `
+    <div class="car-icon" style="transform: rotate(${heading}deg);">
+      ${ICONS.car}
+    </div>`;
+
+  const icon = L.divIcon({
+    className: '',
+    html: iconHtml,
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+  });
+
+  if (carMarker) {
+    carMarker.setLatLng(loc);
+    carMarker.setIcon(icon);
+  } else {
+    carMarker = L.marker(loc, { icon, zIndexOffset: 2000 }).addTo(map);
+  }
+}
+
+// ============================================================
+// تعيين الوجهة وحساب المسار
+// ============================================================
 function setDestination(loc) {
   if (destMarker) map.removeLayer(destMarker);
   destMarker = L.marker(loc, {
     icon: L.divIcon({
       className: '',
-      html: '<div style="font-size:30px;">🏁</div>',
-      iconSize: [30, 30],
-      iconAnchor: [15, 30]
+      html: `<div style="width:32px;height:32px;">${ICONS.arrive}</div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 32]
     })
   }).addTo(map);
 
-  // إذا لم يكن هناك موقع للمستخدم، استخدم مركز دمشق كنقطة انطلاق
+  // نقطة انطلاق: موقع المستخدم الفعلي، أو مركز دمشق إذا لم يُحدد بعد
   const start = userLocation || DAMASCUS;
 
-  document.getElementById('loading').style.display = 'block';
+  if (!userLocation) {
+    speak('لم يتم تحديد موقعك بعد. سيتم استخدام مركز دمشق كنقطة انطلاق. اضغط على زر الموقع لتحديد موقعك.');
+  }
+
+  showLoading('جاري حساب المسار...');
 
   if (routingControl) map.removeControl(routingControl);
 
@@ -328,7 +573,10 @@ function setDestination(loc) {
     fitSelectedRoutes: true,
     show: false,
     lineOptions: {
-      styles: [{ color: '#1a73e8', weight: 6, opacity: 0.85 }]
+      styles: [
+        { color: '#1a73e8', weight: 8, opacity: 0.95 },
+        { color: '#4285f4', weight: 4, opacity: 1 }
+      ]
     },
     createMarker: () => null,
     router: L.Routing.osrmv1({
@@ -338,30 +586,38 @@ function setDestination(loc) {
   }).addTo(map);
 
   routingControl.on('routesfound', e => {
-    document.getElementById('loading').style.display = 'none';
+    hideLoading();
     const route = e.routes[0];
     currentSteps = route.instructions || [];
     currentStepIndex = 0;
     lastSpokenStep = -1;
 
-    // عرض زر بدء التوجيه
-    document.getElementById('startBtn').style.display = 'block';
+    document.getElementById('startBtn').style.display = 'flex';
 
-    // عرض ملخص
     const distKm = (route.summary.totalDistance / 1000).toFixed(1);
     const timeMin = Math.round(route.summary.totalTime / 60);
-    speak(`تم حساب المسار. المسافة ${distKm} كيلومتر، والوقت المتوقع ${timeMin} دقيقة`);
+    speak(`تم حساب المسار. المسافة ${distKm} كيلومتر، والوقت المتوقع ${timeMin} دقيقة. اضغط ابدأ التوجيه للانطلاق.`);
   });
 
-  routingControl.on('routingerror', e => {
-    document.getElementById('loading').style.display = 'none';
+  routingControl.on('routingerror', () => {
+    hideLoading();
     alert('تعذر حساب المسار. تحقق من الاتصال بالإنترنت.');
   });
 }
 
-// ===================== بدء التوجيه =====================
+// ============================================================
+// بدء التوجيه
+// ============================================================
 document.getElementById('startBtn').onclick = () => {
   if (!currentSteps.length) return;
+
+  // تنبيه إذا لم يُحدد موقع المستخدم
+  if (!userLocation) {
+    if (!confirm('لم يتم تحديد موقعك بعد. هل تريد المتابعة باستخدام مركز دمشق كنقطة انطلاق؟')) {
+      return;
+    }
+  }
+
   navigationActive = true;
   currentStepIndex = 0;
   lastSpokenStep = -1;
@@ -369,51 +625,48 @@ document.getElementById('startBtn').onclick = () => {
   document.getElementById('navPanel').style.display = 'block';
   renderSteps();
 
-  // بدء تتبع الموقع
-  if (navigator.geolocation) {
-    watchId = navigator.geolocation.watchPosition(
-      pos => {
-        const loc = [pos.coords.latitude, pos.coords.longitude];
-        updateUserMarker(loc, pos.coords.accuracy);
-        if (navigationActive) checkProgress(loc);
-      },
-      err => console.warn('watchPosition error:', err),
-      { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }
-    );
-  }
+  // شغّل التتبع إن لم يكن يعمل
+  if (watchId === null) startGpsTracking();
 
   speak('بدء التوجيه. ' + (currentSteps[0]?.text || ''));
-}
+};
 
-// ===================== إيقاف التوجيه =====================
+// ============================================================
+// إيقاف التوجيه
+// ============================================================
 document.getElementById('stopBtn').onclick = () => {
   navigationActive = false;
   document.getElementById('navPanel').style.display = 'none';
-  document.getElementById('startBtn').style.display = currentSteps.length ? 'block' : 'none';
+  document.getElementById('startBtn').style.display = currentSteps.length ? 'flex' : 'none';
   synth.cancel();
-  if (watchId !== null) {
-    navigator.geolocation.clearWatch(watchId);
-    watchId = null;
-  }
-  speak('تم إيقاف التوجيه');
-}
+  if (carMarker) { map.removeLayer(carMarker); carMarker = null; }
+  speak('تم إنهاء التوجيه');
+};
 
-// ===================== متابعة التقدم على المسار =====================
+// ============================================================
+// متابعة التقدم على المسار
+// ============================================================
 function checkProgress(loc) {
   if (!currentSteps.length || !routingControl) return;
   const route = routingControl.getRouter()._route;
   if (!route) return;
 
-  // إيجاد أقرب نقطة على المسار
-  const coords = route.coordinates;
-  let minDist = Infinity;
-  let nearestIdx = 0;
-  for (let i = 0; i < coords.length; i++) {
-    const d = haversine(loc[0], loc[1], coords[i].lat, coords[i].lng);
-    if (d < minDist) { minDist = d; nearestIdx = i; }
+  // حدّث أيقونة السيارة بناءً على الاتجاه
+  if (userLocation && loc) {
+    const heading = computeBearing(userLocation[0], userLocation[1], loc[0], loc[1]);
+    if (userMarker) map.removeLayer(userMarker);
+    if (userCircle) map.removeLayer(userCircle);
+    userMarker = null; userCircle = null;
+    updateCarMarker(loc, heading);
   }
 
-  // إيجاد الخطوة الحالية بناءً على المسافة المتبقية
+  const coords = route.coordinates;
+  let minDist = Infinity;
+  for (let i = 0; i < coords.length; i++) {
+    const d = haversine(loc[0], loc[1], coords[i].lat, coords[i].lng);
+    if (d < minDist) minDist = d;
+  }
+
   let accumulated = 0;
   let stepIdx = 0;
   for (let i = 0; i < currentSteps.length; i++) {
@@ -426,7 +679,6 @@ function checkProgress(loc) {
     renderSteps();
   }
 
-  // النطق الصوتي عند تغيير الخطوة
   if (stepIdx !== lastSpokenStep) {
     lastSpokenStep = stepIdx;
     const step = currentSteps[stepIdx];
@@ -439,20 +691,36 @@ function checkProgress(loc) {
   }
 
   // إعلان الوصول
-  const last = currentSteps[currentSteps.length - 1];
-  if (last && minDist < 0.03) {
+  const destLat = destMarker.getLatLng().lat;
+  const destLng = destMarker.getLatLng().lng;
+  const distToDest = haversine(loc[0], loc[1], destLat, destLng);
+  if (distToDest < 0.03) {
     speak('لقد وصلت إلى وجهتك');
     setTimeout(() => document.getElementById('stopBtn').click(), 3000);
   }
 }
 
-// ===================== عرض الخطوات =====================
+// ============================================================
+// حساب الاتجاه بين نقطتين
+// ============================================================
+function computeBearing(lat1, lon1, lat2, lon2) {
+  const toRad = d => d * Math.PI / 180;
+  const toDeg = r => r * 180 / Math.PI;
+  const dLon = toRad(lon2 - lon1);
+  const y = Math.sin(dLon) * Math.cos(toRad(lat2));
+  const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+            Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+  return (toDeg(Math.atan2(y, x)) + 360) % 360;
+}
+
+// ============================================================
+// عرض الخطوات
+// ============================================================
 function renderSteps() {
   const ul = document.getElementById('steps');
   ul.innerHTML = '';
   const total = currentSteps.reduce((s, st) => s + st.distance, 0);
-  document.getElementById('navDistance').textContent =
-    `${(total/1000).toFixed(1)} كم`;
+  document.getElementById('navDistanceText').textContent = `${(total/1000).toFixed(1)} كم`;
 
   currentSteps.forEach((step, i) => {
     const li = document.createElement('li');
@@ -461,24 +729,36 @@ function renderSteps() {
     const distText = step.distance > 1000
       ? `${(step.distance/1000).toFixed(1)} كم`
       : `${Math.round(step.distance)} م`;
-    li.innerHTML = `<span class="icon">${icon}</span>
-      <div><div>${step.text}</div><div class="dist">${distText}</div></div>`;
+    li.innerHTML = `
+      <div class="icon">${icon}</div>
+      <div class="info">
+        <div>${step.text}</div>
+        <div class="dist">${distText}</div>
+      </div>`;
     ul.appendChild(li);
   });
 }
 
 function getIcon(type) {
-  const icons = {
-    'Straight': '⬆️', 'TurnLeft': '⬅️', 'TurnRight': '➡️',
-    'SlightLeft': '↖️', 'SlightRight': '↗️',
-    'SharpLeft': '↰', 'SharpRight': '↱',
-    'Roundabout': '🔄', 'Arrive': '🏁', 'Depart': '🚗',
-    'WaypointReached': '📍'
+  const map = {
+    'Straight': ICONS.straight,
+    'TurnLeft': ICONS.turnLeft,
+    'TurnRight': ICONS.turnRight,
+    'SlightLeft': ICONS.slightLeft,
+    'SlightRight': ICONS.slightRight,
+    'SharpLeft': ICONS.sharpLeft,
+    'SharpRight': ICONS.sharpRight,
+    'Roundabout': ICONS.roundabout,
+    'Arrive': ICONS.arrive,
+    'Depart': ICONS.depart,
+    'WaypointReached': ICONS.waypoint
   };
-  return icons[type] || '⬆️';
+  return map[type] || ICONS.straight;
 }
 
-// ===================== المسافة بين نقطتين (Haversine) =====================
+// ============================================================
+// Haversine
+// ============================================================
 function haversine(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -489,12 +769,35 @@ function haversine(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-// ===================== رسالة ترحيب =====================
+// ============================================================
+// تشغيل تلقائي عند فتح الصفحة
+// ============================================================
 window.addEventListener('load', () => {
   setTimeout(() => {
-    speak('مرحباً بك في تطبيق ملاحة سوريا');
-  }, 800);
+    // اطلب صلاحية GPS تلقائياً
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const loc = [pos.coords.latitude, pos.coords.longitude];
+          gpsFirstFix = true;
+          map.setView(loc, 16);
+          updateUserLocation(loc, pos.coords.accuracy, pos.coords.heading);
+          gpsStatus.classList.add('show', 'active');
+          gpsText.textContent = `GPS نشط · دقة ${Math.round(pos.coords.accuracy)}م`;
+          speak('مرحباً بك في تطبيق ملاحة سوريا. تم تحديد موقعك.');
+          // ابدأ التتبع المستمر
+          startGpsTracking();
+        },
+        err => {
+          gpsStatus.classList.add('show');
+          gpsText.textContent = 'اضغط زر الموقع للسماح بالوصول';
+          speak('مرحباً بك في تطبيق ملاحة سوريا. يرجى السماح بالوصول إلى موقعك.');
+        },
+        { enableHighAccuracy: true, timeout: 15000 }
+      );
+    }
+  }, 600);
 });
 </script>
 </body>
-</html>l
+</html>
