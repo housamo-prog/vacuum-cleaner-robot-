@@ -13,28 +13,24 @@
 </head>
 <body class="bg-gray-100 text-gray-800" x-data="accountingApp()">
 
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex flex-col md:flex-row h-screen overflow-hidden">
         
-        <!-- الشريط الجانبي للتنقل -->
-        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl">
-            <div class="p-5 text-xl font-bold text-white border-b border-slate-800 flex items-center justify-between">
+        <!-- الشريط الجانبي للهواتف والشاشات -->
+        <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl z-20">
+            <div class="p-4 md:p-5 text-lg md:text-xl font-bold text-white border-b border-slate-800 flex items-center justify-between">
                 <span>البرنامج المحاسبي</span>
                 <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Pro v2.0</span>
             </div>
             
-            <nav class="flex-1 p-4 space-y-1.5 overflow-y-auto text-sm">
-                <button @click="currentTab = 'dashboard'" :class="currentTab === 'dashboard' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="w-full text-right px-4 py-2.5 rounded transition flex items-center gap-3">📊 لوحة المؤشرات</button>
-                <button @click="currentTab = 'accounts'" :class="currentTab === 'accounts' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="w-full text-right px-4 py-2.5 rounded transition flex items-center gap-3">🌳 شجرة الحسابات</button>
-                <button @click="currentTab = 'journal'" :class="currentTab === 'journal' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="w-full text-right px-4 py-2.5 rounded transition flex items-center gap-3">📝 قيود اليومية</button>
-                <button @click="currentTab = 'inventory'" :class="currentTab === 'inventory' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="w-full text-right px-4 py-2.5 rounded transition flex items-center gap-3">📦 إدارة المستودعات</button>
-                <button @click="currentTab = 'invoices'" :class="currentTab === 'invoices' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="w-full text-right px-4 py-2.5 rounded transition flex items-center gap-3">🧾 الفواتير والمبيعات</button>
-                <button @click="currentTab = 'reports'" :class="currentTab === 'reports' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="w-full text-right px-4 py-2.5 rounded transition flex items-center gap-3">📈 التقارير المالية</button>
-                <button @click="currentTab = 'backup'" :class="currentTab === 'backup' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="w-full text-right px-4 py-2.5 rounded transition flex items-center gap-3">🛡️ الحماية والنسخ</button>
+            <nav class="flex md:flex-col p-2 md:p-4 space-x-1 md:space-x-0 md:space-y-1.5 overflow-x-auto md:overflow-y-auto text-xs md:text-sm whitespace-nowrap">
+                <button @click="currentTab = 'dashboard'" :class="currentTab === 'dashboard' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">📊 <span class="hidden md:inline">لوحة المؤشرات</span></button>
+                <button @click="currentTab = 'accounts'" :class="currentTab === 'accounts' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">🌳 <span class="hidden md:inline">شجرة الحسابات</span></button>
+                <button @click="currentTab = 'journal'" :class="currentTab === 'journal' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">📝 <span class="hidden md:inline">قيود اليومية</span></button>
+                <button @click="currentTab = 'inventory'" :class="currentTab === 'inventory' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">📦 <span class="hidden md:inline">المستودعات</span></button>
+                <button @click="currentTab = 'invoices'" :class="currentTab === 'invoices' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">🧾 <span class="hidden md:inline">الفواتير والمبيعات</span></button>
+                <button @click="currentTab = 'reports'" :class="currentTab === 'reports' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">📈 <span class="hidden md:inline">التقارير المالية</span></button>
+                <button @click="currentTab = 'backup'" :class="currentTab === 'backup' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800'" class="px-3 py-2 md:w-full text-right rounded transition flex items-center gap-2">🛡️ <span class="hidden md:inline">الحماية والنسخ</span></button>
             </nav>
-
-            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
-                بيانات آمنة ومشفرة محلياً 100%
-            </div>
         </aside>
 
         <!-- المحتوى الرئيسي -->
@@ -42,18 +38,18 @@
             
             <!-- الشريط العلوي -->
             <header class="bg-white shadow-sm px-6 py-4 flex justify-between items-center border-b">
-                <h1 class="text-xl font-bold text-slate-800" x-text="getTabTitle()"></h1>
+                <h1 class="text-lg md:text-xl font-bold text-slate-800" x-text="getTabTitle()"></h1>
                 <div class="flex items-center gap-4">
-                    <span class="text-sm bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-medium">● النظام يعمل بكفاءة</span>
+                    <span class="text-xs md:text-sm bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-medium">● النظام يعمل بكفاءة</span>
                 </div>
             </header>
 
             <!-- مساحة العمل التفاعلية -->
-            <main class="p-6">
+            <main class="p-4 md:p-6">
 
                 <!-- 1. لوحة المؤشرات -->
                 <div x-show="currentTab === 'dashboard'" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
                         <div class="bg-white p-5 rounded-xl shadow-sm border-r-4 border-blue-500">
                             <h3 class="text-gray-500 text-sm">إجمالي الحسابات</h3>
                             <p class="text-3xl font-bold mt-2 text-slate-800" x-text="accounts.length"></p>
@@ -75,7 +71,7 @@
 
                 <!-- 2. شجرة الحسابات -->
                 <div x-show="currentTab === 'accounts'" class="space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
                         <h2 class="text-lg font-bold mb-4">إضافة حساب جديد لشجرة الحسابات</h2>
                         <form @submit.prevent="addAccount" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
@@ -102,7 +98,7 @@
                         </form>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                         <table class="w-full text-right border-collapse text-sm">
                             <thead class="bg-slate-50 border-b">
                                 <tr>
@@ -128,7 +124,7 @@
 
                 <!-- 3. قيود اليومية -->
                 <div x-show="currentTab === 'journal'" class="space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
                         <h2 class="text-lg font-bold mb-4">تسجيل قيد يومية مزدوج (مدين / دائن)</h2>
                         <form @submit.prevent="addJournalEntry" class="space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -168,7 +164,7 @@
                         </form>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                         <table class="w-full text-right border-collapse text-sm">
                             <thead class="bg-slate-50 border-b">
                                 <tr>
@@ -196,7 +192,7 @@
 
                 <!-- 4. إدارة المستودعات -->
                 <div x-show="currentTab === 'inventory'" class="space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
                         <h2 class="text-lg font-bold mb-4">إضافة صنف جديد للمستودع</h2>
                         <form @submit.prevent="addItem" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
@@ -217,7 +213,7 @@
                         </form>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                         <table class="w-full text-right border-collapse text-sm">
                             <thead class="bg-slate-50 border-b">
                                 <tr>
@@ -243,7 +239,7 @@
 
                 <!-- 5. الفواتير -->
                 <div x-show="currentTab === 'invoices'" class="space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
                         <h2 class="text-lg font-bold mb-4">إصدار فاتورة مبيعات جديدة</h2>
                         <form @submit.prevent="addInvoice" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
@@ -268,7 +264,7 @@
                         </form>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
                         <table class="w-full text-right border-collapse text-sm">
                             <thead class="bg-slate-50 border-b">
                                 <tr>
@@ -333,7 +329,7 @@
                         <h2 class="text-lg font-bold mb-2">إدارة البيانات والنسخ الاحتياطي</h2>
                         <p class="text-sm text-gray-500 mb-6">يمكنك تصدير قاعدة بياناتك بالكامل لحفظها على جهازك، أو استعادتها بأي وقت.</p>
                         
-                        <div class="flex gap-4">
+                        <div class="flex flex-col md:flex-row gap-4">
                             <button @click="exportData" class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg text-sm hover:bg-blue-700 transition">📥 تصدير البيانات (JSON)</button>
                             <button @click="clearData" class="bg-rose-100 text-rose-700 px-4 py-2.5 rounded-lg text-sm hover:bg-rose-200 transition">⚠️ تصفير النظام</button>
                         </div>
