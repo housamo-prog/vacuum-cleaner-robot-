@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="كزدورة">
+<meta name="format-detection" content="telephone=no">
 <title>كزدورة — ملاحة وخرائط</title>
 
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
@@ -35,6 +37,7 @@
     touch-action: manipulation; position: fixed;
   }
   #map { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 1; background: #e8eaed; }
+  body.dark #map { background: #121212; }
 
   .maplibregl-ctrl-bottom-left,
   .maplibregl-ctrl-bottom-right { display: none !important; }
@@ -295,7 +298,6 @@
   #savedList li .del-btn svg { width: 18px; height: 18px; fill: var(--danger); }
   #savedList .empty { text-align: center; color: var(--text-sub); padding: 40px 20px; font-size: 14px; }
 
-  /* شريط نقاط التوقف */
   #waypointsBar {
     position: fixed;
     bottom: calc(88px + var(--safe-bottom));
@@ -346,7 +348,6 @@
   }
   .wp-item .wp-del svg { width: 14px; height: 14px; fill: var(--danger); }
 
-  /* خيار نوع المسار — محدّث */
   #routeOptions {
     position: fixed; bottom: calc(20px + var(--safe-bottom));
     left: 50%; transform: translateX(-50%);
@@ -582,14 +583,15 @@
   #mapHint.show { display: block; animation: fadeInOut 3s ease-in-out; }
   @keyframes fadeInOut { 0%, 100% { opacity: 0; } 15%, 85% { opacity: 1; } }
 
-  #nameDialog, #exitDialog {
+  #nameDialog, #exitDialog, #stopConfirmDialog {
     position: fixed; inset: 0; z-index: 4000;
     background: rgba(0,0,0,0.55);
     display: none; align-items: center; justify-content: center;
     padding: 20px;
   }
-  #nameDialog.show, #exitDialog.show { display: flex; }
-  #nameDialogBox, #exitBox {
+  #stopConfirmDialog { z-index: 4500; }
+  #nameDialog.show, #exitDialog.show, #stopConfirmDialog.show { display: flex; }
+  #nameDialogBox, #exitBox, #stopConfirmBox {
     background: var(--panel); border-radius: 18px;
     padding: 22px; width: 100%; max-width: 340px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.3);
@@ -610,24 +612,29 @@
   #nameCancel { background: var(--input-bg); color: var(--text); }
   #nameSave { background: var(--primary); color: #fff; }
 
-  #exitBox { text-align: center; }
-  #exitBox .icon {
+  #exitBox, #stopConfirmBox { text-align: center; }
+  #exitBox .icon, #stopConfirmBox .icon {
     width: 60px; height: 60px; margin: 0 auto 14px;
     background: #fce8e6; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
   }
+  #stopConfirmBox .icon { background: #fff3e0; }
   body.dark #exitBox .icon { background: #4a1e1c; }
+  body.dark #stopConfirmBox .icon { background: #4a3020; }
   #exitBox .icon svg { width: 30px; height: 30px; fill: var(--danger); }
-  #exitBox h3 { font-size: 17px; margin-bottom: 8px; }
-  #exitBox p { font-size: 13px; color: var(--text-sub); margin-bottom: 20px; line-height: 1.5; }
-  #exitBox .actions { display: flex; gap: 10px; }
-  #exitBox button {
+  #stopConfirmBox .icon svg { width: 30px; height: 30px; fill: #ff6d00; }
+  #exitBox h3, #stopConfirmBox h3 { font-size: 17px; margin-bottom: 8px; }
+  #exitBox p, #stopConfirmBox p { font-size: 13px; color: var(--text-sub); margin-bottom: 20px; line-height: 1.5; }
+  #exitBox .actions, #stopConfirmBox .actions { display: flex; gap: 10px; }
+  #exitBox button, #stopConfirmBox button {
     flex: 1; padding: 12px; border-radius: 12px;
     border: none; cursor: pointer; font-family: inherit;
     font-size: 14px; font-weight: 600;
   }
   #exitCancel { background: var(--input-bg); color: var(--text); }
   #exitConfirm { background: var(--danger); color: #fff; }
+  #stopConfirmCancel { background: var(--input-bg); color: var(--text); }
+  #stopConfirmOk { background: #ff6d00; color: #fff; }
 
   .poi-marker {
     display: flex; align-items: center; justify-content: center;
@@ -652,7 +659,6 @@
   .poi-marker.cafe { background: #6d4c41; }
   .poi-marker.hotel { background: #00838f; }
 
-  /* أيقونة نقطة التوقف */
   .waypoint-marker {
     width: 32px; height: 32px;
     background: var(--stop); border-radius: 50% 50% 50% 0;
@@ -788,7 +794,6 @@
   </button>
 </div>
 
-<!-- شريط نقاط التوقف -->
 <div id="waypointsBar">
   <div class="wp-title">
     <span>نقاط التوقف</span>
@@ -902,6 +907,20 @@
   </div>
 </div>
 
+<div id="stopConfirmDialog">
+  <div id="stopConfirmBox">
+    <div class="icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+    </div>
+    <h3>إنهاء التوجيه</h3>
+    <p>هل تريد إنهاء التوجيه والعودة إلى موقعك؟</p>
+    <div class="actions">
+      <button id="stopConfirmCancel">متابعة</button>
+      <button id="stopConfirmOk">إنهاء</button>
+    </div>
+  </div>
+</div>
+
 <button id="recenterBtn">
   <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
 </button>
@@ -942,7 +961,7 @@ window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
 
 // ============================================================
-// ⭐ نمط واحد فقط: OSM Standard
+// نمط خريطة موحّد: OSM Standard
 // ============================================================
 const MAP_STYLE = {
   version: 8,
@@ -980,12 +999,12 @@ const map = new maplibregl.Map({
 });
 
 // ============================================================
-// الحالة العامة
+// الحالة العامة — لا تُحفظ في localStorage (تجربة موحدة)
 // ============================================================
 let destMarker = null, startMarker = null;
 let waypointMarkers = [];
-let currentWaypoints = [];        // [{loc, name}]
-let pendingWaypointPick = false;  // هل ننتظر اختيار نقطة توقف؟
+let currentWaypoints = [];
+let pendingWaypointPick = false;
 let currentSteps = [];
 let currentStepIndex = 0;
 let navigationActive = false;
@@ -997,13 +1016,14 @@ let lastHeading = 0, gpsFirstFix = false;
 let lastPosition = null, lastPositionTime = null;
 let currentSpeed = 0;
 let currentRouteProfile = 'fastest';
-let currentRouteData = null;      // المسار الحالي (للملاحة والتتبع)
+let currentRouteData = null;
 let currentRoutes = { fastest: null, shortest: null };
 let currentDestination = null;
 let currentTravelMode = 'driving';
 let recenterMode = 'follow';
 let activeCategory = null;
 let poiMarkers = [];
+let isDarkMode = false;
 const SPEED_LIMIT = 120;
 
 let offRouteCounter = 0;
@@ -1013,6 +1033,7 @@ const OFF_ROUTE_COUNT = 3;
 const ROUTE_RECALC_COOLDOWN = 15000;
 const MIN_GPS_ACCURACY = 60;
 
+// فقط الأماكن المفضلة تُحفظ
 let savedPlaces = JSON.parse(localStorage.getItem('kzdora_saved') || '[]');
 
 // ============================================================
@@ -1151,18 +1172,85 @@ function formatEta(seconds) {
 }
 
 // ============================================================
-// ⭐ نقاط التوقف
+// ⭐ قراءة الحالة من URL (تجربة موحدة لكل مستخدم)
+// ============================================================
+function readStateFromURL() {
+  const hash = location.hash.replace(/^#kzdora\??/, '');
+  const params = new URLSearchParams(hash);
+
+  const dest = params.get('dest');
+  const mode = params.get('mode');
+  const dark = params.get('dark');
+  const wps = params.get('wps');
+
+  // الوضع الليلي
+  if (dark === '1') setDarkMode(true);
+  else if (dark === '0') setDarkMode(false);
+  else { const h = new Date().getHours(); setDarkMode(h < 6 || h >= 19); }
+
+  // نوع الرحلة
+  if (mode === 'foot' || mode === 'driving') {
+    currentTravelMode = mode;
+    document.querySelectorAll('.mode-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.mode === mode));
+  }
+
+  // نقاط التوقف
+  if (wps) {
+    wps.split('|').forEach((wp, i) => {
+      const parts = wp.split(',').map(Number);
+      if (!isNaN(parts[0]) && !isNaN(parts[1])) {
+        currentWaypoints.push({ loc: [parts[0], parts[1]], name: `نقطة ${i + 1}` });
+      }
+    });
+    updateWaypointsUI();
+    redrawWaypointMarkers();
+  }
+
+  // الوجهة (تُطبّق بعد GPS)
+  if (dest) {
+    const parts = dest.split(',').map(Number);
+    if (!isNaN(parts[0]) && !isNaN(parts[1])) {
+      setTimeout(() => setDestination([parts[0], parts[1]], null), 2000);
+    }
+  }
+}
+
+// ⭐ تحديث URL عند أي تغيير
+function updateURL() {
+  const params = new URLSearchParams();
+
+  if (currentDestination) {
+    params.set('dest', `${currentDestination[0].toFixed(5)},${currentDestination[1].toFixed(5)}`);
+  }
+  if (currentTravelMode !== 'driving') {
+    params.set('mode', currentTravelMode);
+  }
+  if (isDarkMode) {
+    params.set('dark', '1');
+  }
+  if (currentWaypoints.length) {
+    params.set('wps', currentWaypoints.map(w => `${w.loc[0].toFixed(5)},${w.loc[1].toFixed(5)}`).join('|'));
+  }
+
+  const newHash = params.toString();
+  const newURL = newHash ? `#kzdora?${newHash}` : '#kzdora';
+  history.replaceState(null, '', newURL);
+}
+
+// ============================================================
+// نقاط التوقف
 // ============================================================
 function updateWaypointsUI() {
   const list = document.getElementById('waypointsList');
   const bar = document.getElementById('waypointsBar');
   list.innerHTML = '';
-  
+
   if (currentWaypoints.length === 0) {
     bar.classList.remove('show');
     return;
   }
-  
+
   bar.classList.add('show');
   currentWaypoints.forEach((wp, idx) => {
     const div = document.createElement('div');
@@ -1177,6 +1265,7 @@ function updateWaypointsUI() {
       currentWaypoints.splice(idx, 1);
       updateWaypointsUI();
       redrawWaypointMarkers();
+      updateURL();
       if (currentDestination) setDestination(currentDestination, null, true);
     };
     list.appendChild(div);
@@ -1186,7 +1275,7 @@ function updateWaypointsUI() {
 function redrawWaypointMarkers() {
   waypointMarkers.forEach(m => m.remove());
   waypointMarkers = [];
-  
+
   currentWaypoints.forEach((wp, idx) => {
     const el = document.createElement('div');
     el.className = 'waypoint-marker';
@@ -1293,11 +1382,8 @@ function displayPoiResults(results, category) {
     el.style.cursor = 'pointer';
     el.onclick = (e) => {
       e.stopPropagation();
-      if (pendingWaypointPick) {
-        addWaypoint([r.lat, r.lng], r.name);
-      } else {
-        setDestination([r.lat, r.lng], r.name);
-      }
+      if (pendingWaypointPick) addWaypoint([r.lat, r.lng], r.name);
+      else setDestination([r.lat, r.lng], r.name);
     };
     const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
       .setLngLat([r.lng, r.lat])
@@ -1428,21 +1514,18 @@ map.on('dragstart', handlePressEnd);
 map.on('movestart', handlePressEnd);
 map.on('zoomstart', handlePressEnd);
 
-// ⭐ النقر العادي على الخريطة
 map.on('click', (e) => {
-  // تجاهل النقر على العلامات
   if (e.originalEvent && e.originalEvent.target) {
     const t = e.originalEvent.target;
     if (t.closest && (t.closest('.poi-marker') || t.closest('.maplibregl-marker') || t.closest('.waypoint-marker'))) return;
   }
-  
-  // ⭐ إذا كنا في وضع اختيار نقطة توقف
+
   if (pendingWaypointPick) {
     addWaypoint([e.lngLat.lat, e.lngLat.lng], null);
     pendingWaypointPick = false;
     return;
   }
-  
+
   hideMapPopup();
 });
 
@@ -1458,16 +1541,12 @@ document.getElementById('popupStart').onclick = () => {
 };
 
 document.getElementById('popupStop').onclick = () => {
-  if (popupLatLng) {
-    // إذا كان هناك وجهة، أضف نقطة توقف قبلها
-    addWaypoint([popupLatLng.lat, popupLatLng.lng], null);
-  }
+  if (popupLatLng) addWaypoint([popupLatLng.lat, popupLatLng.lng], null);
   hideMapPopup();
 };
 
 document.getElementById('popupDest').onclick = () => {
   if (popupLatLng) {
-    // إذا كان هناك وجهة سابقة، اجعلها نقطة توقف والجديدة وجهة نهائية
     if (currentDestination) {
       addWaypoint([currentDestination[0], currentDestination[1]], 'الوجهة السابقة');
     }
@@ -1481,15 +1560,14 @@ document.getElementById('popupSave').onclick = () => {
   hideMapPopup();
 };
 
-// ⭐ إضافة نقطة توقف
 function addWaypoint(loc, name) {
   currentWaypoints.push({ loc, name: name || `نقطة ${currentWaypoints.length + 1}` });
   updateWaypointsUI();
   redrawWaypointMarkers();
+  updateURL();
   showHint(`✅ تم إضافة نقطة التوقف ${currentWaypoints.length}`);
   speak(`تم إضافة نقطة التوقف ${currentWaypoints.length}`);
-  
-  // أعد حساب المسار إن كانت هناك وجهة
+
   if (currentDestination) {
     setDestination(currentDestination, null, true);
   }
@@ -1580,7 +1658,7 @@ document.addEventListener('click', e => {
 });
 
 // ============================================================
-// حفظ الأماكن
+// حفظ الأماكن — الوحيد الذي يُحفظ في localStorage
 // ============================================================
 const nameDialog = document.getElementById('nameDialog');
 const nameInput = document.getElementById('nameInput');
@@ -1792,7 +1870,7 @@ function getDynamicZoom(speedMs) {
 }
 
 // ============================================================
-// ⭐ تعيين الوجهة + حساب المسار مع دعم نقاط التوقف
+// تعيين الوجهة
 // ============================================================
 function setDestination(loc, name, isRecalc = false) {
   currentDestination = loc;
@@ -1802,7 +1880,7 @@ function setDestination(loc, name, isRecalc = false) {
   el.innerHTML = ICONS.arrive;
   destMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat([loc[1], loc[0]]).addTo(map);
 
-  if (!isRecalc) localStorage.setItem('kzdora_last_dest', JSON.stringify({ loc, name: name || '' }));
+  updateURL();
 
   const start = (navigationActive && userLocation) ? userLocation : (manualStart || userLocation);
   if (!start) {
@@ -1817,47 +1895,39 @@ function setDestination(loc, name, isRecalc = false) {
     document.getElementById('startBtn').classList.remove('show');
   }
 
-  // ⭐ بناء قائمة الإحداثيات مع نقاط التوقف
-  // OSRM format: lng,lat;lng,lat;lng,lat
   const allPoints = [start];
   currentWaypoints.forEach(wp => allPoints.push(wp.loc));
   allPoints.push(loc);
-  
   const coordsStr = allPoints.map(p => `${p[1]},${p[0]}`).join(';');
 
-  // ⭐ استخدام Valhalla أولاً (يدعم المشي والمسارات البديلة) ثم OSRM كاحتياطي
   if (currentTravelMode === 'foot') {
     fetchValhallaRoute(allPoints, 'pedestrian', isRecalc);
   } else {
-    // للسيارة: OSRM يدعم Waypoints بشكل جيد
     fetchOSRMRoute(coordsStr, isRecalc);
   }
 }
 
-// ⭐ OSRM — للسيارة (يدعم نقاط التوقف)
 function fetchOSRMRoute(coordsStr, isRecalc) {
   const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson&steps=true`;
-  
+
   fetch(url)
     .then(r => r.json())
     .then(data => {
       if (!isRecalc) hideLoading();
       if (!data.routes || !data.routes.length) { if (!isRecalc) alert('تعذر حساب المسار'); return; }
-      
+
       const route = data.routes[0];
       currentRouteData = route;
       currentRoutes = { fastest: route, shortest: null };
-      
-      // حساب الإجمالي
+
       const totalDist = route.distance / 1000;
       const totalTime = Math.round(route.duration / 60);
-      
+
       document.getElementById('infoFastest').textContent = `${totalDist.toFixed(1)}كم · ${totalTime}د`;
       document.getElementById('infoShortest').textContent = '—';
-      
+
       drawRoute(route);
-      
-      // احفظ الخطوات
+
       const allSteps = [];
       route.legs.forEach(leg => {
         leg.steps.forEach(s => {
@@ -1873,7 +1943,7 @@ function fetchOSRMRoute(coordsStr, isRecalc) {
       currentSteps = allSteps;
       currentStepIndex = 0;
       lastSpokenStep = -1;
-      
+
       if (!isRecalc) {
         document.getElementById('routeOptions').classList.add('show');
         document.getElementById('startBtn').classList.add('show');
@@ -1885,23 +1955,21 @@ function fetchOSRMRoute(coordsStr, isRecalc) {
         updateNavigationUI();
         speak('تم إعادة حساب المسار');
       }
-      
+
       map.fitBounds([[route.bounds[0], route.bounds[1]], [route.bounds[2], route.bounds[3]]], { padding: 60, duration: 800 });
     })
     .catch(err => { if (!isRecalc) { hideLoading(); alert('تعذر حساب المسار'); } });
 }
 
-// ⭐ Valhalla — للمشي (يدعم pedestrian بشكل صحيح)
 function fetchValhallaRoute(points, costing, isRecalc) {
   const locations = points.map(p => ({ lat: p[0], lon: p[1] }));
   const body = {
     locations: locations,
     costing: costing,
     units: 'kilometers',
-    language: 'ar-SA',
-    directions_options: { units: 'kilometers', language: 'ar-SA' }
+    language: 'ar-SA'
   };
-  
+
   fetch('https://valhalla1.openstreetmap.de/route', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1911,38 +1979,16 @@ function fetchValhallaRoute(points, costing, isRecalc) {
     .then(data => {
       if (!isRecalc) hideLoading();
       if (!data.trip || !data.trip.legs || !data.trip.legs.length) {
-        // فشل Valhalla → استخدم OSRM foot (قد لا يكون دقيقاً 100%)
         fallbackOSRMRoute(points, isRecalc);
         return;
       }
-      
-      // حول مسار Valhalla إلى تنسيق موحد
+
       const coords = [];
       data.trip.legs.forEach(leg => {
         const shape = decodePolyline(leg.shape, 6);
         shape.forEach(c => coords.push(c));
       });
-      
-      const route = {
-        geometry: { type: 'LineString', coordinates: coords },
-        distance: data.trip.summary.length * 1000,
-        duration: data.trip.summary.time,
-        legs: data.trip.legs.map(leg => ({
-          steps: leg.maneuvers.map(m => ({
-            maneuver: {
-              type: mapValhallaManeuver(m.type),
-              modifier: mapValhallaModifier(m.type, m.instruction),
-              location: [m.begin_shape_index] // موقع وهمي
-            },
-            name: m.street_names ? m.street_names[0] : '',
-            distance: m.length * 1000,
-            duration: m.time,
-            instruction: m.instruction
-          }))
-        }))
-      };
-      
-      // حساب bounds
+
       let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
       coords.forEach(c => {
         if (c[0] < minLng) minLng = c[0];
@@ -1950,45 +1996,57 @@ function fetchValhallaRoute(points, costing, isRecalc) {
         if (c[0] > maxLng) maxLng = c[0];
         if (c[1] > maxLat) maxLat = c[1];
       });
-      route.bounds = [minLng, minLat, maxLng, maxLat];
-      
+
+      const route = {
+        geometry: { type: 'LineString', coordinates: coords },
+        distance: data.trip.summary.length * 1000,
+        duration: data.trip.summary.time,
+        bounds: [minLng, minLat, maxLng, maxLat]
+      };
+
       currentRouteData = route;
       currentRoutes = { fastest: route, shortest: null };
-      
+
       const totalDist = route.distance / 1000;
       const totalTime = Math.round(route.duration / 60);
-      
+
       document.getElementById('infoFastest').textContent = `${totalDist.toFixed(1)}كم · ${totalTime}د`;
       document.getElementById('infoShortest').textContent = '—';
-      
+
       drawRoute(route);
-      
-      // خطوات المشي من Valhalla
-      const steps = data.trip.legs.flatMap(leg => 
-        leg.maneuvers.map(m => ({
-          type: mapValhallaManeuverType(m.type),
-          text: m.instruction || 'تابع',
-          distance: m.length * 1000,
-          duration: m.time,
-          location: [coords[Math.min(m.begin_shape_index, coords.length-1)][1], coords[Math.min(m.begin_shape_index, coords.length-1)][0]]
-        }))
-      );
-      currentSteps = steps;
+
+      // خطوات من Valhalla
+      const steps = [];
+      data.trip.legs.forEach(leg => {
+        leg.maneuvers.forEach(m => {
+          const shapeIdx = Math.min(m.begin_shape_index || 0, coords.length - 1);
+          const c = coords[shapeIdx];
+          steps.push({
+            type: mapValhallaManeuverType(m.type),
+            text: m.instruction || 'تابع',
+            distance: (m.length || 0) * 1000,
+            duration: m.time || 0,
+            location: c ? [c[1], c[0]] : null
+          });
+        });
+      });
+      currentSteps = steps.filter(s => s.location);
       currentStepIndex = 0;
       lastSpokenStep = -1;
-      
+
       if (!isRecalc) {
         document.getElementById('routeOptions').classList.add('show');
         document.getElementById('startBtn').classList.add('show');
-        speak(`تم حساب مسار المشي. ${totalDist.toFixed(1)} كيلومتر، ${totalTime} دقيقة`);
+        const wpText = currentWaypoints.length ? ` مع ${currentWaypoints.length} نقطة توقف` : '';
+        speak(`تم حساب مسار المشي${wpText}. ${totalDist.toFixed(1)} كيلومتر، ${totalTime} دقيقة`);
       } else {
         currentStepIndex = 0;
         lastSpokenStep = -1;
         updateNavigationUI();
         speak('تم إعادة حساب المسار');
       }
-      
-      map.fitBounds([[route.bounds[0], route.bounds[1]], [route.bounds[2], route.bounds[3]]], { padding: 60, duration: 800 });
+
+      map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 60, duration: 800 });
     })
     .catch(err => {
       console.warn('Valhalla failed:', err);
@@ -1999,25 +2057,25 @@ function fetchValhallaRoute(points, costing, isRecalc) {
 function fallbackOSRMRoute(points, isRecalc) {
   const coordsStr = points.map(p => `${p[1]},${p[0]}`).join(';');
   const url = `https://router.project-osrm.org/route/v1/foot/${coordsStr}?overview=full&geometries=geojson&steps=true`;
-  
+
   fetch(url)
     .then(r => r.json())
     .then(data => {
       if (!isRecalc) hideLoading();
       if (!data.routes || !data.routes.length) { if (!isRecalc) alert('تعذر حساب مسار المشي'); return; }
-      
+
       const route = data.routes[0];
       currentRouteData = route;
       currentRoutes = { fastest: route, shortest: null };
-      
+
       const totalDist = route.distance / 1000;
       const totalTime = Math.round(route.duration / 60);
-      
+
       document.getElementById('infoFastest').textContent = `${totalDist.toFixed(1)}كم · ${totalTime}د`;
       document.getElementById('infoShortest').textContent = '—';
-      
+
       drawRoute(route);
-      
+
       const allSteps = [];
       route.legs.forEach(leg => {
         leg.steps.forEach(s => {
@@ -2033,7 +2091,7 @@ function fallbackOSRMRoute(points, isRecalc) {
       currentSteps = allSteps;
       currentStepIndex = 0;
       lastSpokenStep = -1;
-      
+
       if (!isRecalc) {
         document.getElementById('routeOptions').classList.add('show');
         document.getElementById('startBtn').classList.add('show');
@@ -2044,13 +2102,12 @@ function fallbackOSRMRoute(points, isRecalc) {
         updateNavigationUI();
         speak('تم إعادة حساب المسار');
       }
-      
+
       map.fitBounds([[route.bounds[0], route.bounds[1]], [route.bounds[2], route.bounds[3]]], { padding: 60, duration: 800 });
     })
     .catch(err => { if (!isRecalc) { hideLoading(); alert('تعذر حساب المسار'); } });
 }
 
-// ⭐ فك تشفير polyline لـ Valhalla
 function decodePolyline(encoded, precision = 6) {
   const factor = Math.pow(10, precision);
   const coords = [];
@@ -2063,7 +2120,7 @@ function decodePolyline(encoded, precision = 6) {
       shift += 5;
     } while (b >= 0x20);
     lat += ((result & 1) ? ~(result >> 1) : (result >> 1));
-    
+
     shift = 0; result = 0;
     do {
       b = encoded.charCodeAt(index++) - 63;
@@ -2071,13 +2128,13 @@ function decodePolyline(encoded, precision = 6) {
       shift += 5;
     } while (b >= 0x20);
     lng += ((result & 1) ? ~(result >> 1) : (result >> 1));
-    
+
     coords.push([lng / factor, lat / factor]);
   }
   return coords;
 }
 
-function mapValhallaManeuver(type) {
+function mapValhallaManeuverType(type) {
   const map = {
     0: 'Straight', 1: 'Depart', 2: 'Straight', 3: 'Straight',
     4: 'Depart', 5: 'Depart', 6: 'Depart',
@@ -2096,25 +2153,6 @@ function mapValhallaManeuver(type) {
   return map[type] || 'Straight';
 }
 
-function mapValhallaManeuverType(type) {
-  const m = mapValhallaManeuver(type);
-  const typeMap = {
-    'Straight': 'Straight', 'Depart': 'Depart', 'TurnLeft': 'TurnLeft',
-    'TurnRight': 'TurnRight', 'SlightLeft': 'SlightLeft', 'SlightRight': 'SlightRight',
-    'SharpLeft': 'SharpLeft', 'SharpRight': 'SharpRight',
-    'Roundabout': 'Roundabout', 'Arrive': 'Arrive'
-  };
-  return typeMap[m] || 'Straight';
-}
-
-function mapValhallaModifier(type, instruction) {
-  if (!instruction) return '';
-  if (instruction.includes('يمين')) return 'right';
-  if (instruction.includes('يسار')) return 'left';
-  return 'straight';
-}
-
-// ⭐ رسم المسار على الخريطة
 function drawRoute(route) {
   ['route-line-outline', 'route-line'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
   ['route-line'].forEach(id => { if (map.getSource(id)) map.removeSource(id); });
@@ -2169,9 +2207,55 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
     playBeep(1000, 100);
     speak(mode === 'foot' ? 'وضع المشي' : 'وضع السيارة');
+    updateURL();
     if (currentDestination) setDestination(currentDestination);
   };
 });
+
+// ============================================================
+// الوضع الليلي
+// ============================================================
+const themeHeaderBtn = document.getElementById('themeHeaderBtn');
+const themeIconHeader = document.getElementById('themeIconHeader');
+
+function setDarkMode(isDark) {
+  isDarkMode = isDark;
+  document.body.classList.toggle('dark', isDark);
+  if (themeIconHeader) themeIconHeader.innerHTML = isDark ? ICONS.sun : ICONS.moon;
+
+  // تبديل طبقة البلاطات
+  try {
+    if (map.getLayer('osm-layer')) map.removeLayer('osm-layer');
+    if (map.getSource('osm-tiles')) map.removeSource('osm-tiles');
+
+    const darkTiles = [
+      'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+      'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+      'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
+    ];
+    const lightTiles = [
+      'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    ];
+
+    map.addSource('osm-tiles', {
+      type: 'raster',
+      tiles: isDark ? darkTiles : lightTiles,
+      tileSize: 256,
+      maxzoom: 19
+    });
+    map.addLayer({ id: 'osm-layer', type: 'raster', source: 'osm-tiles' });
+
+    // أعد رسم المسار فوق الطبقة
+    if (currentRouteData) setTimeout(() => drawRoute(currentRouteData), 100);
+  } catch(e) { console.warn(e); }
+}
+
+themeHeaderBtn.onclick = () => {
+  setDarkMode(!isDarkMode);
+  updateURL();
+};
 
 // ============================================================
 // بدء التوجيه
@@ -2222,6 +2306,16 @@ document.getElementById('startBtn').onclick = async () => {
   });
 };
 
+// ⭐ نافذة تأكيد إنهاء التوجيه المخصصة
+const stopConfirmDialog = document.getElementById('stopConfirmDialog');
+document.getElementById('stopConfirmCancel').onclick = () => {
+  stopConfirmDialog.classList.remove('show');
+};
+document.getElementById('stopConfirmOk').onclick = () => {
+  stopConfirmDialog.classList.remove('show');
+  stopNavigation();
+};
+
 function stopNavigation() {
   navigationActive = false;
   synth.cancel();
@@ -2252,21 +2346,54 @@ function stopNavigation() {
   offRouteCounter = 0;
 
   document.getElementById('waypointsBar').classList.remove('show');
-  map.easeTo({ pitch: 0, bearing: 0, duration: 800 });
+  document.getElementById('routeOptions').classList.remove('show');
 
-  if (userLocation) {
-    map.flyTo({ center: [userLocation[1], userLocation[0]], zoom: 16, duration: 800 });
-    if (!userMarker) {
-      const el = document.createElement('div');
-      el.innerHTML = `<div class="user-location-icon"><div class="pulse"></div><div class="core"></div></div>`;
-      userMarker = new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([userLocation[1], userLocation[0]]).addTo(map);
+  // ⭐ إعادة URL للحالة النظيفة (بدون وجهة)
+  updateURL();
+
+  // ⭐ إعادة الخريطة للوضع المسطح
+  recenterMode = 'follow';
+  map.easeTo({
+    pitch: 0,
+    bearing: 0,
+    duration: 800,
+    easing: t => t * (2 - t)
+  });
+
+  setTimeout(() => {
+    if (userLocation) {
+      map.flyTo({
+        center: [userLocation[1], userLocation[0]],
+        zoom: 16,
+        pitch: 0,
+        bearing: 0,
+        duration: 800
+      });
+      if (!userMarker) {
+        const el = document.createElement('div');
+        el.innerHTML = `<div class="user-location-icon"><div class="pulse"></div><div class="core"></div></div>`;
+        userMarker = new maplibregl.Marker({ element: el, anchor: 'center' })
+          .setLngLat([userLocation[1], userLocation[0]])
+          .addTo(map);
+      }
+    } else {
+      map.flyTo({
+        center: DAMASCUS,
+        zoom: 13,
+        pitch: 0,
+        bearing: 0,
+        duration: 800
+      });
     }
-  }
+  }, 850);
+
   speak('تم إنهاء التوجيه');
 }
 
 document.getElementById('stopBtn').onclick = stopNavigation;
-document.getElementById('navStopFloat').onclick = () => { if (confirm('إنهاء التوجيه؟')) stopNavigation(); };
+document.getElementById('navStopFloat').onclick = () => {
+  stopConfirmDialog.classList.add('show');
+};
 document.getElementById('recenterBtn').onclick = () => {
   recenterMode = 'follow';
   document.getElementById('recenterBtn').classList.remove('show');
@@ -2405,6 +2532,9 @@ window.addEventListener('load', async () => {
   document.getElementById('recenterBtn').classList.add('show');
 
   await keepScreenOn();
+
+  // ⭐ اقرأ الحالة من URL
+  readStateFromURL();
 
   setTimeout(() => {
     if (navigator.geolocation) {
