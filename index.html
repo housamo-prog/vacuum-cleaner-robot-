@@ -7,11 +7,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ملاحة الشام">
-<title>ملاحة الشام — دليل الملاحة والخرائط</title>
+<meta name="apple-mobile-web-app-title" content="كزدورة">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.json">
+<title>كزدورة — ملاحة وخرائط</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<!-- leaflet-rotate للدوران الحقيقي -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate.css" />
 
 <style>
@@ -21,60 +22,84 @@
     --success: #34a853; --border: #f1f3f4; --input-bg: #f1f3f4;
     --gold: #fbbc04; --fuel: #ea8600; --pharmacy: #34a853;
     --hospital: #ea4335; --grocery: #7c4dff;
-    --safe-top: env(safe-area-inset-top);
-    --safe-bottom: env(safe-area-inset-bottom);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   body.dark {
     --bg: #121212; --panel: #1e1e1e; --text: #e8eaed; --text-sub: #9aa0a6;
     --primary: #8ab4f8; --primary-dark: #669df6; --border: #2d2d2d; --input-bg: #2d2d2d;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
-    height: 100%; font-family: -apple-system, 'Segoe UI', Tahoma, Arial, sans-serif;
+    height: 100%; width: 100%;
+    font-family: -apple-system, 'Segoe UI', Tahoma, Arial, sans-serif;
     overflow: hidden; background: var(--bg); color: var(--text);
     overscroll-behavior: none;
     -webkit-user-select: none; user-select: none;
     touch-action: manipulation;
+    position: fixed;
   }
 
-  /* ============================================================
-     الخريطة مع منظور ثلاثي الأبعاد
-     ============================================================ */
+  /* الخريطة بملء الشاشة */
   #map {
-    position: absolute; inset: 0; z-index: 1;
-    transition: filter 0.4s;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw; height: 100vh;
+    z-index: 1;
+    background: #e8eaed;
   }
-  body.navigating #map { filter: saturate(1.1) contrast(1.06) brightness(1.02); }
+  body.navigating #map { filter: saturate(1.12) contrast(1.08); }
 
-  /* منظور ثلاثي الأبعاد أثناء الملاحة — نمط مائل مثل Sygic */
-  body.navigating #map .leaflet-map-pane {
-    transform-style: preserve-3d;
-  }
+  /* تأثير ثلاثي الأبعاد أثناء الملاحة */
   body.navigating #map .leaflet-tile-pane {
-    transform: perspective(600px) rotateX(45deg) scale(1.8) translateY(-8%) !important;
+    transform: perspective(650px) rotateX(48deg) scale(1.9) translateY(-10%) !important;
     transform-origin: 50% 100%;
-    transition: transform 0.6s ease-out;
+    transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: transform;
   }
-  /* إخفاء حواف البلاطات أثناء التحويل */
   body.navigating #map .leaflet-tile {
     outline: 1px solid transparent;
     backface-visibility: hidden;
   }
-
-  /* الأشرطة والأزرار لا تتأثر بالمنظور */
   body.navigating #map .leaflet-overlay-pane,
   body.navigating #map .leaflet-marker-pane,
   body.navigating #map .leaflet-popup-pane {
     transform: none !important;
   }
 
+  /* طبقة المباني ثلاثية الأبعاد */
+  .building-3d {
+    transition: opacity 0.6s;
+  }
+  .building-3d polygon {
+    stroke: rgba(0,0,0,0.25);
+    stroke-width: 0.5;
+  }
+
+  /* ============================================================
+     مؤشر حالة الاتصال (Offline)
+     ============================================================ */
+  #offlineBadge {
+    position: fixed;
+    top: calc(66px + var(--safe-top));
+    left: 50%; transform: translateX(-50%);
+    z-index: 2000;
+    background: rgba(234,67,53,0.95); color: #fff;
+    padding: 8px 16px; border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+    display: none; align-items: center; gap: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+  }
+  #offlineBadge.show { display: flex; animation: slideDown 0.4s; }
+  #offlineBadge svg { width: 14px; height: 14px; fill: #fff; }
+  @keyframes slideDown { from { transform: translate(-50%, -20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
   /* ============================================================
      الهيدر
      ============================================================ */
   #appHeader {
-    position: absolute; top: 0; left: 0; right: 0;
+    position: fixed; top: 0; left: 0; right: 0;
     z-index: 1050;
     padding: calc(10px + var(--safe-top)) 14px 10px;
     background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
@@ -87,29 +112,29 @@
     transform: translateY(-100%); opacity: 0; pointer-events: none;
   }
   #appHeader .logo {
-    width: 38px; height: 38px; flex-shrink: 0;
-    background: rgba(255,255,255,0.18); border-radius: 11px;
+    width: 42px; height: 42px; flex-shrink: 0;
+    background: rgba(255,255,255,0.2); border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.2);
   }
-  #appHeader .logo svg { width: 24px; height: 24px; fill: #fff; }
+  #appHeader .logo svg { width: 26px; height: 26px; fill: #fff; }
   #appHeader .title-block { flex: 1; min-width: 0; }
-  #appHeader .title { font-size: 17px; font-weight: 700; line-height: 1.2; }
-  #appHeader .subtitle { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+  #appHeader .title { font-size: 19px; font-weight: 800; line-height: 1.2; letter-spacing: 0.3px; }
+  #appHeader .subtitle { font-size: 11px; opacity: 0.9; margin-top: 2px; }
   #appHeader .actions { display: flex; gap: 6px; }
   #appHeader .header-btn {
-    width: 36px; height: 36px; border-radius: 50%;
+    width: 38px; height: 38px; border-radius: 50%;
     background: rgba(255,255,255,0.15); border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
   }
-  #appHeader .header-btn svg { width: 18px; height: 18px; fill: #fff; }
+  #appHeader .header-btn:active { background: rgba(255,255,255,0.3); }
+  #appHeader .header-btn svg { width: 20px; height: 20px; fill: #fff; }
 
-  /* ============================================================
-     شريط البحث
-     ============================================================ */
+  /* شريط البحث */
   #searchBar {
-    position: absolute; top: calc(66px + var(--safe-top)); left: 10px; right: 10px;
+    position: fixed; top: calc(66px + var(--safe-top)); left: 10px; right: 10px;
     z-index: 1000; display: flex; gap: 6px; align-items: center;
     background: var(--panel); border-radius: 14px; padding: 6px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
@@ -131,11 +156,9 @@
   }
   .icon-btn svg { width: 22px; height: 22px; fill: var(--primary); }
 
-  /* ============================================================
-     شريط الفئات
-     ============================================================ */
+  /* شريط الفئات */
   #categoryBar {
-    position: absolute; top: calc(124px + var(--safe-top));
+    position: fixed; top: calc(124px + var(--safe-top));
     left: 0; right: 0; z-index: 999;
     overflow-x: auto; overflow-y: hidden;
     padding: 6px 10px 10px;
@@ -176,11 +199,9 @@
   .cat-btn[data-cat="hotel"] svg { fill: #00838f; }
   .cat-btn.active svg { fill: #fff; }
 
-  /* ============================================================
-     نتائج البحث
-     ============================================================ */
+  /* نتائج البحث */
   #results {
-    position: absolute; top: calc(178px + var(--safe-top)); left: 10px; right: 10px;
+    position: fixed; top: calc(178px + var(--safe-top)); left: 10px; right: 10px;
     z-index: 1000; background: var(--panel); border-radius: 14px;
     max-height: 55vh; overflow-y: auto; display: none;
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
@@ -188,10 +209,10 @@
   #results.show { display: block; }
   .result-item {
     padding: 12px 16px; border-bottom: 1px solid var(--border);
-    cursor: pointer; font-size: 14px; color: var(--text);
+    cursor: pointer; font-size: 14px;
     display: flex; gap: 12px; align-items: center;
   }
-  .result-item:hover, .result-item:active { background: var(--input-bg); }
+  .result-item:active { background: var(--input-bg); }
   .result-item .pin svg { width: 22px; height: 22px; flex-shrink: 0; }
   .result-item .text { flex: 1; line-height: 1.4; min-width: 0; }
   .result-item .title { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -213,7 +234,7 @@
     border-radius: 14px 14px 0 0;
   }
   #resultsHeader .title-block { font-size: 13px; font-weight: 600; }
-  #resultsHeader .title-block span { color: var(--text-sub); font-weight: 400; margin-right: 6px; }
+  #resultsHeader .title-block span { color: var(--text-sub); font-weight: 400; }
   #resultsClose {
     background: var(--input-bg); border: none; cursor: pointer;
     width: 30px; height: 30px; border-radius: 50%;
@@ -221,11 +242,9 @@
   }
   #resultsClose svg { width: 16px; height: 16px; fill: var(--text); }
 
-  /* ============================================================
-     شريط نوع الرحلة — أسفل
-     ============================================================ */
+  /* شريط نوع الرحلة أسفل */
   #travelModeBar {
-    position: absolute;
+    position: fixed;
     bottom: calc(20px + var(--safe-bottom));
     left: 50%; transform: translateX(-50%);
     z-index: 1000;
@@ -253,11 +272,9 @@
   }
   .mode-btn svg { width: 20px; height: 20px; fill: currentColor; }
 
-  /* ============================================================
-     عداد السرعة
-     ============================================================ */
+  /* عداد السرعة */
   #speedometer {
-    position: absolute; top: calc(180px + var(--safe-top)); left: 10px;
+    position: fixed; top: calc(180px + var(--safe-top)); left: 10px;
     z-index: 999; background: var(--panel);
     padding: 8px 14px; border-radius: 14px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
@@ -278,7 +295,7 @@
   #speedUnit { font-size: 11px; color: var(--text-sub); line-height: 1.2; }
 
   #gpsStatus {
-    position: absolute; top: calc(180px + var(--safe-top)); right: 10px;
+    position: fixed; top: calc(180px + var(--safe-top)); right: 10px;
     z-index: 999; background: var(--panel);
     padding: 8px 12px; border-radius: 20px;
     font-size: 11px; color: var(--text-sub); display: none;
@@ -297,17 +314,14 @@
   #gpsStatus.active .dot { background: var(--success); }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-  /* ============================================================
-     قائمة الضغط المطول
-     ============================================================ */
+  /* قائمة الضغط المطول */
   #mapPopup {
-    position: absolute; z-index: 2000;
+    position: fixed; z-index: 2000;
     background: var(--panel); border-radius: 14px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     padding: 6px; display: none; min-width: 200px;
   }
   #mapPopup.show { display: block; }
-  @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
   .popup-item {
     background: transparent; border: none; cursor: pointer;
     padding: 12px 14px; border-radius: 10px;
@@ -315,14 +329,14 @@
     font-family: inherit; font-size: 14px; color: var(--text);
     width: 100%; text-align: right;
   }
-  .popup-item:hover { background: var(--input-bg); }
+  .popup-item:active { background: var(--input-bg); }
   .popup-item svg { width: 20px; height: 20px; flex-shrink: 0; }
   .popup-item.start svg { fill: var(--success); }
   .popup-item.dest svg { fill: var(--danger); }
   .popup-item.save svg { fill: var(--gold); }
 
   #savedPanel {
-    position: absolute; inset: 0; z-index: 1500;
+    position: fixed; inset: 0; z-index: 1500;
     background: rgba(0,0,0,0.5);
     display: none; align-items: flex-end;
   }
@@ -350,7 +364,7 @@
     display: flex; align-items: center; gap: 12px;
     cursor: pointer; border-radius: 10px;
   }
-  #savedList li:hover { background: var(--input-bg); }
+  #savedList li:active { background: var(--input-bg); }
   #savedList li .star svg { width: 20px; height: 20px; fill: var(--gold); }
   #savedList li .info { flex: 1; }
   #savedList li .name { font-weight: 500; font-size: 14px; }
@@ -359,11 +373,9 @@
   #savedList li .del-btn svg { width: 18px; height: 18px; fill: var(--danger); }
   #savedList .empty { text-align: center; color: var(--text-sub); padding: 40px 20px; font-size: 14px; }
 
-  /* ============================================================
-     خيارات المسار
-     ============================================================ */
+  /* خيارات المسار */
   #routeOptions {
-    position: absolute; bottom: calc(88px + var(--safe-bottom));
+    position: fixed; bottom: calc(88px + var(--safe-bottom));
     left: 50%; transform: translateX(-50%);
     z-index: 1000; background: var(--panel);
     border-radius: 16px; padding: 8px;
@@ -388,7 +400,7 @@
   .route-btn .info { font-size: 10px; opacity: 0.85; }
 
   #navPanel {
-    position: absolute; bottom: 0; left: 0; right: 0;
+    position: fixed; bottom: 0; left: 0; right: 0;
     z-index: 1000; background: var(--panel);
     border-radius: 20px 20px 0 0;
     box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
@@ -416,7 +428,7 @@
   #steps { list-style: none; }
   #steps li {
     padding: 12px 14px; border-bottom: 1px solid var(--border);
-    font-size: 14px; color: var(--text); display: flex;
+    font-size: 14px; display: flex;
     gap: 12px; align-items: flex-start; border-radius: 10px;
   }
   #steps li.current { background: #e8f0fe; color: #0d47a1; font-weight: 600; }
@@ -432,28 +444,25 @@
   #steps .info { flex: 1; }
   #steps .dist { color: var(--text-sub); font-size: 12px; margin-top: 3px; font-weight: 400; }
 
-  /* ============================================================
-     وضع الملاحة — Sygic Style
-     ============================================================ */
+  /* وضع الملاحة */
   #navTopBar {
-    position: absolute; top: 0; left: 0; right: 0;
+    position: fixed; top: 0; left: 0; right: 0;
     z-index: 1100; padding: calc(14px + var(--safe-top)) 14px 14px;
-    background: linear-gradient(180deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 70%, transparent 100%);
+    background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.55) 70%, transparent 100%);
     display: none; align-items: center; gap: 16px;
     color: #fff;
   }
   #navTopBar.show { display: flex; animation: slideDown 0.4s ease-out; }
-  @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
   #navTopBar .turn-icon {
-    width: 70px; height: 70px; flex-shrink: 0;
-    background: var(--primary); border-radius: 18px;
+    width: 74px; height: 74px; flex-shrink: 0;
+    background: var(--primary); border-radius: 20px;
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 4px 16px rgba(26,115,232,0.5);
   }
-  #navTopBar .turn-icon svg { width: 44px; height: 44px; fill: #fff; }
+  #navTopBar .turn-icon svg { width: 48px; height: 48px; fill: #fff; }
   #navTopBar .info { flex: 1; min-width: 0; }
   #navTopBar .dist {
-    font-size: 30px; font-weight: 800; line-height: 1;
+    font-size: 32px; font-weight: 800; line-height: 1;
     font-variant-numeric: tabular-nums;
     text-shadow: 0 2px 8px rgba(0,0,0,0.4);
   }
@@ -463,9 +472,9 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   #navBottomBar {
-    position: absolute; bottom: 0; left: 0; right: 0;
+    position: fixed; bottom: 0; left: 0; right: 0;
     z-index: 1100; padding: 14px 18px calc(18px + var(--safe-bottom));
-    background: linear-gradient(0deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 70%, transparent 100%);
+    background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.55) 70%, transparent 100%);
     display: none; align-items: center; gap: 16px; color: #fff;
   }
   #navBottomBar.show { display: flex; }
@@ -491,7 +500,7 @@
   #navBottomBar .speed-badge .lbl { font-size: 10px; opacity: 0.8; margin-top: 2px; }
 
   #navStopFloat {
-    position: absolute; top: calc(14px + var(--safe-top)); left: 14px;
+    position: fixed; top: calc(14px + var(--safe-top)); left: 14px;
     z-index: 1200;
     background: rgba(234,67,53,0.95); color: #fff;
     border: none; cursor: pointer;
@@ -503,7 +512,7 @@
   #navStopFloat svg { width: 20px; height: 20px; fill: #fff; }
 
   #recenterBtn {
-    position: absolute; bottom: calc(88px + var(--safe-bottom)); right: 10px;
+    position: fixed; bottom: calc(88px + var(--safe-bottom)); right: 10px;
     z-index: 998;
     background: var(--panel); border: none; cursor: pointer;
     width: 46px; height: 46px; border-radius: 50%;
@@ -512,13 +521,11 @@
   }
   #recenterBtn.show { display: flex; }
   #recenterBtn svg { width: 22px; height: 22px; fill: var(--text); }
-  body.navigating #recenterBtn {
-    display: none;
-  }
+  body.navigating #recenterBtn { display: none; }
   body.navigating #recenterBtn.show { display: flex; }
 
   #startBtn {
-    position: absolute; bottom: calc(150px + var(--safe-bottom));
+    position: fixed; bottom: calc(150px + var(--safe-bottom));
     left: 50%; transform: translateX(-50%);
     z-index: 1000; background: var(--primary); color: #fff; border: none;
     padding: 14px 28px 14px 22px; border-radius: 50px;
@@ -535,7 +542,7 @@
   #startBtn svg { width: 20px; height: 20px; fill: #fff; }
 
   #loading {
-    position: absolute; top: 50%; left: 50%;
+    position: fixed; top: 50%; left: 50%;
     transform: translate(-50%,-50%); z-index: 3000;
     background: rgba(32,33,36,0.92); color: #fff;
     padding: 16px 24px; border-radius: 14px;
@@ -566,9 +573,6 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   }
 
-  /* ============================================================
-     أيقونة السيارة — محسّنة مع ظل ثلاثي الأبعاد
-     ============================================================ */
   .vehicle-marker {
     width: 64px; height: 64px;
     display: flex; align-items: center; justify-content: center;
@@ -578,15 +582,14 @@
   }
   .vehicle-marker svg {
     width: 100%; height: 100%;
-    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.45)) drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5)) drop-shadow(0 2px 4px rgba(0,0,0,0.35));
   }
-  /* هالة ضوئية أسفل السيارة */
   .vehicle-marker::before {
     content: '';
     position: absolute;
     bottom: 2px; left: 50%; transform: translateX(-50%);
-    width: 44px; height: 14px;
-    background: radial-gradient(ellipse, rgba(26,115,232,0.55) 0%, rgba(26,115,232,0.15) 50%, transparent 75%);
+    width: 46px; height: 16px;
+    background: radial-gradient(ellipse, rgba(26,115,232,0.6) 0%, rgba(26,115,232,0.15) 50%, transparent 75%);
     border-radius: 50%;
     z-index: -1;
     animation: carGlow 2s ease-in-out infinite;
@@ -595,37 +598,9 @@
     0%, 100% { opacity: 0.8; transform: translateX(-50%) scale(1); }
     50% { opacity: 1; transform: translateX(-50%) scale(1.15); }
   }
-  /* السهم الأمامي الذي يشير لاتجاه السير */
-  .vehicle-marker::after {
-    content: '';
-    position: absolute;
-    top: -6px; left: 50%; transform: translateX(-50%);
-    width: 0; height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 12px solid rgba(26,115,232,0.9);
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-    animation: arrowPulse 1.5s ease-in-out infinite;
-  }
-  @keyframes arrowPulse {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(-4px); }
-  }
-  body.dark .vehicle-marker::after {
-    border-bottom-color: rgba(138,180,248,0.9);
-  }
-
-  .side-btn {
-    position: absolute; z-index: 999;
-    background: var(--panel); border: none; cursor: pointer;
-    width: 46px; height: 46px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.2);
-  }
-  .side-btn svg { width: 22px; height: 22px; fill: var(--text); }
 
   #mapHint {
-    position: absolute; bottom: calc(180px + var(--safe-bottom));
+    position: fixed; bottom: calc(180px + var(--safe-bottom));
     left: 50%; transform: translateX(-50%);
     z-index: 998; background: rgba(32,33,36,0.9); color: #fff;
     padding: 8px 14px; border-radius: 20px;
@@ -633,21 +608,19 @@
     pointer-events: none;
   }
   #mapHint.show { display: block; animation: fadeInOut 3s ease-in-out; }
-  @keyframes fadeInOut {
-    0%, 100% { opacity: 0; }
-    15%, 85% { opacity: 1; }
-  }
+  @keyframes fadeInOut { 0%, 100% { opacity: 0; } 15%, 85% { opacity: 1; } }
 
-  #nameDialog {
-    position: absolute; inset: 0; z-index: 4000;
-    background: rgba(0,0,0,0.5);
+  #nameDialog, #exitDialog {
+    position: fixed; inset: 0; z-index: 4000;
+    background: rgba(0,0,0,0.55);
     display: none; align-items: center; justify-content: center;
     padding: 20px;
   }
-  #nameDialog.show { display: flex; }
-  #nameDialogBox {
-    background: var(--panel); border-radius: 16px;
-    padding: 20px; width: 100%; max-width: 340px;
+  #nameDialog.show, #exitDialog.show { display: flex; }
+  #nameDialogBox, #exitBox {
+    background: var(--panel); border-radius: 18px;
+    padding: 22px; width: 100%; max-width: 340px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
   }
   #nameDialogBox h3 { font-size: 16px; margin-bottom: 12px; }
   #nameInput {
@@ -665,19 +638,7 @@
   #nameCancel { background: var(--input-bg); color: var(--text); }
   #nameSave { background: var(--primary); color: #fff; }
 
-  #exitDialog {
-    position: absolute; inset: 0; z-index: 4100;
-    background: rgba(0,0,0,0.6);
-    display: none; align-items: center; justify-content: center;
-    padding: 20px;
-  }
-  #exitDialog.show { display: flex; }
-  #exitBox {
-    background: var(--panel); border-radius: 18px;
-    padding: 24px; width: 100%; max-width: 320px;
-    text-align: center;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-  }
+  #exitBox { text-align: center; }
   #exitBox .icon {
     width: 60px; height: 60px; margin: 0 auto 14px;
     background: #fce8e6; border-radius: 50%;
@@ -706,9 +667,7 @@
     transform: rotate(-45deg);
     border: 2.5px solid #fff;
     box-shadow: 0 3px 10px rgba(0,0,0,0.35);
-    transition: transform 0.2s;
   }
-  .poi-marker:hover { transform: rotate(-45deg) scale(1.1); }
   .poi-marker svg {
     width: 18px; height: 18px; fill: #fff;
     transform: rotate(45deg);
@@ -731,13 +690,19 @@
 
 <div id="map"></div>
 
+<!-- شارة عدم الاتصال -->
+<div id="offlineBadge">
+  <svg viewBox="0 0 24 24"><path d="M23.64 7c-.45-.34-4.93-4-11.64-4-1.5 0-2.89.19-4.15.48L18.18 13.8 23.64 7zm-6.6 8.22L3.27 1.44 2 2.72l2.05 2.06C1.91 5.76.59 6.82.36 7l10.08 12.56c.8 1 2.32 1 3.12 0l2.20-2.75 2.5 2.5 1.27-1.27-2.49-2.82z"/></svg>
+  <span>لا يوجد اتصال — وضع محدود</span>
+</div>
+
 <header id="appHeader">
   <div class="logo">
-    <svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
   </div>
   <div class="title-block">
-    <div class="title">ملاحة الشام</div>
-    <div class="subtitle">دليل الملاحة والخرائط في سوريا</div>
+    <div class="title">كزدورة</div>
+    <div class="subtitle">ملاحة وخرائط في سوريا</div>
   </div>
   <div class="actions">
     <button class="header-btn" id="savedHeaderBtn" title="الأماكن المحفوظة">
@@ -750,11 +715,11 @@
 </header>
 
 <div id="searchBar">
-  <button id="locBtn" class="icon-btn" title="موقعي">
+  <button id="locBtn" class="icon-btn">
     <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
   </button>
   <input id="searchInput" type="text" placeholder="ابحث عن مكان في سوريا..." />
-  <button id="searchBtn" class="icon-btn" title="بحث">
+  <button id="searchBtn" class="icon-btn">
     <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
   </button>
 </div>
@@ -887,7 +852,7 @@
     <div class="lbl">كم/س</div>
   </div>
 </div>
-<button id="navStopFloat" title="إنهاء الملاحة">
+<button id="navStopFloat">
   <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
 </button>
 
@@ -935,7 +900,7 @@
       <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
     </div>
     <h3>تأكيد الخروج</h3>
-    <p>هل تريد فعلاً إغلاق تطبيق ملاحة الشام؟</p>
+    <p>هل تريد فعلاً إغلاق تطبيق كزدورة؟</p>
     <div class="actions">
       <button id="exitCancel">البقاء</button>
       <button id="exitConfirm">خروج</button>
@@ -943,7 +908,7 @@
   </div>
 </div>
 
-<button id="recenterBtn" title="إعادة التمركز">
+<button id="recenterBtn">
   <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
 </button>
 
@@ -952,15 +917,14 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate.js"></script>
+<script src="https://unpkg.com/osmbuildings@4.0.2/dist/OSMBuildings-Leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
 
 <script>
 // ============================================================
 // منع إطفاء الشاشة
 // ============================================================
-let noSleep = null;
-let wakeLock = null;
-
+let noSleep = null, wakeLock = null;
 async function keepScreenOn() {
   try {
     if ('wakeLock' in navigator) {
@@ -981,10 +945,32 @@ function allowScreenOff() {
   } catch(e) {}
 }
 document.addEventListener('visibilitychange', async () => {
-  if (document.visibilityState === 'visible' && wakeLock === null) {
-    await keepScreenOn();
-  }
+  if (document.visibilityState === 'visible' && wakeLock === null) await keepScreenOn();
 });
+
+// ============================================================
+// Service Worker — للعمل بدون اتصال
+// ============================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => {
+      console.warn('SW registration failed:', err);
+    });
+  });
+}
+
+// حالة الاتصال
+const offlineBadge = document.getElementById('offlineBadge');
+function updateOnlineStatus() {
+  if (navigator.onLine) {
+    offlineBadge.classList.remove('show');
+  } else {
+    offlineBadge.classList.add('show');
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
 
 // ============================================================
 // أيقونات SVG
@@ -1018,7 +1004,6 @@ const POI_ICONS_MAP = {
   hotel:      '<svg viewBox="0 0 24 24"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>'
 };
 
-// أيقونة سيارة مع سهم أمامي مدمج لضمان معرفة الاتجاه
 const CAR_ICON_TOPVIEW = `
 <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -1031,43 +1016,22 @@ const CAR_ICON_TOPVIEW = `
       <stop offset="0%" stop-color="#e8f3ff"/>
       <stop offset="100%" stop-color="#4a90e2"/>
     </linearGradient>
-    <filter id="carShadow">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="1.5"/>
-      <feOffset dx="0" dy="1.5" result="offsetblur"/>
-      <feComponentTransfer><feFuncA type="linear" slope="0.35"/></feComponentTransfer>
-      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
   </defs>
-  <!-- سهم الاتجاه (أمام السيارة) -->
-  <path d="M32 1 L 27 8 L 30 7 L 30 10 L 34 10 L 34 7 L 37 8 Z"
-        fill="#34a853" stroke="#fff" stroke-width="1"/>
-  <!-- جسم السيارة -->
+  <path d="M32 1 L 27 8 L 30 7 L 30 10 L 34 10 L 34 7 L 37 8 Z" fill="#34a853" stroke="#fff" stroke-width="1"/>
   <path d="M32 5 C 25 5 21 9 21 15 L 19 22 L 17 26 L 17 48 C 17 54 21 57 25 57 L 39 57 C 43 57 47 54 47 48 L 47 26 L 45 22 L 43 15 C 43 9 39 5 32 5 Z"
-        fill="url(#carBody)" stroke="#fff" stroke-width="2" filter="url(#carShadow)"/>
-  <!-- الزجاج الأمامي -->
+        fill="url(#carBody)" stroke="#fff" stroke-width="2"/>
   <path d="M25 15 Q 32 12 39 15 L 37 23 Q 32 21 27 23 Z" fill="url(#carGlass)" opacity="0.95"/>
-  <!-- الزجاج الخلفي -->
   <path d="M27 50 Q 32 48 37 50 L 38 54 Q 32 53 26 54 Z" fill="url(#carGlass)" opacity="0.85"/>
-  <!-- السقف -->
   <rect x="23" y="27" width="18" height="20" rx="3" fill="#0d47a1" opacity="0.85"/>
-  <!-- خط الوسط -->
-  <line x1="32" y1="27" x2="32" y2="47" stroke="#4a90e2" stroke-width="0.8" opacity="0.6"/>
-  <!-- المصابيح الأمامية -->
   <ellipse cx="24" cy="9" rx="2" ry="1.5" fill="#ffe082"/>
   <ellipse cx="40" cy="9" rx="2" ry="1.5" fill="#ffe082"/>
-  <!-- المصابيح الخلفية -->
   <rect x="21" y="55" width="4" height="1.8" rx="0.9" fill="#ff5252"/>
   <rect x="39" y="55" width="4" height="1.8" rx="0.9" fill="#ff5252"/>
-  <!-- المرايا الجانبية -->
-  <path d="M19 22 L 17 24 L 17 22 Z" fill="#1a73e8" stroke="#fff" stroke-width="0.5"/>
-  <path d="M45 22 L 47 24 L 47 22 Z" fill="#1a73e8" stroke="#fff" stroke-width="0.5"/>
 </svg>`;
 
 const WALK_ICON = `
 <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-  <!-- سهم الاتجاه -->
-  <path d="M32 2 L 28 10 L 30.5 9 L 30.5 12 L 33.5 12 L 33.5 9 L 36 10 Z"
-        fill="#34a853" stroke="#fff" stroke-width="1"/>
+  <path d="M32 2 L 28 10 L 30.5 9 L 30.5 12 L 33.5 12 L 33.5 9 L 36 10 Z" fill="#34a853" stroke="#fff" stroke-width="1"/>
   <circle cx="32" cy="34" r="24" fill="#1a73e8" stroke="#fff" stroke-width="3"/>
   <circle cx="32" cy="34" r="20" fill="#4a90e2" opacity="0.4"/>
   <g transform="translate(32,34)">
@@ -1078,7 +1042,7 @@ const WALK_ICON = `
 </svg>`;
 
 // ============================================================
-// إعداد الخريطة — مع دعم الدوران
+// إعداد الخريطة
 // ============================================================
 const DAMASCUS = [33.5138, 36.2765];
 const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1094,13 +1058,42 @@ const map = L.map('map', {
   rotate: true,
   bearing: 0,
   rotateControl: false,
-  touchRotate: false, // نمنع الدوران اليدوي حتى لا يتعارض مع التتبع
+  touchRotate: false,
   shiftKeyRotate: false,
   compassBearing: false
 }).setView(DAMASCUS, 13);
 
 streetLayer.addTo(map);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+// ============================================================
+// ⭐ طبقة المباني ثلاثية الأبعاد
+// ============================================================
+let osmb = null;
+let buildingsVisible = false;
+
+function enable3DBuildings() {
+  if (osmb) return;
+  try {
+    osmb = new OSMBuildings(map).load('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json');
+    osmb.setStyle({
+      wallColor: 'rgb(210,215,220)',
+      roofColor: 'rgb(180,185,190)',
+      shadowColor: 'rgba(0,0,0,0.3)',
+      shadows: true,
+      baseColor: '#c8d0d8'
+    });
+    buildingsVisible = true;
+  } catch(e) { console.warn('OSM Buildings failed:', e); }
+}
+
+function disable3DBuildings() {
+  if (osmb && osmb.destroy) {
+    try { osmb.destroy(); } catch(e) {}
+    osmb = null;
+    buildingsVisible = false;
+  }
+}
 
 // ============================================================
 // الحالة العامة
@@ -1126,22 +1119,25 @@ let activeCategory = null;
 let poiMarkers = [];
 const SPEED_LIMIT = 120;
 
+// ⭐ نظام إعادة الحساب الذكي (يحل مشكلة التصحيح المتكرر)
+let offRouteCounter = 0;        // عدد القراءات المتتالية خارج المسار
 let lastRouteRecalcTime = 0;
-const ROUTE_RECALC_COOLDOWN = 5000;
+const OFF_ROUTE_THRESHOLD_M = 80;      // 80 متر بدل 50
+const OFF_ROUTE_COUNT = 3;             // 3 قراءات متتالية
+const ROUTE_RECALC_COOLDOWN = 15000;   // 15 ثانية
+const MIN_GPS_ACCURACY = 60;           // تجاهل القراءات الأقل دقة من 60 م
 
-let savedPlaces = JSON.parse(localStorage.getItem('syria_nav_saved') || '[]');
+let savedPlaces = JSON.parse(localStorage.getItem('kzdora_saved') || '[]');
+let cachedRoutes = JSON.parse(localStorage.getItem('kzdora_cached_routes') || '{}');
 
 // ============================================================
 // الوضع الليلي
 // ============================================================
-const themeBtn = document.getElementById('themeBtn');
 const themeHeaderBtn = document.getElementById('themeHeaderBtn');
-const themeIcon = document.getElementById('themeIcon');
 const themeIconHeader = document.getElementById('themeIconHeader');
 
 function setDarkMode(isDark) {
   document.body.classList.toggle('dark', isDark);
-  if (themeIcon) themeIcon.innerHTML = isDark ? ICONS.sun : ICONS.moon;
   if (themeIconHeader) themeIconHeader.innerHTML = isDark ? ICONS.sun : ICONS.moon;
   if (isDark) {
     if (map.hasLayer(streetLayer)) map.removeLayer(streetLayer);
@@ -1150,15 +1146,14 @@ function setDarkMode(isDark) {
     if (map.hasLayer(darkLayer)) map.removeLayer(darkLayer);
     streetLayer.addTo(map);
   }
-  localStorage.setItem('syria_nav_dark', isDark ? '1' : '0');
+  localStorage.setItem('kzdora_dark', isDark ? '1' : '0');
 }
 function initTheme() {
-  const saved = localStorage.getItem('syria_nav_dark');
+  const saved = localStorage.getItem('kzdora_dark');
   if (saved !== null) setDarkMode(saved === '1');
   else { const h = new Date().getHours(); setDarkMode(h < 6 || h >= 19); }
 }
 initTheme();
-if (themeBtn) themeBtn.onclick = () => setDarkMode(!document.body.classList.contains('dark'));
 themeHeaderBtn.onclick = () => setDarkMode(!document.body.classList.contains('dark'));
 
 // ============================================================
@@ -1260,6 +1255,10 @@ const CAT_LABELS = {
 };
 
 async function searchNearby(category) {
+  if (!navigator.onLine) {
+    showHint('⚠️ البحث عن الأماكن القريبة يحتاج اتصال بالإنترنت');
+    return;
+  }
   const center = userLocation || map.getCenter();
   if (!center) { showHint('⏳ جاري تحديد موقعك...'); return; }
   showLoading(`جاري البحث عن ${CAT_LABELS[category]}...`);
@@ -1309,7 +1308,7 @@ async function searchNearby(category) {
   } catch (err) {
     hideLoading();
     console.error('Overpass error:', err);
-    showHint('⚠️ خطأ في الاتصال بالخادم. حاول مجدداً.');
+    showHint('⚠️ خطأ في الاتصال');
   }
 }
 
@@ -1465,9 +1464,6 @@ document.getElementById('popupSave').onclick = () => {
   hideMapPopup();
 };
 
-// ============================================================
-// نقطة الانطلاق
-// ============================================================
 function setManualStart(loc) {
   manualStart = loc;
   if (startMarker) map.removeLayer(startMarker);
@@ -1491,6 +1487,10 @@ const searchBtn = document.getElementById('searchBtn');
 
 async function searchPlaces(query) {
   if (!query.trim()) return;
+  if (!navigator.onLine) {
+    showHint('⚠️ البحث العام يحتاج اتصال بالإنترنت');
+    return;
+  }
   const resultsBox = document.getElementById('results');
   const resultsList = document.getElementById('resultsList');
   const resultsCount = document.getElementById('resultsCount');
@@ -1501,7 +1501,7 @@ async function searchPlaces(query) {
 
   try {
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=sy&limit=10&accept-language=ar&addressdetails=1`;
-    const res = await fetch(url, { headers: { 'User-Agent': 'SyriaNavigationApp/1.0' } });
+    const res = await fetch(url, { headers: { 'User-Agent': 'KzdoraApp/1.0' } });
     const data = await res.json();
     resultsCount.textContent = `(${data.length})`;
     if (!data.length) {
@@ -1568,8 +1568,7 @@ document.addEventListener('click', e => {
 // ============================================================
 const nameDialog = document.getElementById('nameDialog');
 const nameInput = document.getElementById('nameInput');
-let pendingSaveLocation = null;
-let pendingSaveCallback = null;
+let pendingSaveLocation = null, pendingSaveCallback = null;
 
 function openNameDialog(loc, defaultName = '', callback = null) {
   pendingSaveLocation = loc;
@@ -1598,7 +1597,7 @@ nameInput.addEventListener('keypress', e => {
   if (e.key === 'Enter') document.getElementById('nameSave').click();
 });
 function persistSaved() {
-  localStorage.setItem('syria_nav_saved', JSON.stringify(savedPlaces));
+  localStorage.setItem('kzdora_saved', JSON.stringify(savedPlaces));
 }
 
 const savedPanel = document.getElementById('savedPanel');
@@ -1662,7 +1661,7 @@ function startGpsTracking() {
     pos => {
       const loc = [pos.coords.latitude, pos.coords.longitude];
       const accuracy = pos.coords.accuracy;
-      let heading = pos.coords.heading;
+      const heading = pos.coords.heading;
 
       if (!gpsFirstFix) {
         gpsFirstFix = true;
@@ -1673,14 +1672,18 @@ function startGpsTracking() {
       updateUserLocation(loc, accuracy, heading);
 
       if (navigationActive) {
-        // استخدم سرعة GPS الفعلية
         const speedMs = pos.coords.speed != null && pos.coords.speed >= 0
           ? pos.coords.speed
           : (currentSpeed / 3.6);
 
         updateVehiclePosition(loc, heading, speedMs);
         checkProgress(loc);
-        checkOffRoute(loc);
+        // ⭐ كشف الانحراف الذكي (يعمل فقط بدقة عالية)
+        if (accuracy < MIN_GPS_ACCURACY) {
+          checkOffRoute(loc);
+        } else {
+          offRouteCounter = 0;
+        }
       }
       gpsStatus.classList.add('active');
       gpsText.textContent = `GPS · ${Math.round(accuracy)}م`;
@@ -1694,7 +1697,7 @@ function startGpsTracking() {
 }
 
 // ============================================================
-// كشف الانحراف
+// ⭐ كشف الانحراف الذكي — يحل مشكلة التصحيح المتكرر
 // ============================================================
 function checkOffRoute(loc) {
   if (!routeLine || !navigationActive) return;
@@ -1707,16 +1710,23 @@ function checkOffRoute(loc) {
     if (d < minDist) minDist = d;
   }
 
-  if (minDist > 0.05) {
-    lastRouteRecalcTime = Date.now();
-    showHint('🔄 إعادة حساب المسار...');
-    playBeep(700, 200);
-    speak('تم تغيير المسار، جاري إعادة الحساب', true);
+  if (minDist > OFF_ROUTE_THRESHOLD_M / 1000) {
+    offRouteCounter++;
+    if (offRouteCounter >= OFF_ROUTE_COUNT) {
+      // 3 قراءات متتالية خارج المسار → أعد الحساب
+      lastRouteRecalcTime = Date.now();
+      offRouteCounter = 0;
+      showHint('🔄 إعادة حساب المسار...');
+      playBeep(700, 200);
+      speak('تم تغيير المسار، جاري إعادة الحساب', true);
 
-    if (currentDestination) {
-      userLocation = loc;
-      setDestination(currentDestination, null, true);
+      if (currentDestination) {
+        userLocation = loc;
+        setDestination(currentDestination, null, true);
+      }
     }
+  } else {
+    offRouteCounter = 0;
   }
 }
 
@@ -1775,26 +1785,18 @@ function updateUserLocation(loc, accuracy, heading) {
   }
 }
 
-// ============================================================
-// ⭐ أيقونة المركبة مع تتبع صحيح ودوران صحيح
-// ============================================================
 function updateVehiclePosition(loc, heading, speedMs) {
-  // ⭐ حساب الاتجاه الحقيقي للسير
-  // heading من GPS قد يكون null → استخدم الفرق بين موقعين متتاليين
   let newHeading = heading;
   if (newHeading === null || newHeading === undefined || isNaN(newHeading) || newHeading < 0) {
     if (lastPosition && lastPosition[1] !== loc[1]) {
-      // حرّك فعلياً → احسب الاتجاه من الموقع السابق
       const d = haversine(lastPosition[0], lastPosition[1], loc[0], loc[1]);
-      if (d > 0.005) { // > 5 أمتار (تجنب الضجيج)
+      if (d > 0.005) {
         newHeading = computeBearing(lastPosition[0], lastPosition[1], loc[0], loc[1]);
       }
     }
   }
 
-  // Smooth rotation لتجنب الاهتزاز
   if (newHeading !== null && newHeading !== undefined && !isNaN(newHeading)) {
-    // اختر الاتجاه الأقصر بين الدورتين
     let delta = newHeading - lastHeading;
     if (delta > 180) delta -= 360;
     if (delta < -180) delta += 360;
@@ -1805,54 +1807,30 @@ function updateVehiclePosition(loc, heading, speedMs) {
   if (userCircle) { map.removeLayer(userCircle); userCircle = null; }
 
   const iconSvg = currentTravelMode === 'foot' ? WALK_ICON : CAR_ICON_TOPVIEW;
-  // ⭐ الأيقونة تدور بنفس اتجاه السير (لا عكس!)
   const iconHtml = `<div class="vehicle-marker" style="transform: rotate(${lastHeading}deg);">${iconSvg}</div>`;
-
   const zoom = map.getZoom();
   const size = Math.max(44, Math.min(88, 34 + (zoom - 14) * 8));
 
   const icon = L.divIcon({
-    className: '',
-    html: iconHtml,
-    iconSize: [size, size],
-    iconAnchor: [size/2, size/2]
+    className: '', html: iconHtml,
+    iconSize: [size, size], iconAnchor: [size/2, size/2]
   });
 
   if (vehicleMarker) {
     vehicleMarker.setLatLng(loc);
     vehicleMarker.setIcon(icon);
   } else {
-    vehicleMarker = L.marker(loc, {
-      icon, zIndexOffset: 3000, interactive: false
-    }).addTo(map);
+    vehicleMarker = L.marker(loc, { icon, zIndexOffset: 3000, interactive: false }).addTo(map);
   }
 
-  // ⭐ تتبع الخريطة للمؤشر (المؤشر يتحرك مع الشاشة)
   if (recenterMode === 'follow' && navigationActive) {
     const targetZoom = getDynamicZoom(speedMs || 0);
-
-    // ⭐ نضع السيارة في الثلث السفلي ونتحرك معها للأمام
-    // اتجاه الحركة: lastHeading
-    // نضع المركز خلف السيارة بمقدار 35% من ارتفاع الشاشة
-
-    // الزاوية العكسية: ندور الخريطة بنفس اتجاه السيارة (لا عكس!)
-    // لأن السيارة تبقى ثابتة نحو الأعلى، والخريطة تدور حولها
-    const rotationDeg = -lastHeading; // الخريطة تدور عكس اتجاه السيارة لتظهر السيارة دائماً نحو الأعلى
-
-    // احسب مركز الخريطة
-    const offsetPx = map.getSize().y * 0.32; // السيارة في الثلث السفلي
-    const mapHeightMeters = offsetPx * (156543.03392 * Math.cos(loc[0]*Math.PI/180) / Math.pow(2, targetZoom));
+    const rotationDeg = -lastHeading;
+    const offsetPx = map.getSize().y * 0.32;
     const centerLatLng = offsetLatLng(loc, lastHeading + 180, offsetPx);
 
-    // ⭐ استخدم panTo للمركز الجديد بدون تغيير الزوم لتفادي الإزعاج
     map.setView(centerLatLng, targetZoom, { animate: true, duration: 0.35, easeLinearity: 0.5 });
-
-    // ⭐ تدوير الخريطة (المؤشر يبقى نحو الأعلى دائماً)
-    try {
-      if (map.setBearing) {
-        map.setBearing(rotationDeg);
-      }
-    } catch(e) {}
+    try { if (map.setBearing) map.setBearing(rotationDeg); } catch(e) {}
   }
 }
 
@@ -1893,13 +1871,46 @@ function setDestination(loc, name, isRecalc = false) {
   }).addTo(map);
 
   if (!isRecalc) {
-    localStorage.setItem('syria_nav_last_dest', JSON.stringify({ loc, name: name || '' }));
+    localStorage.setItem('kzdora_last_dest', JSON.stringify({ loc, name: name || '' }));
   }
 
   const start = (navigationActive && userLocation) ? userLocation : (manualStart || userLocation);
   if (!start) {
     speak('يرجى تحديد موقع الانطلاق. اضغط مطولاً على الخريطة');
     showHint('📍 اضغط مطولاً على الخريطة لتحديد موقع الانطلاق');
+    return;
+  }
+
+  // ⭐ تحقق من وجود مسار محفوظ بدون اتصال
+  if (!navigator.onLine) {
+    const cacheKey = `${start[0].toFixed(4)},${start[1].toFixed(4)}_${loc[0].toFixed(4)},${loc[1].toFixed(4)}`;
+    if (cachedRoutes[cacheKey]) {
+      // استخدم المسار المحفوظ
+      const data = cachedRoutes[cacheKey];
+      const routes = data.routes;
+      if (routes && routes.length) {
+        const fastest = [...routes].sort((a,b) => a.duration - b.duration)[0];
+        const shortest = [...routes].sort((a,b) => a.distance - b.distance)[0];
+        const traffic = [...routes].sort((a,b) => (b.distance/b.duration) - (a.distance/a.duration))[0];
+        currentRouteOptions = { fastest, shortest, traffic, all: routes };
+        document.getElementById('infoFastest').textContent = `${(fastest.distance/1000).toFixed(1)}كم · ${Math.round(fastest.duration/60)}د`;
+        document.getElementById('infoShortest').textContent = `${(shortest.distance/1000).toFixed(1)}كم · ${Math.round(shortest.duration/60)}د`;
+        document.getElementById('infoTraffic').textContent = `${(traffic.distance/1000).toFixed(1)}كم · ${Math.round(traffic.duration/60)}د`;
+        selectRoute('fastest');
+        if (!isRecalc) {
+          document.getElementById('routeOptions').classList.add('show');
+          document.getElementById('startBtn').classList.add('show');
+        } else {
+          currentStepIndex = 0;
+          lastSpokenStep = -1;
+          updateNavigationUI();
+          speak('تم استخدام المسار المحفوظ');
+        }
+        showHint('📴 تم استخدام المسار المحفوظ (بدون إنترنت)');
+        return;
+      }
+    }
+    showHint('⚠️ المسار غير محفوظ ويعمل بدون إنترنت مطلوب');
     return;
   }
 
@@ -1921,6 +1932,25 @@ function setDestination(loc, name, isRecalc = false) {
         if (!isRecalc) alert('تعذر حساب المسار');
         return;
       }
+
+      // ⭐ احفظ المسار محلياً للعمل بدون اتصال
+      const cacheKey = `${start[0].toFixed(4)},${start[1].toFixed(4)}_${loc[0].toFixed(4)},${loc[1].toFixed(4)}`;
+      cachedRoutes[cacheKey] = {
+        routes: data.routes.slice(0, 3),
+        ts: Date.now()
+      };
+      try {
+        localStorage.setItem('kzdora_cached_routes', JSON.stringify(cachedRoutes));
+      } catch(e) {
+        // في حال تجاوز الحد، احذف الأقدم
+        const keys = Object.keys(cachedRoutes);
+        if (keys.length > 20) {
+          const oldest = keys.sort((a,b) => cachedRoutes[a].ts - cachedRoutes[b].ts)[0];
+          delete cachedRoutes[oldest];
+          localStorage.setItem('kzdora_cached_routes', JSON.stringify(cachedRoutes));
+        }
+      }
+
       const routes = data.routes;
       const fastest = [...routes].sort((a,b) => a.duration - b.duration)[0];
       const shortest = [...routes].sort((a,b) => a.distance - b.distance)[0];
@@ -1939,7 +1969,6 @@ function setDestination(loc, name, isRecalc = false) {
       if (!isRecalc) {
         document.getElementById('routeOptions').classList.add('show');
         document.getElementById('startBtn').classList.add('show');
-
         const modeText = currentTravelMode === 'foot' ? 'مشياً' : 'بالسيارة';
         speak(`تم حساب المسار ${modeText}. الأسرع ${(fastest.distance/1000).toFixed(1)} كيلومتر، ${Math.round(fastest.duration/60)} دقيقة`);
       } else {
@@ -2050,7 +2079,6 @@ document.getElementById('startBtn').onclick = async () => {
 
   await keepScreenOn();
 
-  // ⭐ تركيز على موقع المستخدم قبل البدء
   if (userLocation) {
     map.setView(userLocation, 17, { animate: true });
     await new Promise(r => setTimeout(r, 400));
@@ -2060,7 +2088,11 @@ document.getElementById('startBtn').onclick = async () => {
   recenterMode = 'follow';
   currentStepIndex = 0;
   lastSpokenStep = -1;
+  offRouteCounter = 0;
   document.body.classList.add('navigating');
+
+  // ⭐ تفعيل المباني ثلاثية الأبعاد
+  enable3DBuildings();
 
   document.getElementById('startBtn').classList.remove('show');
   document.getElementById('routeOptions').classList.remove('show');
@@ -2075,13 +2107,10 @@ document.getElementById('startBtn').onclick = async () => {
   playBeep(880, 120);
   setTimeout(() => speak('بدء التوجيه. ' + (currentSteps[0]?.text || '')), 200);
 
-  // ⭐ ابدأ الكاميرا في وضع التتبع مع الدوران
   if (userLocation) {
     const targetZoom = 17;
     const targetCenter = offsetLatLng(userLocation, lastHeading + 180, map.getSize().y * 0.32);
     map.setView(targetCenter, targetZoom, { animate: true });
-
-    // تدوير الخريطة لاتجاه السير
     setTimeout(() => {
       try { if (map.setBearing) map.setBearing(-lastHeading); } catch(e) {}
     }, 500);
@@ -2102,6 +2131,9 @@ function stopNavigation() {
 
   allowScreenOff();
 
+  // ⭐ إيقاف المباني ثلاثية الأبعاد
+  disable3DBuildings();
+
   document.getElementById('navTopBar').classList.remove('show');
   document.getElementById('navBottomBar').classList.remove('show');
   document.getElementById('navStopFloat').classList.remove('show');
@@ -2120,8 +2152,8 @@ function stopNavigation() {
   currentDestination = null;
   manualStart = null;
   lastRouteRecalcTime = 0;
+  offRouteCounter = 0;
 
-  // ⭐ إعادة دوران الخريطة للشمال
   try { if (map.setBearing) map.setBearing(0); } catch(e) {}
 
   if (userLocation) {
@@ -2263,7 +2295,7 @@ document.getElementById('exitConfirm').onclick = () => {
   exitDialog.classList.remove('show');
   window.close();
   setTimeout(() => {
-    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;padding:20px;background:#1a73e8;color:#fff;flex-direction:column;gap:16px;"><div style="font-size:60px;">👋</div><h2>شكراً لاستخدامك ملاحة الشام</h2><p style="opacity:0.9;">يمكنك إغلاق التبويب الآن</p></div>';
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;padding:20px;background:linear-gradient(135deg,#1a73e8,#0d47a1);color:#fff;flex-direction:column;gap:16px;"><div style="font-size:60px;">👋</div><h2>شكراً لاستخدامك كزدورة</h2><p style="opacity:0.9;">يمكنك إغلاق التبويب الآن</p></div>';
   }, 200);
 };
 
@@ -2296,13 +2328,13 @@ window.addEventListener('load', async () => {
           updateUserLocation(loc, pos.coords.accuracy, pos.coords.heading);
           gpsStatus.classList.add('show', 'active');
           gpsText.textContent = `GPS · ${Math.round(pos.coords.accuracy)}م`;
-          speak('أهلاً بك في ملاحة الشام. دليل الملاحة والخرائط في سوريا');
+          speak('أهلاً بك في كزدورة. ملاحة وخرائط في سوريا');
           startGpsTracking();
         },
         err => {
           gpsStatus.classList.add('show');
           gpsText.textContent = 'اضغط زر الموقع للسماح';
-          speak('أهلاً بك في ملاحة الشام. يرجى السماح بالوصول إلى موقعك أو حدد موقعك يدوياً بالضغط المطول.');
+          speak('أهلاً بك في كزدورة. يرجى السماح بالوصول إلى موقعك أو حدد موقعك يدوياً بالضغط المطول.');
           showHint('📍 اضغط مطولاً على الخريطة لتحديد موقعك');
         },
         { enableHighAccuracy: true, timeout: 15000 }
