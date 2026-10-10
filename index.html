@@ -606,4 +606,275 @@ function addInvLine() {
   const tr = document.createElement('tr');
   tr.innerHTML = `
     <td><input class="form-control iDesc"></td>
-    <td><input type="number" step="0.01" class="form-control iQty" value="1"
+    <td><input type="number" step="0.01" class="form-control iQty" value="1" oninput="calcInvoice()"></td>
+    <td><input type="number" step="0.01" class="form-control iPrice" value="0" oninput="calcInvoice()"></td>
+    <td class="iTotal">0.00</td>
+    <td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove();calcInvoice()">×</button></td>`;
+  document.getElementById('invLines').appendChild(tr);
+}
+
+function calcInvoice() {
+  let sub = 0;
+  document.querySelectorAll('#invLines tr').forEach(tr => {
+    const q = Number(tr.querySelector('.iQty').value || 0);
+    const p = Number(tr.querySelector('.iPrice').value || 0);
+    const t = q * p;
+    sub += t;
+    tr.querySelector('.iTotal').textContent = fmt(t);
+  });
+  const taxRate = Number(document.getElementById('invTax').value || 0);
+  const disc = Number(document.getElementById('invDiscount').value || 0);
+  const tax = (sub - disc) * taxRate / 100;
+  const total = sub - disc + tax;
+  document.getElementById('invSubtotal').textContent = fmt(sub);
+  document.getElementById('invTaxAmount').textContent = fmt(tax);
+  document.getElementById('invTotal').textContent = fmt(total);
+}
+
+async function saveInvoice() {
+  const type = document.getElementById('invType').value;
+  const partyId = Number(document.getElementById('invParty').value);
+  const date = document.getElementById('invDate').value;
+  const due = document.getElementById('invDue').value;
+  const notes = document.getElementById('invNotes').value;
+  const items = [];
+  document.querySelectorAll('#invLines tr').forEach(tr => {
+    const d = tr.querySelector('.iDesc').value.trim();
+    const q = Number(tr.querySelector('.iQty').value || 0);
+    const p = Number(tr.querySelector('.iPrice').value || 0);
+    if (d) items.push({ desc: d, qty: q, price: p, total: q * p });
+  });
+  if (!date || items.length === 0) { toast('أدخل البيانات', 'danger'); return; }
+  const sub = items.reduce((s, i) => s + i.total, 0);
+  const taxRate = Number(document.getElementById('invTax').value || 0);
+  const disc = Number(document.getElementById('invDiscount').value || 0);
+  const tax = (sub - disc) * taxRate / 100;
+  const total = sub - disc + tax;
+
+  const invs = await DB.getAll('invoices');
+  const prefix = type === 'sales' ? 'SI' : 'PI';
+  const num = `${prefix}-${new Date().getFullYear()}-${String(invs.length + 1).padStart(5, '0')}`;
+
+  await DB.add('invoices', {
+    number: num, type, partyId, date, due, notes, items,
+    subtotal: sub, taxRate, tax, discount: disc, total,
+    status: 'unpaid', createdAt: new Date().toISOString()
+  });
+  logAction('فاتورة جديدة', num);
+  invoiceModal.hide();
+  toast('تم حفظ الفاتورة');
+  await loadAll();
+}
+
+async function renderInvoices() {
+  const invs = await DB.getAll('invoices');
+  const parties = await DB.getAll('parties');
+  const pmap = Object.fromEntries(parties.map(p => [p.id, p.name]));
+  invs.sort((a, b) => b.id - a.id);
+  document.getElementById('invoicesList').innerHTML = invs.map(i => `
+    <tr>
+      <td>${i.number}</td><td>${i.date}</td>
+      <td>${i.type === 'sales' ? 'مبيعات' : 'مشتريات'}</td>
+      <td>${pmap[i.partyId] || '-'}</td>
+      <td>${fmt(i.total)}</td>
+      <td><span class="badge bg-${i.status === 'unpaid' ? 'danger' : 'success'}">${i.status}</span></td>
+    </tr>`).join('') || '<tr><td colspan=6 class="text-center">لا توجد فواتير</td></tr>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// التقارير
+// ═══════════════════════════════════════════════════════════════
+async function showReport(type) {
+  const accounts = await DB.getAll('accounts');
+  const entries = await DB.getAll('entries');
+  const bal = {};
+  entries.forEach(e => e.lines.forEach(l => {
+    bal[l.accountId] = (bal[l.accountId] || 0) + (l.debit - l.credit);
+  }));
+  const el = document.getElementById('reportContent');
+
+  if (type === 'trial') {
+    const rows = accounts.filter(a => !a.isGroup).map(a => {
+      const b = bal[a.id] || 0;
+      return { code: a.code, name: a.name, debit: b > 0 ? b : 0, credit: b < 0 ? -b : 0 };
+    });
+    const td = rows.reduce((s, r) => s + r.debit, 0);
+    const tc = rows.reduce((s, r) => s + r.credit, 0);
+    el.innerHTML = `<div class="card p-3">
+      <h5>ميزان المراجعة</h5>
+      <table class="table table-hover">
+        <thead><tr><th>الكود</th><th>الحساب</th><th>مدين</th><th>دائن</th></tr></thead>
+        <tbody>${rows.map(r => `<tr><td>${r.code}</td><td>${r.name}</td>
+          <td class="text-success">${fmt(r.debit)}</td>
+          <td class="text-danger">${fmt(r.credit)}</td></tr>`).join('')}
+        <tr class="table-dark"><td colspan="2"><b>الإجمالي</b></td>
+        <td><b>${fmt(td)}</b></td><td><b>${fmt(tc)}</b></td></tr></tbody>
+      </table></div>`;
+  } else if (type === 'income') {
+    const revs = accounts.filter(a => a.type === 'revenue' && !a.isGroup)
+      .map(a => ({ name: a.name, amount: -(bal[a.id] || 0) }));
+    const exps = accounts.filter(a => a.type === 'expense' && !a.isGroup)
+      .map(a => ({ name: a.name, amount: bal[a.id] || 0 }));
+    const tr = revs.reduce((s, r) => s + r.amount, 0);
+    const te = exps.reduce((s, e) => s + e.amount, 0);
+    const net = tr - te;
+    el.innerHTML = `<div class="row g-3">
+      <div class="col-md-6"><div class="card p-3">
+        <h5 class="text-success">الإيرادات</h5>
+        <table class="table"><tbody>
+        ${revs.map(r => `<tr><td>${r.name}</td><td>${fmt(r.amount)}</td></tr>`).join('')}
+        <tr class="table-success"><td><b>الإجمالي</b></td><td><b>${fmt(tr)}</b></td></tr>
+        </tbody></table></div></div>
+      <div class="col-md-6"><div class="card p-3">
+        <h5 class="text-danger">المصروفات</h5>
+        <table class="table"><tbody>
+        ${exps.map(e => `<tr><td>${e.name}</td><td>${fmt(e.amount)}</td></tr>`).join('')}
+        <tr class="table-danger"><td><b>الإجمالي</b></td><td><b>${fmt(te)}</b></td></tr>
+        </tbody></table></div></div>
+    </div>
+    <div class="card p-3 mt-3 text-center">
+      <h3>صافي الربح: <span class="text-${net >= 0 ? 'success' : 'danger'}">${fmt(net)}</span></h3>
+    </div>`;
+  } else if (type === 'balance') {
+    const assets = accounts.filter(a => a.type === 'asset' && !a.isGroup)
+      .map(a => ({ name: a.name, amount: bal[a.id] || 0 }));
+    const liabs = accounts.filter(a => a.type === 'liability' && !a.isGroup)
+      .map(a => ({ name: a.name, amount: -(bal[a.id] || 0) }));
+    const equity = accounts.filter(a => a.type === 'equity' && !a.isGroup)
+      .map(a => ({ name: a.name, amount: -(bal[a.id] || 0) }));
+    const ta = assets.reduce((s, a) => s + a.amount, 0);
+    const tl = liabs.reduce((s, l) => s + l.amount, 0);
+    const te = equity.reduce((s, e) => s + e.amount, 0);
+    const mkTable = (title, data, total, color) => `<div class="card p-3 mb-3">
+      <h5 class="text-${color}">${title}</h5>
+      <table class="table"><tbody>
+      ${data.map(d => `<tr><td>${d.name}</td><td>${fmt(d.amount)}</td></tr>`).join('')}
+      <tr class="table-${color}"><td><b>الإجمالي</b></td><td><b>${fmt(total)}</b></td></tr>
+      </tbody></table></div>`;
+    el.innerHTML = `<div class="row g-3">
+      <div class="col-md-6">${mkTable('الأصول', assets, ta, 'primary')}</div>
+      <div class="col-md-6">${mkTable('الخصوم', liabs, tl, 'warning')}
+      ${mkTable('حقوق الملكية', equity, te, 'success')}</div>
+    </div>
+    <div class="card p-3 text-center">
+      <h5>الأصول: ${fmt(ta)} | الخصوم + الملكية: ${fmt(tl + te)}</h5>
+      <p class="text-${Math.abs(ta - (tl + te)) < 1 ? 'success' : 'danger'}">
+      ${Math.abs(ta - (tl + te)) < 1 ? '✓ متوازنة' : '⚠ غير متوازنة'}</p></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// سجل التدقيق
+// ═══════════════════════════════════════════════════════════════
+async function renderAudit() {
+  const logs = await DB.getAll('audit');
+  logs.sort((a, b) => new Date(b.time) - new Date(a.time));
+  document.getElementById('auditList').innerHTML = logs.slice(0, 200).map(l => `
+    <tr><td>${new Date(l.time).toLocaleString('ar')}</td>
+    <td>${l.action}</td><td>${l.details || '-'}</td></tr>
+  `).join('') || '<tr><td colspan=3 class="text-center">لا يوجد</td></tr>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// لوحة التحكم
+// ═══════════════════════════════════════════════════════════════
+let chart;
+
+async function renderDashboard() {
+  const accounts = await DB.getAll('accounts');
+  const entries = await DB.getAll('entries');
+  const bal = {};
+  entries.forEach(e => e.lines.forEach(l => {
+    bal[l.accountId] = (bal[l.accountId] || 0) + (l.debit - l.credit);
+  }));
+  const sumType = t => accounts.filter(a => a.type === t && !a.isGroup)
+    .reduce((s, a) => s + (bal[a.id] || 0), 0);
+  const assets = sumType('asset');
+  const liab = -sumType('liability');
+  const rev = -sumType('revenue');
+  const exp = sumType('expense');
+  const net = rev - exp;
+
+  document.getElementById('stAssets').textContent = fmt(assets);
+  document.getElementById('stLiab').textContent = fmt(liab);
+  document.getElementById('stRev').textContent = fmt(rev);
+  document.getElementById('stNet').textContent = fmt(net);
+
+  const recent = entries.slice().sort((a, b) => b.id - a.id).slice(0, 5);
+  document.getElementById('recentEntries').innerHTML = recent.map(e => `
+    <tr><td>${e.number}</td><td>${e.date}</td><td>${e.desc || '-'}</td>
+    <td class="text-success">${fmt(e.totalDebit)}</td>
+    <td class="text-danger">${fmt(e.totalCredit)}</td></tr>
+  `).join('') || '<tr><td colspan=5 class="text-center">لا توجد قيود</td></tr>';
+
+  const ctx = document.getElementById('chartOverview');
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['أصول', 'خصوم', 'إيرادات', 'مصروفات', 'صافي'],
+      datasets: [{
+        data: [assets, liab, rev, exp, net],
+        backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', net >= 0 ? '#047857' : '#b91c1c']
+      }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// التشغيل
+// ═══════════════════════════════════════════════════════════════
+async function loadAll() {
+  await renderDashboard();
+  await renderAccounts();
+  await renderJournal();
+  await renderInvoices();
+  await renderParties();
+  await renderAudit();
+}
+
+async function seedData() {
+  const accs = await DB.getAll('accounts');
+  if (accs.length > 0) return;
+  const defaultAccs = [
+    { code: '1000', name: 'الأصول', type: 'asset', isGroup: true },
+    { code: '1100', name: 'النقدية', type: 'asset', isGroup: false },
+    { code: '1110', name: 'الصندوق', type: 'asset', isGroup: false },
+    { code: '1120', name: 'البنك', type: 'asset', isGroup: false },
+    { code: '1200', name: 'العملاء المدينون', type: 'asset', isGroup: false },
+    { code: '1300', name: 'المخزون', type: 'asset', isGroup: false },
+    { code: '2000', name: 'الخصوم', type: 'liability', isGroup: true },
+    { code: '2100', name: 'الموردون الدائنون', type: 'liability', isGroup: false },
+    { code: '2200', name: 'ضريبة القيمة المضافة', type: 'liability', isGroup: false },
+    { code: '3000', name: 'حقوق الملكية', type: 'equity', isGroup: true },
+    { code: '3100', name: 'رأس المال', type: 'equity', isGroup: false },
+    { code: '3200', name: 'الأرباح المحتجزة', type: 'equity', isGroup: false },
+    { code: '4000', name: 'الإيرادات', type: 'revenue', isGroup: true },
+    { code: '4100', name: 'إيرادات المبيعات', type: 'revenue', isGroup: false },
+    { code: '5000', name: 'المصروفات', type: 'expense', isGroup: true },
+    { code: '5100', name: 'تكلفة البضاعة المباعة', type: 'expense', isGroup: false },
+    { code: '5200', name: 'مصروفات رواتب', type: 'expense', isGroup: false },
+    { code: '5300', name: 'مصروفات إيجار', type: 'expense', isGroup: false },
+    { code: '5400', name: 'مصروفات عمومية', type: 'expense', isGroup: false }
+  ];
+  for (const a of defaultAccs) await DB.add('accounts', a);
+}
+
+window.addEventListener('load', async () => {
+  await openDB();
+  await seedData();
+  entryModal = new bootstrap.Modal(document.getElementById('entryModal'));
+  invoiceModal = new bootstrap.Modal(document.getElementById('invoiceModal'));
+  if (sessionStorage.getItem('logged') === '1') {
+    document.getElementById('loginView').style.display = 'none';
+    document.getElementById('appView').style.display = 'block';
+    loadAll();
+  }
+  document.getElementById('loginPass').addEventListener('keypress', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+});
+</script>
+</body>
+</html>
