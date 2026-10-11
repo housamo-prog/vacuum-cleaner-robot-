@@ -1,7 +1,7 @@
 {
   "name": "كزدورة — ملاحة وخرائط",
   "short_name": "كزدورة",
-  "description": "تطبيق ملاحة وخرائط عربي للعمل في سوريا",
+  "description": "تطبيق ملاحة عربي للعمل في سوريا — يعمل بدون إنترنت",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
