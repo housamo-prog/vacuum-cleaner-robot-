@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#1a73e8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -11,325 +11,294 @@
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.json">
 <title>كزدورة — ملاحة وخرائط</title>
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
-:root{--panel:#fff;--text:#202124;--text-sub:#5f6368;--primary:#1a73e8;--primary-dark:#1557b0;--danger:#ea4335;--success:#34a853;--border:#f1f3f4;--input-bg:#f1f3f4;--gold:#fbbc04;--fuel:#ea8600;--pharmacy:#34a853;--hospital:#ea4335;--grocery:#7c4dff;--stop:#ff6d00;--emergency:#d32f2f;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);}
-body.dark{--panel:#1e1e1e;--text:#e8eaed;--text-sub:#9aa0a6;--primary:#8ab4f8;--border:#2d2d2d;--input-bg:#2d2d2d;}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;width:100%;font-family:-apple-system,'Segoe UI',Tahoma,Arial,sans-serif;overflow:hidden;background:#e8eaed;color:var(--text);overscroll-behavior:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;position:fixed;}
-#map{position:fixed;inset:0;width:100vw;height:100vh;z-index:1;background:#e8eaed;}
-body.dark #map{background:#121212;}
-body.dark #map .maplibregl-canvas{filter:invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9);}
-body.dark .maplibregl-marker,body.dark .poi-marker{filter:invert(1) hue-rotate(180deg);}
-.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none!important;}
-
-#offlineBadge{position:fixed;top:calc(66px + var(--safe-top));left:50%;transform:translateX(-50%);z-index:2000;background:rgba(234,67,53,.95);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;display:none;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,0,0,.3);}
-#offlineBadge.show{display:flex;}
-#offlineBadge svg{width:14px;height:14px;fill:#fff;}
-
-#installPrompt{position:fixed;bottom:calc(88px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(200%);z-index:1400;background:linear-gradient(135deg,#1a73e8,#0d47a1);color:#fff;padding:12px 20px;border-radius:50px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 24px rgba(26,115,232,.5);font-family:inherit;font-size:14px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;}
-#installPrompt.show{transform:translateX(-50%) translateY(0);opacity:1;}
-#installPrompt svg{width:20px;height:20px;fill:#fff;}
-body.navigating #installPrompt{display:none;}
-
-#appHeader{position:fixed;top:0;left:0;right:0;z-index:1050;padding:calc(10px + var(--safe-top)) 14px 10px;background:linear-gradient(135deg,#1a73e8 0%,#0d47a1 100%);display:flex;align-items:center;gap:10px;box-shadow:0 2px 14px rgba(0,0,0,.25);color:#fff;transition:transform .35s ease,opacity .35s;}
-body.navigating #appHeader{transform:translateY(-100%);opacity:0;pointer-events:none;}
-#appHeader .logo{width:42px;height:42px;flex-shrink:0;background:rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.2);}
-#appHeader .logo svg{width:26px;height:26px;fill:#fff;}
-#appHeader .title-block{flex:1;min-width:0;}
-#appHeader .title{font-size:19px;font-weight:800;}
-#appHeader .subtitle{font-size:11px;opacity:.9;margin-top:2px;}
-#appHeader .actions{display:flex;gap:6px;}
-#appHeader .header-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.15);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-#appHeader .header-btn svg{width:20px;height:20px;fill:#fff;}
-
-#searchBar{position:fixed;top:calc(66px + var(--safe-top));left:10px;right:10px;z-index:1000;display:flex;gap:6px;align-items:center;background:var(--panel);border-radius:14px;padding:6px;box-shadow:0 2px 12px rgba(0,0,0,.15);transition:transform .3s,opacity .3s;}
-body.navigating #searchBar{transform:translateY(-250%);opacity:0;pointer-events:none;}
-#searchInput{flex:1;border:none;outline:none;padding:12px 14px;font-size:15px;border-radius:10px;background:var(--input-bg);font-family:inherit;color:var(--text);}
-#searchInput::placeholder{color:var(--text-sub);}
-.icon-btn{background:transparent;border:none;cursor:pointer;width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
-.icon-btn svg{width:22px;height:22px;fill:var(--primary);}
-
-#categoryBar{position:fixed;top:calc(124px + var(--safe-top));left:0;right:0;z-index:999;overflow-x:auto;overflow-y:hidden;padding:6px 10px 10px;display:flex;gap:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:transform .3s,opacity .3s;}
-#categoryBar::-webkit-scrollbar{display:none;}
-body.navigating #categoryBar{transform:translateY(-350%);opacity:0;pointer-events:none;}
-.cat-btn{flex-shrink:0;background:var(--panel);border:none;cursor:pointer;padding:8px 14px 8px 10px;border-radius:22px;display:flex;align-items:center;gap:6px;font-family:inherit;font-size:13px;font-weight:500;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.12);white-space:nowrap;border:1.5px solid transparent;}
-.cat-btn.active{background:var(--primary);color:#fff;}
-.cat-btn svg{width:18px;height:18px;flex-shrink:0;}
-.cat-btn[data-cat="fuel"] svg{fill:var(--fuel);}
-.cat-btn[data-cat="pharmacy"] svg{fill:var(--pharmacy);}
-.cat-btn[data-cat="hospital"] svg{fill:var(--hospital);}
-.cat-btn[data-cat="grocery"] svg{fill:var(--grocery);}
-.cat-btn[data-cat="restaurant"] svg{fill:#ff6d00;}
-.cat-btn[data-cat="atm"] svg{fill:#00897b;}
-.cat-btn[data-cat="parking"] svg{fill:#3949ab;}
-.cat-btn[data-cat="mosque"] svg{fill:#5d4037;}
-.cat-btn[data-cat="cafe"] svg{fill:#6d4c41;}
-.cat-btn[data-cat="hotel"] svg{fill:#00838f;}
-.cat-btn.active svg{fill:#fff;}
-
-#results{position:fixed;top:calc(178px + var(--safe-top));left:10px;right:10px;z-index:1000;background:var(--panel);border-radius:14px;max-height:55vh;overflow-y:auto;display:none;box-shadow:0 4px 20px rgba(0,0,0,.2);}
-#results.show{display:block;}
-.result-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;display:flex;gap:12px;align-items:center;}
-.result-item:active{background:var(--input-bg);}
-.result-item .pin svg{width:22px;height:22px;flex-shrink:0;}
-.result-item .text{flex:1;line-height:1.4;min-width:0;}
-.result-item .title{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.result-item .sub{font-size:12px;color:var(--text-sub);margin-top:2px;}
-.result-item .dist-badge{background:var(--input-bg);color:var(--primary);padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;flex-shrink:0;}
-.result-item .save-btn{background:transparent;border:none;cursor:pointer;padding:8px;}
-.result-item .save-btn svg{width:18px;height:18px;fill:var(--text-sub);}
-.result-item .save-btn.saved svg{fill:var(--gold);}
-#resultsHeader{position:sticky;top:0;z-index:2;background:var(--panel);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);border-radius:14px 14px 0 0;}
-#resultsHeader .title-block{font-size:13px;font-weight:600;}
-#resultsHeader .title-block span{color:var(--text-sub);font-weight:400;}
-#resultsClose{background:var(--input-bg);border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-#resultsClose svg{width:16px;height:16px;fill:var(--text);}
-
-#travelModeBar{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:var(--panel);border-radius:28px;padding:6px;box-shadow:0 4px 24px rgba(0,0,0,.25);display:none;gap:4px;transition:transform .35s,opacity .35s;}
-#travelModeBar.show{display:flex;}
-body.navigating #travelModeBar{transform:translate(-50%,250%);opacity:0;pointer-events:none;}
-.mode-btn{background:transparent;border:none;cursor:pointer;padding:10px 20px;border-radius:22px;display:flex;align-items:center;gap:8px;font-family:inherit;font-size:14px;font-weight:600;color:var(--text-sub);}
-.mode-btn.active{background:var(--primary);color:#fff;}
-.mode-btn svg{width:20px;height:20px;fill:currentColor;}
-
-#speedometer{position:fixed;top:calc(180px + var(--safe-top));left:10px;z-index:999;background:var(--panel);padding:8px 14px;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.15);display:none;align-items:center;gap:8px;transition:transform .3s,opacity .3s;}
-#speedometer.show{display:flex;}
-body.navigating #speedometer{transform:translateY(-250%);opacity:0;pointer-events:none;}
-#speedometer.over{background:#fce8e6;}
-#speedometer.over #speedValue{color:var(--danger);}
-#speedValue{font-size:26px;font-weight:800;color:var(--primary);min-width:45px;text-align:center;font-variant-numeric:tabular-nums;}
-#speedUnit{font-size:11px;color:var(--text-sub);line-height:1.2;}
-
-#gpsStatus{position:fixed;top:calc(180px + var(--safe-top));right:10px;z-index:999;background:var(--panel);padding:8px 12px;border-radius:20px;font-size:11px;color:var(--text-sub);display:none;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:transform .3s,opacity .3s;}
-#gpsStatus.show{display:flex;}
-body.navigating #gpsStatus{transform:translateY(-250%);opacity:0;pointer-events:none;}
-#gpsStatus .dot{width:8px;height:8px;border-radius:50%;background:var(--danger);animation:pulse 1.5s infinite;}
-#gpsStatus.active .dot{background:var(--success);}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-#mapPopup{position:fixed;z-index:2000;background:var(--panel);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.3);padding:6px;display:none;min-width:210px;}
-#mapPopup.show{display:block;}
-.popup-item{background:transparent;border:none;cursor:pointer;padding:12px 14px;border-radius:10px;display:flex;align-items:center;gap:10px;font-family:inherit;font-size:14px;color:var(--text);width:100%;text-align:right;}
-.popup-item:active{background:var(--input-bg);}
-.popup-item svg{width:20px;height:20px;flex-shrink:0;}
-.popup-item.start svg{fill:var(--success);}
-.popup-item.dest svg{fill:var(--danger);}
-.popup-item.save svg{fill:var(--gold);}
-.popup-item.stop svg{fill:var(--stop);}
-
-#savedPanel{position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.5);display:none;align-items:flex-end;}
-#savedPanel.show{display:flex;}
-#savedContent{background:var(--panel);width:100%;max-height:70vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto;}
+:root{--panel:#fff;--text:#202124;--text-sub:#5f6368;--primary:#1a73e8;--primary-dark:#1557b0;--danger:#ea4335;--success:#34a853;--border:#f1f3f4;--input-bg:#f1f3f4;--gold:#fbbc04;--fuel:#ea8600;--pharmacy:#34a853;--hospital:#ea4335;--grocery:#7c4dff;--stop:#ff6d00;--emergency:#d32f2f;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+body.dark{--panel:#1e1e1e;--text:#e8eaed;--text-sub:#9aa0a6;--primary:#8ab4f8;--border:#2d2d2d;--input-bg:#2d2d2d}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;width:100%;font-family:-apple-system,'Segoe UI',Tahoma,Arial,sans-serif;overflow:hidden;background:#e8eaed;color:var(--text);overscroll-behavior:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;position:fixed}
+#map{position:fixed;inset:0;width:100vw;height:100vh;z-index:1;background:#e8eaed}
+body.dark #map{background:#121212}
+body.dark #map .maplibregl-canvas{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
+body.dark .maplibregl-marker,body.dark .poi-marker{filter:invert(1) hue-rotate(180deg)}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none!important}
+#offlineBadge{position:fixed;top:calc(66px + var(--safe-top));left:50%;transform:translateX(-50%);z-index:2000;background:rgba(234,67,53,.95);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;display:none;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+#offlineBadge.show{display:flex}
+#offlineBadge svg{width:14px;height:14px;fill:#fff}
+#installPrompt{position:fixed;bottom:calc(88px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(200%);z-index:1400;background:linear-gradient(135deg,#1a73e8,#0d47a1);color:#fff;padding:12px 20px;border-radius:50px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 24px rgba(26,115,232,.5);font-family:inherit;font-size:14px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0}
+#installPrompt.show{transform:translateX(-50%) translateY(0);opacity:1}
+#installPrompt svg{width:20px;height:20px;fill:#fff}
+body.navigating #installPrompt{display:none}
+#appHeader{position:fixed;top:0;left:0;right:0;z-index:1050;padding:calc(10px + var(--safe-top)) 14px 10px;background:linear-gradient(135deg,#1a73e8 0%,#0d47a1 100%);display:flex;align-items:center;gap:10px;box-shadow:0 2px 14px rgba(0,0,0,.25);color:#fff;transition:transform .35s,opacity .35s}
+body.navigating #appHeader{transform:translateY(-100%);opacity:0;pointer-events:none}
+#appHeader .logo{width:42px;height:42px;flex-shrink:0;background:rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.2)}
+#appHeader .logo svg{width:26px;height:26px;fill:#fff}
+#appHeader .title-block{flex:1;min-width:0}
+#appHeader .title{font-size:19px;font-weight:800}
+#appHeader .subtitle{font-size:11px;opacity:.9;margin-top:2px}
+#appHeader .actions{display:flex;gap:6px}
+#appHeader .header-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.15);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#appHeader .header-btn svg{width:20px;height:20px;fill:#fff}
+#searchBar{position:fixed;top:calc(66px + var(--safe-top));left:10px;right:10px;z-index:1000;display:flex;gap:6px;align-items:center;background:var(--panel);border-radius:14px;padding:6px;box-shadow:0 2px 12px rgba(0,0,0,.15);transition:transform .3s,opacity .3s}
+body.navigating #searchBar{transform:translateY(-250%);opacity:0;pointer-events:none}
+#searchInput{flex:1;border:none;outline:none;padding:12px 14px;font-size:15px;border-radius:10px;background:var(--input-bg);font-family:inherit;color:var(--text)}
+#searchInput::placeholder{color:var(--text-sub)}
+.icon-btn{background:transparent;border:none;cursor:pointer;width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.icon-btn svg{width:22px;height:22px;fill:var(--primary)}
+#categoryBar{position:fixed;top:calc(124px + var(--safe-top));left:0;right:0;z-index:999;overflow-x:auto;overflow-y:hidden;padding:6px 10px 10px;display:flex;gap:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:transform .3s,opacity .3s}
+#categoryBar::-webkit-scrollbar{display:none}
+body.navigating #categoryBar{transform:translateY(-350%);opacity:0;pointer-events:none}
+.cat-btn{flex-shrink:0;background:var(--panel);border:none;cursor:pointer;padding:8px 14px 8px 10px;border-radius:22px;display:flex;align-items:center;gap:6px;font-family:inherit;font-size:13px;font-weight:500;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.12);white-space:nowrap;border:1.5px solid transparent}
+.cat-btn.active{background:var(--primary);color:#fff}
+.cat-btn svg{width:18px;height:18px;flex-shrink:0}
+.cat-btn[data-cat="fuel"] svg{fill:var(--fuel)}
+.cat-btn[data-cat="pharmacy"] svg{fill:var(--pharmacy)}
+.cat-btn[data-cat="hospital"] svg{fill:var(--hospital)}
+.cat-btn[data-cat="grocery"] svg{fill:var(--grocery)}
+.cat-btn[data-cat="restaurant"] svg{fill:#ff6d00}
+.cat-btn[data-cat="atm"] svg{fill:#00897b}
+.cat-btn[data-cat="parking"] svg{fill:#3949ab}
+.cat-btn[data-cat="mosque"] svg{fill:#5d4037}
+.cat-btn[data-cat="cafe"] svg{fill:#6d4c41}
+.cat-btn[data-cat="hotel"] svg{fill:#00838f}
+.cat-btn.active svg{fill:#fff}
+#results{position:fixed;top:calc(178px + var(--safe-top));left:10px;right:10px;z-index:1000;background:var(--panel);border-radius:14px;max-height:55vh;overflow-y:auto;display:none;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+#results.show{display:block}
+.result-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;display:flex;gap:12px;align-items:center}
+.result-item:active{background:var(--input-bg)}
+.result-item .pin svg{width:22px;height:22px;flex-shrink:0}
+.result-item .text{flex:1;line-height:1.4;min-width:0}
+.result-item .title{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.result-item .sub{font-size:12px;color:var(--text-sub);margin-top:2px}
+.result-item .dist-badge{background:var(--input-bg);color:var(--primary);padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;flex-shrink:0}
+.result-item .save-btn{background:transparent;border:none;cursor:pointer;padding:8px}
+.result-item .save-btn svg{width:18px;height:18px;fill:var(--text-sub)}
+.result-item .save-btn.saved svg{fill:var(--gold)}
+#resultsHeader{position:sticky;top:0;z-index:2;background:var(--panel);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);border-radius:14px 14px 0 0}
+#resultsHeader .title-block{font-size:13px;font-weight:600}
+#resultsHeader .title-block span{color:var(--text-sub);font-weight:400}
+#resultsClose{background:var(--input-bg);border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+#resultsClose svg{width:16px;height:16px;fill:var(--text)}
+#travelModeBar{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:var(--panel);border-radius:28px;padding:6px;box-shadow:0 4px 24px rgba(0,0,0,.25);display:none;gap:4px;transition:transform .35s,opacity .35s}
+#travelModeBar.show{display:flex}
+body.navigating #travelModeBar{transform:translate(-50%,250%);opacity:0;pointer-events:none}
+.mode-btn{background:transparent;border:none;cursor:pointer;padding:10px 20px;border-radius:22px;display:flex;align-items:center;gap:8px;font-family:inherit;font-size:14px;font-weight:600;color:var(--text-sub)}
+.mode-btn.active{background:var(--primary);color:#fff}
+.mode-btn svg{width:20px;height:20px;fill:currentColor}
+#speedometer{position:fixed;top:calc(180px + var(--safe-top));left:10px;z-index:999;background:var(--panel);padding:8px 14px;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.15);display:none;align-items:center;gap:8px;transition:transform .3s,opacity .3s}
+#speedometer.show{display:flex}
+body.navigating #speedometer{transform:translateY(-250%);opacity:0;pointer-events:none}
+#speedometer.over{background:#fce8e6}
+#speedometer.over #speedValue{color:var(--danger)}
+#speedValue{font-size:26px;font-weight:800;color:var(--primary);min-width:45px;text-align:center;font-variant-numeric:tabular-nums}
+#speedUnit{font-size:11px;color:var(--text-sub);line-height:1.2}
+#gpsStatus{position:fixed;top:calc(180px + var(--safe-top));right:10px;z-index:999;background:var(--panel);padding:8px 12px;border-radius:20px;font-size:11px;color:var(--text-sub);display:none;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:transform .3s,opacity .3s}
+#gpsStatus.show{display:flex}
+body.navigating #gpsStatus{transform:translateY(-250%);opacity:0;pointer-events:none}
+#gpsStatus .dot{width:8px;height:8px;border-radius:50%;background:var(--danger);animation:pulse 1.5s infinite}
+#gpsStatus.active .dot{background:var(--success)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}#mapPopup{position:fixed;z-index:2000;background:var(--panel);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.3);padding:6px;display:none;min-width:210px}
+#mapPopup.show{display:block}
+.popup-item{background:transparent;border:none;cursor:pointer;padding:12px 14px;border-radius:10px;display:flex;align-items:center;gap:10px;font-family:inherit;font-size:14px;color:var(--text);width:100%;text-align:right}
+.popup-item:active{background:var(--input-bg)}
+.popup-item svg{width:20px;height:20px;flex-shrink:0}
+.popup-item.start svg{fill:var(--success)}
+.popup-item.dest svg{fill:var(--danger)}
+.popup-item.save svg{fill:var(--gold)}
+.popup-item.stop svg{fill:var(--stop)}
+#savedPanel{position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.5);display:none;align-items:flex-end}
+#savedPanel.show{display:flex}
+#savedContent{background:var(--panel);width:100%;max-height:70vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-#savedHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
-#savedHeader h3{font-size:18px;}
-#savedClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-#savedClose svg{width:18px;height:18px;fill:var(--text);}
-#savedList{list-style:none;}
-#savedList li{padding:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;border-radius:10px;}
-#savedList li:active{background:var(--input-bg);}
-#savedList li .star svg{width:20px;height:20px;fill:var(--gold);}
-#savedList li .info{flex:1;}
-#savedList li .name{font-weight:500;font-size:14px;}
-#savedList li .coords{font-size:11px;color:var(--text-sub);margin-top:3px;}
-#savedList li .del-btn{background:transparent;border:none;cursor:pointer;padding:8px;}
-#savedList li .del-btn svg{width:18px;height:18px;fill:var(--danger);}
-#savedList .empty{text-align:center;color:var(--text-sub);padding:40px 20px;font-size:14px;}
-
-#waypointsBar{position:fixed;bottom:calc(160px + var(--safe-bottom));left:10px;right:10px;z-index:1000;background:var(--panel);border-radius:14px;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,.2);display:none;transition:transform .3s,opacity .3s;max-height:30vh;overflow-y:auto;}
-#waypointsBar.show{display:block;}
-body.navigating #waypointsBar{transform:translateY(250%);opacity:0;pointer-events:none;}
-#waypointsBar .wp-title{font-size:12px;font-weight:600;color:var(--text-sub);padding:4px 8px 8px;display:flex;justify-content:space-between;align-items:center;}
-#waypointsBar .wp-title button{background:transparent;border:none;cursor:pointer;font-size:12px;color:var(--primary);font-weight:600;font-family:inherit;}
-.wp-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;font-size:13px;background:var(--input-bg);margin-bottom:6px;}
-.wp-item .wp-num{width:24px;height:24px;border-radius:50%;background:var(--stop);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
-.wp-item .wp-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.wp-item .wp-del{background:transparent;border:none;cursor:pointer;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-.wp-item .wp-del svg{width:14px;height:14px;fill:var(--danger);}
-
-#routeOptions{position:fixed;bottom:calc(88px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:var(--panel);border-radius:16px;padding:6px;box-shadow:0 4px 20px rgba(0,0,0,.2);display:none;gap:4px;transition:transform .3s,opacity .3s;}
-#routeOptions.show{display:flex;}
-body.navigating #routeOptions{transform:translate(-50%,250%);opacity:0;pointer-events:none;}
-.route-btn{background:transparent;border:none;cursor:pointer;padding:8px 12px;border-radius:10px;font-size:11px;font-weight:500;font-family:inherit;color:var(--text-sub);display:flex;flex-direction:column;align-items:center;gap:2px;min-width:72px;}
-.route-btn.active{background:var(--primary);color:#fff;}
-.route-btn.active svg{fill:#fff;}
-.route-btn svg{width:16px;height:16px;fill:var(--text-sub);}
-.route-btn .info{font-size:9px;opacity:.85;}
-.route-btn:disabled{opacity:.4;cursor:not-allowed;}
-
-#startBtn{position:fixed;bottom:calc(160px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1001;background:var(--primary);color:#fff;border:none;padding:14px 28px 14px 22px;border-radius:50px;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(26,115,232,.4);display:none;font-family:inherit;align-items:center;gap:8px;transition:transform .3s,opacity .3s;white-space:nowrap;}
-#startBtn.show{display:flex;}
-body.navigating #startBtn{transform:translate(-50%,250%);opacity:0;pointer-events:none;}
-#startBtn svg{width:20px;height:20px;fill:#fff;}
-
-#navPanel{position:fixed;bottom:0;left:0;right:0;z-index:1000;background:var(--panel);border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,.2);padding:16px 18px calc(20px + var(--safe-bottom));display:none;max-height:45vh;overflow-y:auto;}
-#navPanel.show{display:block;}
-#navHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
-#navDistance{font-size:20px;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:8px;}
-#navDistance svg{width:20px;height:20px;fill:var(--primary);}
-#stopBtn{background:#fce8e6;color:#c5221f;border:none;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;}
-body.dark #stopBtn{background:#4a1e1c;color:#f28b82;}
-#steps{list-style:none;}
-#steps li{padding:12px 14px;border-bottom:1px solid var(--border);font-size:14px;display:flex;gap:12px;align-items:flex-start;border-radius:10px;}
-#steps li.current{background:#e8f0fe;color:#0d47a1;font-weight:600;}
-body.dark #steps li.current{background:#1a3a5c;color:#8ab4f8;}
-#steps .icon{min-width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--input-bg);border-radius:8px;}
-#steps li.current .icon{background:var(--primary);}
-#steps .icon svg{width:20px;height:20px;fill:var(--text-sub);}
-#steps li.current .icon svg{fill:#fff;}
-#steps .info{flex:1;}
-#steps .dist{color:var(--text-sub);font-size:12px;margin-top:3px;font-weight:400;}
-
-#navTopBar{position:fixed;top:0;left:0;right:0;z-index:1100;padding:calc(14px + var(--safe-top)) 14px 14px;background:linear-gradient(180deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.6) 60%,transparent 100%);display:none;align-items:center;gap:14px;color:#fff;}
-#navTopBar.show{display:flex;}
-#navTopBar .turn-icon{width:82px;height:82px;flex-shrink:0;background:linear-gradient(135deg,#1a73e8,#0d47a1);border-radius:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(26,115,232,.55);border:2px solid rgba(255,255,255,.15);}
-#navTopBar .turn-icon svg{width:54px;height:54px;fill:#fff;}
-#navTopBar .info{flex:1;min-width:0;}
-#navTopBar .dist{font-size:38px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 3px 12px rgba(0,0,0,.9);}
-#navTopBar .instr{font-size:15px;margin-top:8px;text-shadow:0 2px 8px rgba(0,0,0,.9);background:rgba(0,0,0,.4);padding:6px 10px;border-radius:8px;display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-
-#navBottomBar{position:fixed;bottom:0;left:0;right:0;z-index:1100;padding:10px 12px calc(14px + var(--safe-bottom));display:none;}
-#navBottomBar.show{display:block;}
-#navBottomCard{background:rgba(20,20,22,.96);border-radius:18px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 32px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.08);color:#fff;}
-#navBottomCard .stat{flex:1;display:flex;flex-direction:column;align-items:center;}
-#navBottomCard .stat .val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;}
-#navBottomCard .stat .lbl{font-size:10px;opacity:.7;margin-top:3px;}
-#navBottomCard .stat .val.eta{color:#8ab4f8;}
-#navBottomCard .divider{width:1px;height:36px;background:rgba(255,255,255,.1);}
-#navBottomCard .speed-badge{background:linear-gradient(135deg,#fff,#e8eaed);color:#1a73e8;padding:6px 14px;border-radius:12px;display:flex;flex-direction:column;align-items:center;min-width:72px;}
-#navBottomCard .speed-badge.over{background:linear-gradient(135deg,#ea4335,#c5221f);color:#fff;}
-#navBottomCard .speed-badge .val{font-size:24px;font-weight:900;}
-#navBottomCard .speed-badge .lbl{font-size:9px;opacity:.85;}
-
-#navStopFloat{position:fixed;top:calc(14px + var(--safe-top));left:14px;z-index:1200;background:rgba(234,67,53,.95);color:#fff;border:none;cursor:pointer;width:48px;height:48px;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.4);}
-#navStopFloat.show{display:flex;}
-#navStopFloat svg{width:20px;height:20px;fill:#fff;}
-
-#recenterBtn{position:fixed;right:12px;bottom:calc(20px + var(--safe-bottom));z-index:999;background:#fff;color:#1a73e8;border:none;cursor:pointer;width:52px;height:52px;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.3);}
-#recenterBtn.show{display:flex;}
-#recenterBtn svg{width:26px;height:26px;fill:#1a73e8;}
-body.navigating #recenterBtn{bottom:calc(20px + var(--safe-bottom));}
-
-#loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3000;background:rgba(32,33,36,.92);color:#fff;padding:16px 24px;border-radius:14px;font-size:14px;display:none;align-items:center;gap:12px;}
-#loading.show{display:flex;}
-.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-.user-location-icon{position:relative;width:24px;height:24px;}
-.user-location-icon .pulse{position:absolute;inset:0;border-radius:50%;background:rgba(26,115,232,.3);animation:pulseRing 2s ease-out infinite;}
+#savedHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+#savedHeader h3{font-size:18px}
+#savedClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+#savedClose svg{width:18px;height:18px;fill:var(--text)}
+#savedList{list-style:none}
+#savedList li{padding:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;border-radius:10px}
+#savedList li:active{background:var(--input-bg)}
+#savedList li .star svg{width:20px;height:20px;fill:var(--gold)}
+#savedList li .info{flex:1}
+#savedList li .name{font-weight:500;font-size:14px}
+#savedList li .coords{font-size:11px;color:var(--text-sub);margin-top:3px}
+#savedList li .del-btn{background:transparent;border:none;cursor:pointer;padding:8px}
+#savedList li .del-btn svg{width:18px;height:18px;fill:var(--danger)}
+#savedList .empty{text-align:center;color:var(--text-sub);padding:40px 20px;font-size:14px}
+#waypointsBar{position:fixed;bottom:calc(160px + var(--safe-bottom));left:10px;right:10px;z-index:1000;background:var(--panel);border-radius:14px;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,.2);display:none;transition:transform .3s,opacity .3s;max-height:30vh;overflow-y:auto}
+#waypointsBar.show{display:block}
+body.navigating #waypointsBar{transform:translateY(250%);opacity:0;pointer-events:none}
+#waypointsBar .wp-title{font-size:12px;font-weight:600;color:var(--text-sub);padding:4px 8px 8px;display:flex;justify-content:space-between;align-items:center}
+#waypointsBar .wp-title button{background:transparent;border:none;cursor:pointer;font-size:12px;color:var(--primary);font-weight:600;font-family:inherit}
+.wp-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;font-size:13px;background:var(--input-bg);margin-bottom:6px}
+.wp-item .wp-num{width:24px;height:24px;border-radius:50%;background:var(--stop);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.wp-item .wp-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wp-item .wp-del{background:transparent;border:none;cursor:pointer;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.wp-item .wp-del svg{width:14px;height:14px;fill:var(--danger)}
+#routeOptions{position:fixed;bottom:calc(88px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:var(--panel);border-radius:16px;padding:6px;box-shadow:0 4px 20px rgba(0,0,0,.2);display:none;gap:4px;transition:transform .3s,opacity .3s}
+#routeOptions.show{display:flex}
+body.navigating #routeOptions{transform:translate(-50%,250%);opacity:0;pointer-events:none}
+.route-btn{background:transparent;border:none;cursor:pointer;padding:8px 12px;border-radius:10px;font-size:11px;font-weight:500;font-family:inherit;color:var(--text-sub);display:flex;flex-direction:column;align-items:center;gap:2px;min-width:72px}
+.route-btn.active{background:var(--primary);color:#fff}
+.route-btn.active svg{fill:#fff}
+.route-btn svg{width:16px;height:16px;fill:var(--text-sub)}
+.route-btn .info{font-size:9px;opacity:.85}
+.route-btn:disabled{opacity:.4;cursor:not-allowed}
+#startBtn{position:fixed;bottom:calc(160px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1001;background:var(--primary);color:#fff;border:none;padding:14px 28px 14px 22px;border-radius:50px;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(26,115,232,.4);display:none;font-family:inherit;align-items:center;gap:8px;transition:transform .3s,opacity .3s;white-space:nowrap}
+#startBtn.show{display:flex}
+body.navigating #startBtn{transform:translate(-50%,250%);opacity:0;pointer-events:none}
+#startBtn svg{width:20px;height:20px;fill:#fff}
+#navPanel{position:fixed;bottom:0;left:0;right:0;z-index:1000;background:var(--panel);border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,.2);padding:16px 18px calc(20px + var(--safe-bottom));display:none;max-height:45vh;overflow-y:auto}
+#navPanel.show{display:block}
+#navHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+#navDistance{font-size:20px;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:8px}
+#navDistance svg{width:20px;height:20px;fill:var(--primary)}
+#stopBtn{background:#fce8e6;color:#c5221f;border:none;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}
+body.dark #stopBtn{background:#4a1e1c;color:#f28b82}
+#steps{list-style:none}
+#steps li{padding:12px 14px;border-bottom:1px solid var(--border);font-size:14px;display:flex;gap:12px;align-items:flex-start;border-radius:10px}
+#steps li.current{background:#e8f0fe;color:#0d47a1;font-weight:600}
+body.dark #steps li.current{background:#1a3a5c;color:#8ab4f8}
+#steps .icon{min-width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--input-bg);border-radius:8px}
+#steps li.current .icon{background:var(--primary)}
+#steps .icon svg{width:20px;height:20px;fill:var(--text-sub)}
+#steps li.current .icon svg{fill:#fff}
+#steps .info{flex:1}
+#steps .dist{color:var(--text-sub);font-size:12px;margin-top:3px;font-weight:400}
+#navTopBar{position:fixed;top:0;left:0;right:0;z-index:1100;padding:calc(14px + var(--safe-top)) 14px 14px;background:linear-gradient(180deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.6) 60%,transparent 100%);display:none;align-items:center;gap:14px;color:#fff}
+#navTopBar.show{display:flex}
+#navTopBar .turn-icon{width:82px;height:82px;flex-shrink:0;background:linear-gradient(135deg,#1a73e8,#0d47a1);border-radius:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(26,115,232,.55);border:2px solid rgba(255,255,255,.15)}
+#navTopBar .turn-icon svg{width:54px;height:54px;fill:#fff}
+#navTopBar .info{flex:1;min-width:0}
+#navTopBar .dist{font-size:38px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 3px 12px rgba(0,0,0,.9)}
+#navTopBar .instr{font-size:15px;margin-top:8px;text-shadow:0 2px 8px rgba(0,0,0,.9);background:rgba(0,0,0,.4);padding:6px 10px;border-radius:8px;display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#navBottomBar{position:fixed;bottom:0;left:0;right:0;z-index:1100;padding:10px 12px calc(14px + var(--safe-bottom));display:none}
+#navBottomBar.show{display:block}
+#navBottomCard{background:rgba(20,20,22,.96);border-radius:18px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 32px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.08);color:#fff}
+#navBottomCard .stat{flex:1;display:flex;flex-direction:column;align-items:center}
+#navBottomCard .stat .val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+#navBottomCard .stat .lbl{font-size:10px;opacity:.7;margin-top:3px}
+#navBottomCard .stat .val.eta{color:#8ab4f8}
+#navBottomCard .divider{width:1px;height:36px;background:rgba(255,255,255,.1)}
+#navBottomCard .speed-badge{background:linear-gradient(135deg,#fff,#e8eaed);color:#1a73e8;padding:6px 14px;border-radius:12px;display:flex;flex-direction:column;align-items:center;min-width:72px}
+#navBottomCard .speed-badge.over{background:linear-gradient(135deg,#ea4335,#c5221f);color:#fff}
+#navBottomCard .speed-badge .val{font-size:24px;font-weight:900}
+#navBottomCard .speed-badge .lbl{font-size:9px;opacity:.85}
+#navStopFloat{position:fixed;top:calc(14px + var(--safe-top));left:14px;z-index:1200;background:rgba(234,67,53,.95);color:#fff;border:none;cursor:pointer;width:48px;height:48px;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+#navStopFloat.show{display:flex}
+#navStopFloat svg{width:20px;height:20px;fill:#fff}
+#recenterBtn{position:fixed;right:12px;bottom:calc(20px + var(--safe-bottom));z-index:999;background:#fff;color:#1a73e8;border:none;cursor:pointer;width:52px;height:52px;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+#recenterBtn.show{display:flex}
+#recenterBtn svg{width:26px;height:26px;fill:#1a73e8}
+body.navigating #recenterBtn{bottom:calc(20px + var(--safe-bottom))}
+#loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3000;background:rgba(32,33,36,.92);color:#fff;padding:16px 24px;border-radius:14px;font-size:14px;display:none;align-items:center;gap:12px}
+#loading.show{display:flex}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.user-location-icon{position:relative;width:24px;height:24px}
+.user-location-icon .pulse{position:absolute;inset:0;border-radius:50%;background:rgba(26,115,232,.3);animation:pulseRing 2s ease-out infinite}
 @keyframes pulseRing{0%{transform:scale(1);opacity:.7}100%{transform:scale(3);opacity:0}}
-.user-location-icon .core{position:absolute;inset:4px;border-radius:50%;background:var(--primary);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);}
-.vehicle-marker{width:64px;height:64px;display:flex;align-items:center;justify-content:center;transform-origin:center center;}
-.vehicle-marker svg{width:100%;height:100%;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5));}
-
-#mapHint{position:fixed;bottom:calc(230px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:998;background:rgba(32,33,36,.9);color:#fff;padding:8px 14px;border-radius:20px;font-size:12px;display:none;white-space:nowrap;pointer-events:none;}
-#mapHint.show{display:block;animation:fadeInOut 3s ease-in-out;}
+.user-location-icon .core{position:absolute;inset:4px;border-radius:50%;background:var(--primary);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.vehicle-marker{width:64px;height:64px;display:flex;align-items:center;justify-content:center;transform-origin:center center}
+.vehicle-marker svg{width:100%;height:100%;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5))}
+#mapHint{position:fixed;bottom:calc(230px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:998;background:rgba(32,33,36,.9);color:#fff;padding:8px 14px;border-radius:20px;font-size:12px;display:none;white-space:nowrap;pointer-events:none}
+#mapHint.show{display:block;animation:fadeInOut 3s ease-in-out}
 @keyframes fadeInOut{0%,100%{opacity:0}15%,85%{opacity:1}}
-
-#nameDialog,#exitDialog,#stopConfirmDialog,#installDialog,#emergencyPanel,#downloadPanel{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px;}
-#stopConfirmDialog{z-index:4500;}
-#installDialog{z-index:4600;}
-#emergencyPanel{z-index:4800;background:rgba(0,0,0,.7);align-items:flex-end;padding:0;}
-#downloadPanel{z-index:4800;background:rgba(0,0,0,.7);align-items:flex-end;padding:0;}
-#nameDialog.show,#exitDialog.show,#stopConfirmDialog.show,#installDialog.show{display:flex;}
-#emergencyPanel.show{display:flex;}
-#downloadPanel.show{display:flex;}
-#nameDialogBox,#exitBox,#stopConfirmBox,#installBox{background:var(--panel);border-radius:18px;padding:22px;width:100%;max-width:340px;box-shadow:0 10px 40px rgba(0,0,0,.3);}
-#nameDialogBox h3{font-size:16px;margin-bottom:12px;}
-#nameInput{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:15px;outline:none;margin-bottom:14px;}
-#nameDialogBox .actions{display:flex;gap:8px;justify-content:flex-end;}
-#nameDialogBox button{padding:10px 18px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:500;}
-#nameCancel{background:var(--input-bg);color:var(--text);}
-#nameSave{background:var(--primary);color:#fff;}
-#exitBox,#stopConfirmBox,#installBox{text-align:center;}
-#exitBox .icon,#stopConfirmBox .icon,#installBox .icon{width:60px;height:60px;margin:0 auto 14px;background:#fce8e6;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-#stopConfirmBox .icon{background:#fff3e0;}
-#installBox .icon{background:#e8f0fe;}
-body.dark #exitBox .icon{background:#4a1e1c;}
-body.dark #stopConfirmBox .icon{background:#4a3020;}
-body.dark #installBox .icon{background:#1a3a5c;}
-#exitBox .icon svg{width:30px;height:30px;fill:var(--danger);}
-#stopConfirmBox .icon svg{width:30px;height:30px;fill:#ff6d00;}
-#installBox .icon svg{width:30px;height:30px;fill:var(--primary);}
-#exitBox h3,#stopConfirmBox h3,#installBox h3{font-size:17px;margin-bottom:8px;}
-#exitBox p,#stopConfirmBox p,#installBox p{font-size:13px;color:var(--text-sub);margin-bottom:20px;line-height:1.5;}
-#exitBox .actions,#stopConfirmBox .actions,#installBox .actions{display:flex;gap:10px;}
-#exitBox button,#stopConfirmBox button,#installBox button{flex:1;padding:12px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;}
-#exitCancel,#stopConfirmCancel,#installCancel{background:var(--input-bg);color:var(--text);}
-#exitConfirm{background:var(--danger);color:#fff;}
-#stopConfirmOk{background:#ff6d00;color:#fff;}
-#installOk{background:var(--primary);color:#fff;}
-
-#emergencyContent{background:var(--panel);width:100%;max-height:85vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto;}
-#emergencyHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
-#emergencyHeader h3{font-size:18px;display:flex;align-items:center;gap:8px;}
-#emergencyHeader h3 svg{width:22px;height:22px;fill:var(--emergency);}
-#emergencyClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-#emergencyClose svg{width:18px;height:18px;fill:var(--text);}
-
-.em-section{margin-bottom:20px;}
-.em-section-title{font-size:13px;font-weight:700;color:var(--text-sub);margin-bottom:10px;padding-right:4px;display:flex;align-items:center;gap:6px;}
-.em-section-title svg{width:16px;height:16px;fill:var(--text-sub);}
-.em-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
-.em-grid.cols-3{grid-template-columns:repeat(2,1fr);}
-.em-btn{background:var(--input-bg);border:none;cursor:pointer;padding:14px 10px;border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:inherit;color:var(--text);transition:transform .1s;text-decoration:none;}
-.em-btn:active{transform:scale(.96);}
-.em-btn .em-icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-.em-btn .em-icon svg{width:22px;height:22px;fill:#fff;}
-.em-btn .em-label{font-size:12px;font-weight:600;text-align:center;line-height:1.3;}
-.em-btn .em-number{font-size:11px;color:var(--text-sub);font-variant-numeric:tabular-nums;}
-.em-btn.police .em-icon{background:#1565c0;}
-.em-btn.ambulance .em-icon{background:#c62828;}
-.em-btn.fire .em-icon{background:#e65100;}
-.em-btn.emergency .em-icon{background:var(--emergency);}
-.em-btn.tow .em-icon{background:#6a1b9a;}
-.em-btn.electric .em-icon{background:#f9a825;}
-.em-btn.plumber .em-icon{background:#00838f;}
-.em-btn.pharmacy .em-icon{background:#2e7d32;}
-
-#downloadContent{background:var(--panel);width:100%;max-height:80vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto;}
-#downloadHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
-#downloadHeader h3{font-size:18px;display:flex;align-items:center;gap:8px;}
-#downloadHeader h3 svg{width:22px;height:22px;fill:var(--primary);}
-#downloadClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-#downloadClose svg{width:18px;height:18px;fill:var(--text);}
-.download-info{background:var(--input-bg);border-radius:12px;padding:14px;margin-bottom:14px;font-size:13px;line-height:1.6;color:var(--text-sub);}
-.download-info strong{color:var(--text);}
-.download-btn{background:var(--primary);color:#fff;border:none;padding:14px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;transition:background .2s;}
-.download-btn:hover{background:var(--primary-dark);}
-.download-btn:active{transform:scale(.98);}
-.download-btn:disabled{background:var(--input-bg);color:var(--text-sub);cursor:not-allowed;}
-.download-btn svg{width:20px;height:20px;fill:currentColor;}
-.download-progress{margin-top:14px;display:none;}
-.download-progress.show{display:block;}
-.download-progress .bar{width:100%;height:8px;background:var(--input-bg);border-radius:4px;overflow:hidden;margin-bottom:8px;}
-.download-progress .fill{height:100%;background:var(--primary);width:0%;transition:width .3s;border-radius:4px;}
-.download-progress .text{font-size:12px;color:var(--text-sub);text-align:center;}
-.download-stats{display:flex;gap:10px;margin-top:14px;}
-.download-stats .stat{flex:1;background:var(--input-bg);border-radius:12px;padding:12px;text-align:center;}
-.download-stats .stat .val{font-size:20px;font-weight:800;color:var(--primary);font-variant-numeric:tabular-nums;}
-.download-stats .stat .lbl{font-size:11px;color:var(--text-sub);margin-top:4px;}
-
-.poi-marker{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2.5px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35);}
-.poi-marker svg{width:18px;height:18px;fill:#fff;transform:rotate(45deg);}
-.poi-marker.fuel{background:var(--fuel);}
-.poi-marker.pharmacy{background:var(--pharmacy);}
-.poi-marker.hospital{background:var(--hospital);}
-.poi-marker.grocery{background:var(--grocery);}
-.poi-marker.restaurant{background:#ff6d00;}
-.poi-marker.atm{background:#00897b;}
-.poi-marker.parking{background:#3949ab;}
-.poi-marker.mosque{background:#5d4037;}
-.poi-marker.cafe{background:#6d4c41;}
-.poi-marker.hotel{background:#00838f;}
-
-.waypoint-marker{width:32px;height:32px;background:var(--stop);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;}
-.waypoint-marker span{transform:rotate(45deg);}
-::-webkit-scrollbar{width:0;height:0;}
+#nameDialog,#exitDialog,#stopConfirmDialog,#installDialog,#emergencyPanel,#downloadPanel{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px}
+#stopConfirmDialog{z-index:4500}
+#installDialog{z-index:4600}
+#emergencyPanel{z-index:4800;background:rgba(0,0,0,.7);align-items:flex-end;padding:0}
+#downloadPanel{z-index:4800;background:rgba(0,0,0,.7);align-items:flex-end;padding:0}
+#nameDialog.show,#exitDialog.show,#stopConfirmDialog.show,#installDialog.show{display:flex}
+#emergencyPanel.show{display:flex}
+#downloadPanel.show{display:flex}
+#nameDialogBox,#exitBox,#stopConfirmBox,#installBox{background:var(--panel);border-radius:18px;padding:22px;width:100%;max-width:340px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+#nameDialogBox h3{font-size:16px;margin-bottom:12px}
+#nameInput{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:15px;outline:none;margin-bottom:14px}
+#nameDialogBox .actions{display:flex;gap:8px;justify-content:flex-end}
+#nameDialogBox button{padding:10px 18px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:500}
+#nameCancel{background:var(--input-bg);color:var(--text)}
+#nameSave{background:var(--primary);color:#fff}
+#exitBox,#stopConfirmBox,#installBox{text-align:center}
+#exitBox .icon,#stopConfirmBox .icon,#installBox .icon{width:60px;height:60px;margin:0 auto 14px;background:#fce8e6;border-radius:50%;display:flex;align-items:center;justify-content:center}
+#stopConfirmBox .icon{background:#fff3e0}
+#installBox .icon{background:#e8f0fe}
+body.dark #exitBox .icon{background:#4a1e1c}
+body.dark #stopConfirmBox .icon{background:#4a3020}
+body.dark #installBox .icon{background:#1a3a5c}
+#exitBox .icon svg{width:30px;height:30px;fill:var(--danger)}
+#stopConfirmBox .icon svg{width:30px;height:30px;fill:#ff6d00}
+#installBox .icon svg{width:30px;height:30px;fill:var(--primary)}
+#exitBox h3,#stopConfirmBox h3,#installBox h3{font-size:17px;margin-bottom:8px}
+#exitBox p,#stopConfirmBox p,#installBox p{font-size:13px;color:var(--text-sub);margin-bottom:20px;line-height:1.5}
+#exitBox .actions,#stopConfirmBox .actions,#installBox .actions{display:flex;gap:10px}
+#exitBox button,#stopConfirmBox button,#installBox button{flex:1;padding:12px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600}
+#exitCancel,#stopConfirmCancel,#installCancel{background:var(--input-bg);color:var(--text)}
+#exitConfirm{background:var(--danger);color:#fff}
+#stopConfirmOk{background:#ff6d00;color:#fff}
+#installOk{background:var(--primary);color:#fff}
+#emergencyContent{background:var(--panel);width:100%;max-height:85vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
+#emergencyHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+#emergencyHeader h3{font-size:18px;display:flex;align-items:center;gap:8px}
+#emergencyHeader h3 svg{width:22px;height:22px;fill:var(--emergency)}
+#emergencyClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+#emergencyClose svg{width:18px;height:18px;fill:var(--text)}
+.em-section{margin-bottom:20px}
+.em-section-title{font-size:13px;font-weight:700;color:var(--text-sub);margin-bottom:10px;padding-right:4px;display:flex;align-items:center;gap:6px}
+.em-section-title svg{width:16px;height:16px;fill:var(--text-sub)}
+.em-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.em-btn{background:var(--input-bg);border:none;cursor:pointer;padding:14px 10px;border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:inherit;color:var(--text);transition:transform .1s;text-decoration:none}
+.em-btn:active{transform:scale(.96)}
+.em-btn .em-icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.em-btn .em-icon svg{width:22px;height:22px;fill:#fff}
+.em-btn .em-label{font-size:12px;font-weight:600;text-align:center;line-height:1.3}
+.em-btn .em-number{font-size:11px;color:var(--text-sub);font-variant-numeric:tabular-nums}
+.em-btn.police .em-icon{background:#1565c0}
+.em-btn.ambulance .em-icon{background:#c62828}
+.em-btn.fire .em-icon{background:#e65100}
+.em-btn.emergency .em-icon{background:var(--emergency)}
+.em-btn.tow .em-icon{background:#6a1b9a}
+.em-btn.electric .em-icon{background:#f9a825}
+.em-btn.plumber .em-icon{background:#00838f}
+.em-btn.pharmacy .em-icon{background:#2e7d32}
+#downloadContent{background:var(--panel);width:100%;max-height:80vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
+#downloadHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+#downloadHeader h3{font-size:18px;display:flex;align-items:center;gap:8px}
+#downloadHeader h3 svg{width:22px;height:22px;fill:var(--primary)}
+#downloadClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+#downloadClose svg{width:18px;height:18px;fill:var(--text)}
+.download-info{background:var(--input-bg);border-radius:12px;padding:14px;margin-bottom:14px;font-size:13px;line-height:1.6;color:var(--text-sub)}
+.download-info strong{color:var(--text)}
+.download-btn{background:var(--primary);color:#fff;border:none;padding:14px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;transition:background .2s}
+.download-btn:hover{background:var(--primary-dark)}
+.download-btn:active{transform:scale(.98)}
+.download-btn:disabled{background:var(--input-bg);color:var(--text-sub);cursor:not-allowed}
+.download-btn svg{width:20px;height:20px;fill:currentColor}
+.download-progress{margin-top:14px;display:none}
+.download-progress.show{display:block}
+.download-progress .bar{width:100%;height:8px;background:var(--input-bg);border-radius:4px;overflow:hidden;margin-bottom:8px}
+.download-progress .fill{height:100%;background:var(--primary);width:0%;transition:width .3s;border-radius:4px}
+.download-progress .text{font-size:12px;color:var(--text-sub);text-align:center}
+.download-stats{display:flex;gap:10px;margin-top:14px}
+.download-stats .stat{flex:1;background:var(--input-bg);border-radius:12px;padding:12px;text-align:center}
+.download-stats .stat .val{font-size:20px;font-weight:800;color:var(--primary);font-variant-numeric:tabular-nums}
+.download-stats .stat .lbl{font-size:11px;color:var(--text-sub);margin-top:4px}
+.poi-marker{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2.5px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35)}
+.poi-marker svg{width:18px;height:18px;fill:#fff;transform:rotate(45deg)}
+.poi-marker.fuel{background:var(--fuel)}
+.poi-marker.pharmacy{background:var(--pharmacy)}
+.poi-marker.hospital{background:var(--hospital)}
+.poi-marker.grocery{background:var(--grocery)}
+.poi-marker.restaurant{background:#ff6d00}
+.poi-marker.atm{background:#00897b}
+.poi-marker.parking{background:#3949ab}
+.poi-marker.mosque{background:#5d4037}
+.poi-marker.cafe{background:#6d4c41}
+.poi-marker.hotel{background:#00838f}
+.waypoint-marker{width:32px;height:32px;background:var(--stop);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px}
+.waypoint-marker span{transform:rotate(45deg)}
+::-webkit-scrollbar{width:0;height:0}
 </style>
-</head>
-<body>
+</head><body>
 
 <div id="map"></div>
 
@@ -390,7 +359,7 @@ body.dark #installBox .icon{background:#1a3a5c;}
 <span>صيدلية</span>
 </button>
 <button class="cat-btn" data-cat="hospital">
-<svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+<svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10z"/></svg>
 <span>مشفى</span>
 </button>
 <button class="cat-btn" data-cat="grocery">
@@ -402,7 +371,7 @@ body.dark #installBox .icon{background:#1a3a5c;}
 <span>مطعم</span>
 </button>
 <button class="cat-btn" data-cat="atm">
-<svg viewBox="0 0 24 24"><path d="M11.5 1L2 6v2h19V6l-9.5-5zM2 19h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h1v-2H2v2zm18-8H2v5h18v-5zm-2 2h-3v-1h3v1zM6.5 10.5H4v-1h2.5v1z"/></svg>
+<svg viewBox="0 0 24 24"><path d="M11.5 1L2 6v2h19V6l-9.5-5zM2 19h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h1v-2H2v2zm18-8H2v5h18v-5zm-2 2h-3v-1h3v1z"/></svg>
 <span>صراف آلي</span>
 </button>
 <button class="cat-btn" data-cat="parking">
@@ -449,9 +418,7 @@ body.dark #installBox .icon{background:#1a3a5c;}
 <span id="speedUnit">كم/س<br>سرعة</span>
 </div>
 
-<div id="gpsStatus"><span class="dot"></span><span id="gpsText">جاري الاتصال...</span></div>
-
-<div id="routeOptions">
+<div id="gpsStatus"><span class="dot"></span><span id="gpsText">جاري الاتصال...</span></div><div id="routeOptions">
 <button class="route-btn active" data-profile="fastest">
 <svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
 <span>الأسرع</span>
@@ -626,7 +593,9 @@ body.dark #installBox .icon{background:#1a3a5c;}
 
 <div id="exitDialog">
 <div id="exitBox">
-<div class="icon"><svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg></div>
+<div class="icon">
+<svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+</div>
 <h3>تأكيد الخروج</h3>
 <p>هل تريد فعلاً إغلاق تطبيق كزدورة؟</p>
 <div class="actions">
@@ -638,7 +607,9 @@ body.dark #installBox .icon{background:#1a3a5c;}
 
 <div id="stopConfirmDialog">
 <div id="stopConfirmBox">
-<div class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>
+<div class="icon">
+<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+</div>
 <h3>إنهاء التوجيه</h3>
 <p>هل تريد إنهاء التوجيه والعودة إلى موقعك؟</p>
 <div class="actions">
@@ -650,7 +621,9 @@ body.dark #installBox .icon{background:#1a3a5c;}
 
 <div id="installDialog">
 <div id="installBox">
-<div class="icon"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></div>
+<div class="icon">
+<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+</div>
 <h3>تثبيت كزدورة</h3>
 <p id="installInstructions">لإضافة التطبيق إلى الشاشة الرئيسية:</p>
 <div class="actions">
@@ -665,15 +638,12 @@ body.dark #installBox .icon{background:#1a3a5c;}
 </button>
 
 <div id="mapHint"></div>
-<div id="loading"><div class="spinner"></div><span id="loadingText">جاري المعالجة...</span></div>
-
-<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<div id="loading"><div class="spinner"></div><span id="loadingText">جاري المعالجة...</span></div><script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
-
 <script>
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // منع إطفاء الشاشة
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 let noSleep = null, wakeLock = null;
 async function keepScreenOn() {
   try { if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); return; } } catch(e) {}
@@ -685,15 +655,13 @@ function allowScreenOff() {
 document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState === 'visible' && wakeLock === null) await keepScreenOn();
 });
-
-// Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // IndexedDB
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 const DB_NAME='kzdora_offline', DB_VERSION=1, TILE_STORE='tiles';
 let db = null;
 async function initDB() {
@@ -747,16 +715,15 @@ async function clearAllTiles() {
     tx.onerror = () => resolve(false);
   });
 }
-
 async function updateOfflineStats() {
   const stats = await getTilesStats();
   document.getElementById('statTiles').textContent = stats.count;
-  document.getElementById('statSize').textContent = (stats.size/1024/1024).toFixed(1)+' MB';
+  document.getElementById('statSize').textContent = (stats.size/1024/1024).toFixed(1) + ' MB';
 }
 
-// ═══════════════════════════════════════════════════════════
-// تنزيل منطقة
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// تنزيل منطقة للعمل بدون إنترنت
+// ═══════════════════════════════════════════════════════════════
 let downloadCancelFlag = false;
 async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
   if (!navigator.onLine) { showHint('⚠️ التنزيل يحتاج اتصال'); return; }
@@ -811,60 +778,54 @@ async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
   document.getElementById('downloadFill').style.width = '100%';
   document.getElementById('downloadText').textContent = `✅ تم تنزيل ${saved} بلاطة جديدة`;
   setTimeout(() => document.getElementById('downloadProgress').classList.remove('show'), 3000);
-  speak(`تم تنزيل منطقة العمل بدون إنترنت`);
+  speak('تم تنزيل منطقة العمل بدون إنترنت');
   updateOfflineStats();
 }
 
-// ═══════════════════════════════════════════════════════════
-// الصور والأيقونات
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// الأيقونات
+// ═══════════════════════════════════════════════════════════════
 const ICONS = {
-  straight:'<svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.59 5.58L20 12l-8-8-8 8z"/></svg>',
-  turnLeft:'<svg viewBox="0 0 24 24"><path d="M20 11v2H8l-5.5-5.5L4 6l4.5 4.5H18V7l4 4-4 4v-4h2z" transform="scale(-1,1) translate(-24,0)"/></svg>',
-  turnRight:'<svg viewBox="0 0 24 24"><path d="M20 11v2H8l-5.5-5.5L4 6l4.5 4.5H18V7l4 4-4 4v-4h2z"/></svg>',
-  slightLeft:'<svg viewBox="0 0 24 24"><path d="M10 9l4-4 4 4h-3v7c0 1.1-.9 2-2 2H5v-2h8V9h-3z" transform="scale(-1,1) translate(-24,0)"/></svg>',
-  slightRight:'<svg viewBox="0 0 24 24"><path d="M10 9l4-4 4 4h-3v7c0 1.1-.9 2-2 2H5v-2h8V9h-3z"/></svg>',
-  sharpLeft:'<svg viewBox="0 0 24 24"><path d="M6 6l6 6-1.4 1.4L7 9.8V19H5V6h1z" transform="scale(-1,1) translate(-24,0)"/></svg>',
-  sharpRight:'<svg viewBox="0 0 24 24"><path d="M6 6l6 6-1.4 1.4L7 9.8V19H5V6h1z"/></svg>',
-  roundabout:'<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-13h-2v5l4.28 2.54.72-1.21-3-1.8V7z"/></svg>',
-  arrive:'<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>',
-  depart:'<svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>',
-  waypoint:'<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>',
-  moon:'<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>',
-  sun:'<svg viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1z"/></svg>'
+  straight: '<svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.59 5.58L20 12l-8-8-8 8z"/></svg>',
+  turnLeft: '<svg viewBox="0 0 24 24"><path d="M20 11v2H8l-5.5-5.5L4 6l4.5 4.5H18V7l4 4-4 4v-4h2z" transform="scale(-1,1) translate(-24,0)"/></svg>',
+  turnRight: '<svg viewBox="0 0 24 24"><path d="M20 11v2H8l-5.5-5.5L4 6l4.5 4.5H18V7l4 4-4 4v-4h2z"/></svg>',
+  slightLeft: '<svg viewBox="0 0 24 24"><path d="M10 9l4-4 4 4h-3v7c0 1.1-.9 2-2 2H5v-2h8V9h-3z" transform="scale(-1,1) translate(-24,0)"/></svg>',
+  slightRight: '<svg viewBox="0 0 24 24"><path d="M10 9l4-4 4 4h-3v7c0 1.1-.9 2-2 2H5v-2h8V9h-3z"/></svg>',
+  sharpLeft: '<svg viewBox="0 0 24 24"><path d="M6 6l6 6-1.4 1.4L7 9.8V19H5V6h1z" transform="scale(-1,1) translate(-24,0)"/></svg>',
+  sharpRight: '<svg viewBox="0 0 24 24"><path d="M6 6l6 6-1.4 1.4L7 9.8V19H5V6h1z"/></svg>',
+  roundabout: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-13h-2v5l4.28 2.54.72-1.21-3-1.8V7z"/></svg>',
+  arrive: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>',
+  depart: '<svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>',
+  waypoint: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>',
+  moon: '<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>',
+  sun: '<svg viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1z"/></svg>'
 };
-
 const POI_ICONS_MAP = {
-  fuel:'<svg viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v16h10v-7.5h1.5v5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77zM12 10H6V5h6v5z"/></svg>',
-  pharmacy:'<svg viewBox="0 0 24 24"><path d="M21 5h-2.64l1.14-3.14L17.15 1l-1.46 4H3v2l2 6-2 6v2h18v-2l-2-6 2-6V5zm-5 9h-3v3h-2v-3H8v-2h3V9h2v3h3v2z"/></svg>',
-  hospital:'<svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10z"/></svg>',
-  grocery:'<svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>',
-  restaurant:'<svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>',
-  atm:'<svg viewBox="0 0 24 24"><path d="M11.5 1L2 6v2h19V6l-9.5-5zM2 19h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h1v-2H2v2zm18-8H2v5h18v-5zm-2 2h-3v-1h3v1z"/></svg>',
-  parking:'<svg viewBox="0 0 24 24"><path d="M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z"/></svg>',
-  mosque:'<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 1.74.65 3.34 1.72 4.61C4.61 14.89 3 17.34 3 20h18c0-2.66-1.61-5.11-3.72-6.39C18.35 12.34 19 10.74 19 9c0-3.87-3.13-7-7-7zm0 15c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>',
-  cafe:'<svg viewBox="0 0 24 24"><path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"/></svg>',
-  hotel:'<svg viewBox="0 0 24 24"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>'
+  fuel: '<svg viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v16h10v-7.5h1.5v5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77zM12 10H6V5h6v5z"/></svg>',
+  pharmacy: '<svg viewBox="0 0 24 24"><path d="M21 5h-2.64l1.14-3.14L17.15 1l-1.46 4H3v2l2 6-2 6v2h18v-2l-2-6 2-6V5zm-5 9h-3v3h-2v-3H8v-2h3V9h2v3h3v2z"/></svg>',
+  hospital: '<svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10z"/></svg>',
+  grocery: '<svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>',
+  restaurant: '<svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>',
+  atm: '<svg viewBox="0 0 24 24"><path d="M11.5 1L2 6v2h19V6l-9.5-5zM2 19h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h1v-2H2v2zm18-8H2v5h18v-5zm-2 2h-3v-1h3v1z"/></svg>',
+  parking: '<svg viewBox="0 0 24 24"><path d="M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z"/></svg>',
+  mosque: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 1.74.65 3.34 1.72 4.61C4.61 14.89 3 17.34 3 20h18c0-2.66-1.61-5.11-3.72-6.39C18.35 12.34 19 10.74 19 9c0-3.87-3.13-7-7-7zm0 15c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>',
+  cafe: '<svg viewBox="0 0 24 24"><path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"/></svg>',
+  hotel: '<svg viewBox="0 0 24 24"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>'
 };
-
 const CAR_ICON_TOPVIEW = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="cb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4a90e2"/><stop offset="50%" stop-color="#1a73e8"/><stop offset="100%" stop-color="#0d47a1"/></linearGradient></defs><path d="M32 1 L 27 8 L 30 7 L 30 10 L 34 10 L 34 7 L 37 8 Z" fill="#34a853" stroke="#fff" stroke-width="1"/><path d="M32 5 C 25 5 21 9 21 15 L 19 22 L 17 26 L 17 48 C 17 54 21 57 25 57 L 39 57 C 43 57 47 54 47 48 L 47 26 L 45 22 L 43 15 C 43 9 39 5 32 5 Z" fill="url(#cb)" stroke="#fff" stroke-width="2"/><rect x="23" y="27" width="18" height="20" rx="3" fill="#0d47a1" opacity="0.85"/><ellipse cx="24" cy="9" rx="2" ry="1.5" fill="#ffe082"/><ellipse cx="40" cy="9" rx="2" ry="1.5" fill="#ffe082"/></svg>`;
-
 const WALK_ICON = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M32 2 L 28 10 L 30.5 9 L 30.5 12 L 33.5 12 L 33.5 9 L 36 10 Z" fill="#34a853" stroke="#fff" stroke-width="1"/><circle cx="32" cy="34" r="24" fill="#1a73e8" stroke="#fff" stroke-width="3"/><g transform="translate(32,34)"><circle cx="0" cy="-10" r="4" fill="#fff"/><path d="M -3 -6 L 3 -6 L 5 4 L 2 4 L 0 0 L -2 4 L -5 4 Z" fill="#fff"/></g></svg>`;
-
 const EM_ICONS = {
-  police:'<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>',
-  ambulance:'<svg viewBox="0 0 24 24"><path d="M18 18.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm-9 0c.83 0 1.5-.67 1.5-1.5S9.83 15.5 9 15.5s-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm10-9.5h-3V6h-2v3h-3v2h3v3h2v-3h3zM3 5v13h2c0 2.21 1.79 4 4 4s4-1.79 4-4h2c0 2.21 1.79 4 4 4s4-1.79 4-4h2V9c0-1.1-.9-2-2-2h-3V4c0-.55-.45-1-1-1H6c-.55 0-1 .45-1 1v1H3z"/></svg>',
-  fire:'<svg viewBox="0 0 24 24"><path d="M13.5 0.67s0.74 2.65 0.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l0.03-0.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5 0.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>',
-  emergency:'<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>',
-  tow:'<svg viewBox="0 0 24 24"><path d="M20 8h-3V4H1v2h2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"/></svg>',
-  electric:'<svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>',
-  plumber:'<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 1.74.65 3.34 1.72 4.61C4.61 14.89 3 17.34 3 20h18c0-2.66-1.61-5.11-3.72-6.39C18.35 12.34 19 10.74 19 9c0-3.87-3.13-7-7-7z"/></svg>',
-  pharmacy:'<svg viewBox="0 0 24 24"><path d="M21 5h-2.64l1.14-3.14L17.15 1l-1.46 4H3v2l2 6-2 6v2h18v-2l-2-6 2-6V5zm-5 9h-3v3h-2v-3H8v-2h3V9h2v3h3v2z"/></svg>'
-};
-
-// ═══════════════════════════════════════════════════════════
+  police: '<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>',
+  ambulance: '<svg viewBox="0 0 24 24"><path d="M18 18.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm-9 0c.83 0 1.5-.67 1.5-1.5S9.83 15.5 9 15.5s-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm10-9.5h-3V6h-2v3h-3v2h3v3h2v-3h3zM3 5v13h2c0 2.21 1.79 4 4 4s4-1.79 4-4h2c0 2.21 1.79 4 4 4s4-1.79 4-4h2V9c0-1.1-.9-2-2-2h-3V4c0-.55-.45-1-1-1H6c-.55 0-1 .45-1 1v1H3z"/></svg>',
+  fire: '<svg viewBox="0 0 24 24"><path d="M13.5 0.67s0.74 2.65 0.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l0.03-0.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5 0.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>',
+  emergency: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>',
+  tow: '<svg viewBox="0 0 24 24"><path d="M20 8h-3V4H1v2h2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"/></svg>',
+  electric: '<svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>',
+  plumber: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 1.74.65 3.34 1.72 4.61C4.61 14.89 3 17.34 3 20h18c0-2.66-1.61-5.11-3.72-6.39C18.35 12.34 19 10.74 19 9c0-3.87-3.13-7-7-7z"/></svg>',
+  pharmacy: '<svg viewBox="0 0 24 24"><path d="M21 5h-2.64l1.14-3.14L17.15 1l-1.46 4H3v2l2 6-2 6v2h18v-2l-2-6 2-6V5zm-5 9h-3v3h-2v-3H8v-2h3V9h2v3h3v2z"/></svg>'
+};// ═══════════════════════════════════════════════════════════════
 // التوجيه الصوتي
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 const synth = window.speechSynthesis;
 let arabicVoice = null;
 function pickArabicVoice() {
@@ -884,66 +845,84 @@ function speak(text, priority = false) {
 function playBeep(f = 880, d = 150) {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = ctx.createOscillator(); const g = ctx.createGain();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
     o.type = 'sine'; o.frequency.value = f;
     g.gain.setValueAtTime(0.15, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + d/1000);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + d / 1000);
     o.connect(g); g.connect(ctx.destination);
-    o.start(); o.stop(ctx.currentTime + d/1000);
-  } catch(e) {}
+    o.start(); o.stop(ctx.currentTime + d / 1000);
+  } catch (e) {}
 }
 
-// ═══════════════════════════════════════════════════════════
-// أدوات
-// ═══════════════════════════════════════════════════════════
-function showLoading(m) { document.getElementById('loadingText').textContent = m; document.getElementById('loading').classList.add('show'); }
-function hideLoading() { document.getElementById('loading').classList.remove('show'); }
+// ═══════════════════════════════════════════════════════════════
+// أدوات مساعدة + إدارة التحميل
+// ═══════════════════════════════════════════════════════════════
+let loadingTimeout = null;
+function showLoading(m) {
+  document.getElementById('loadingText').textContent = m;
+  document.getElementById('loading').classList.add('show');
+  clearTimeout(loadingTimeout);
+  loadingTimeout = setTimeout(() => hideLoading(), 15000);
+}
+function hideLoading() {
+  clearTimeout(loadingTimeout);
+  loadingTimeout = null;
+  document.getElementById('loading').classList.remove('show');
+}
 function showHint(t) {
   const h = document.getElementById('mapHint');
-  h.textContent = t; h.classList.add('show');
+  h.textContent = t;
+  h.classList.add('show');
   setTimeout(() => h.classList.remove('show'), 3000);
 }
-function computeBearing(lat1,lon1,lat2,lon2){
-  const toRad=d=>d*Math.PI/180, toDeg=r=>r*180/Math.PI;
-  const dLon=toRad(lon2-lon1);
-  const y=Math.sin(dLon)*Math.cos(toRad(lat2));
-  const x=Math.cos(toRad(lat1))*Math.sin(toRad(lat2))-Math.sin(toRad(lat1))*Math.cos(toRad(lat2))*Math.cos(dLon);
-  return (toDeg(Math.atan2(y,x))+360)%360;
+function computeBearing(lat1, lon1, lat2, lon2) {
+  const toRad = d => d * Math.PI / 180;
+  const toDeg = r => r * 180 / Math.PI;
+  const dLon = toRad(lon2 - lon1);
+  const y = Math.sin(dLon) * Math.cos(toRad(lat2));
+  const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+  return (toDeg(Math.atan2(y, x)) + 360) % 360;
 }
-function haversine(lat1,lon1,lat2,lon2){
-  const R=6371;
-  const dLat=(lat2-lat1)*Math.PI/180;
-  const dLon=(lon2-lon1)*Math.PI/180;
-  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
-function formatDist(m){ if(m>=1000) return (m/1000).toFixed(1)+' كم'; return Math.round(m)+' م'; }
-function formatEta(s){ const d=new Date(Date.now()+s*1000); return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`; }
+function formatDist(m) {
+  if (m >= 1000) return (m / 1000).toFixed(1) + ' كم';
+  return Math.round(m) + ' م';
+}
+function formatEta(s) {
+  const d = new Date(Date.now() + s * 1000);
+  return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+}
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // بيانات الطوارئ
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 const EMERGENCY_DATA = {
   numbers: [
-    { type:'police', label:'الشرطة', number:'112', icon:'police' },
-    { type:'ambulance', label:'الإسعاف', number:'110', icon:'ambulance' },
-    { type:'fire', label:'الإطفاء', number:'113', icon:'fire' },
-    { type:'emergency', label:'طوارئ عامة', number:'112', icon:'emergency' }
+    { type: 'police', label: 'الشرطة', number: '112', icon: 'police' },
+    { type: 'ambulance', label: 'الإسعاف', number: '110', icon: 'ambulance' },
+    { type: 'fire', label: 'الإطفاء', number: '113', icon: 'fire' },
+    { type: 'emergency', label: 'طوارئ عامة', number: '112', icon: 'emergency' }
   ],
   services: [
-    { type:'tow', label:'سحب سيارات', number:'0921234567', icon:'tow' },
-    { type:'electric', label:'كهربائي طوارئ', number:'0931234567', icon:'electric' },
-    { type:'plumber', label:'سباك طوارئ', number:'0941234567', icon:'plumber' },
-    { type:'pharmacy', label:'صيدلية مناوبة', number:'0951234567', icon:'pharmacy' }
+    { type: 'tow', label: 'سحب سيارات', number: '0921234567', icon: 'tow' },
+    { type: 'electric', label: 'كهربائي طوارئ', number: '0931234567', icon: 'electric' },
+    { type: 'plumber', label: 'سباك طوارئ', number: '0941234567', icon: 'plumber' },
+    { type: 'pharmacy', label: 'صيدلية مناوبة', number: '0951234567', icon: 'pharmacy' }
   ]
 };
-
 function buildEmergencyPanel() {
   const body = document.getElementById('emergencyBody');
   body.innerHTML = '';
   const sec1 = document.createElement('div');
   sec1.className = 'em-section';
-  sec1.innerHTML = `<div class="em-section-title"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>الأرقام الرسمية (تعمل بدون إنترنت)</div>`;
+  sec1.innerHTML = `<div class="em-section-title"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>الأرقام الرسمية</div>`;
   const g1 = document.createElement('div');
   g1.className = 'em-grid';
   EMERGENCY_DATA.numbers.forEach(n => {
@@ -955,7 +934,6 @@ function buildEmergencyPanel() {
   });
   sec1.appendChild(g1);
   body.appendChild(sec1);
-
   const sec2 = document.createElement('div');
   sec2.className = 'em-section';
   sec2.innerHTML = `<div class="em-section-title"><svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>خدمات محلية</div>`;
@@ -972,40 +950,40 @@ function buildEmergencyPanel() {
   body.appendChild(sec2);
 }
 
-// ═══════════════════════════════════════════════════════════
-// الحالة
-// ═══════════════════════════════════════════════════════════
-let destMarker=null, startMarker=null;
-let waypointMarkers=[];
-let currentWaypoints=[];
-let pendingWaypointPick=false;
-let currentSteps=[];
-let currentStepIndex=0;
-let navigationActive=false;
-let watchId=null;
-let lastSpokenStep=-1;
-let userLocation=null, manualStart=null;
-let userMarker=null, vehicleMarker=null;
-let lastHeading=0, gpsFirstFix=false;
-let lastPosition=null, lastPositionTime=null;
-let currentSpeed=0;
-let currentRouteProfile='fastest';
-let currentRouteData=null;
-let currentRoutes={fastest:null, shortest:null};
-let currentDestination=null;
-let currentTravelMode='driving';
-let recenterMode='follow';
-let activeCategory=null;
-let poiMarkers=[];
-let isDarkMode=false;
-const SPEED_LIMIT=120;
-let offRouteCounter=0, lastRouteRecalcTime=0;
-const OFF_ROUTE_THRESHOLD_M=80, OFF_ROUTE_COUNT=3, ROUTE_RECALC_COOLDOWN=15000, MIN_GPS_ACCURACY=60;
+// ═══════════════════════════════════════════════════════════════
+// الحالة العامة
+// ═══════════════════════════════════════════════════════════════
+let destMarker = null, startMarker = null;
+let waypointMarkers = [];
+let currentWaypoints = [];
+let pendingWaypointPick = false;
+let currentSteps = [];
+let currentStepIndex = 0;
+let navigationActive = false;
+let watchId = null;
+let lastSpokenStep = -1;
+let userLocation = null, manualStart = null;
+let userMarker = null, vehicleMarker = null;
+let lastHeading = 0, gpsFirstFix = false;
+let lastPosition = null, lastPositionTime = null;
+let currentSpeed = 0;
+let currentRouteProfile = 'fastest';
+let currentRouteData = null;
+let currentRoutes = { fastest: null, shortest: null };
+let currentDestination = null;
+let currentTravelMode = 'driving';
+let recenterMode = 'follow';
+let activeCategory = null;
+let poiMarkers = [];
+let isDarkMode = false;
+const SPEED_LIMIT = 120;
+let offRouteCounter = 0, lastRouteRecalcTime = 0;
+const OFF_ROUTE_THRESHOLD_M = 80, OFF_ROUTE_COUNT = 3, ROUTE_RECALC_COOLDOWN = 15000, MIN_GPS_ACCURACY = 60;
 let savedPlaces = JSON.parse(localStorage.getItem('kzdora_saved') || '[]');
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // قراءة URL
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 function readStateFromURL() {
   const hash = location.hash.replace(/^#kzdora\??/, '');
   const p = new URLSearchParams(hash);
@@ -1039,9 +1017,9 @@ function updateURL() {
   history.replaceState(null,'',h?`#kzdora?${h}`:'#kzdora');
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // نقاط التوقف
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 function updateWaypointsUI() {
   const list = document.getElementById('waypointsList');
   const bar = document.getElementById('waypointsBar');
@@ -1071,9 +1049,9 @@ function redrawWaypointMarkers() {
   });
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // الخريطة
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 const MAP_STYLE = {
   version: 8, name:'OSM',
   sources: {
@@ -1091,9 +1069,9 @@ const MAP_STYLE = {
 const DAMASCUS = [36.2765, 33.5138];
 const map = new maplibregl.Map({ container:'map', style:MAP_STYLE, center:DAMASCUS, zoom:13, pitch:0, bearing:0, attributionControl:false, antialias:true });
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // POI
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 const CAT_LABELS = { fuel:'محطة وقود', pharmacy:'صيدلية', hospital:'مشفى', grocery:'بقالية', restaurant:'مطعم', atm:'صراف آلي', parking:'موقف سيارات', mosque:'مسجد', cafe:'مقهى', hotel:'فندق' };
 const OSM_TAGS = { fuel:'["amenity"="fuel"]', pharmacy:'["amenity"="pharmacy"]', hospital:'["amenity"~"hospital|clinic"]', grocery:'["shop"~"supermarket|convenience"]', restaurant:'["amenity"~"restaurant|fast_food"]', atm:'["amenity"~"atm|bank"]', parking:'["amenity"="parking"]', mosque:'["amenity"="place_of_worship"]["religion"="muslim"]', cafe:'["amenity"="cafe"]', hotel:'["tourism"~"hotel|guest_house"]' };
 
@@ -1112,10 +1090,10 @@ async function searchNearby(cat) {
       clearTimeout(t);
       if (!r.ok) continue;
       const data = await r.json();
-      if (data.elements?.length) {
+      if (data.elements && data.elements.length) {
         const results = data.elements.map(el => {
-          const plat = el.lat || el.center?.lat;
-          const plng = el.lon || el.center?.lon;
+          const plat = el.lat || (el.center && el.center.lat);
+          const plng = el.lon || (el.center && el.center.lon);
           if (!plat || !plng) return null;
           const name = el.tags?.name || el.tags?.['name:ar'] || el.tags?.['name:en'] || CAT_LABELS[cat];
           return { name, lat:plat, lng:plng, dist:haversine(lat,lng,plat,plng), address:buildAddress(el.tags) };
@@ -1172,9 +1150,9 @@ function renderResultsList(results, cat) {
   box.classList.add('show');
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // الضغط المطول
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 const mapPopup = document.getElementById('mapPopup');
 let popupLatLng = null, pressTimer = null, pressStartPoint = null;
 function showMapPopup(ll, x, y) {
@@ -1209,9 +1187,9 @@ map.on('click', (e) => {
 });
 map.on('contextmenu', e => { e.preventDefault(); showMapPopup({ lat:e.lngLat.lat, lng:e.lngLat.lng }, e.point.x, e.point.y); });
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // الوضع الليلي
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 const themeHeaderBtn = document.getElementById('themeHeaderBtn');
 const themeIconHeader = document.getElementById('themeIconHeader');
 function setDarkMode(d) {
@@ -1219,11 +1197,9 @@ function setDarkMode(d) {
   document.body.classList.toggle('dark', d);
   themeIconHeader.innerHTML = d ? ICONS.sun : ICONS.moon;
 }
-themeHeaderBtn.onclick = () => { setDarkMode(!isDarkMode); updateURL(); };
-
-// ═══════════════════════════════════════════════════════════
+themeHeaderBtn.onclick = () => { setDarkMode(!isDarkMode); updateURL(); };// ═══════════════════════════════════════════════════════════════
 // GPS
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 const gpsStatus = document.getElementById('gpsStatus');
 const gpsText = document.getElementById('gpsText');
 const speedometer = document.getElementById('speedometer');
@@ -1313,10 +1289,11 @@ function updateVehiclePosition(loc, heading, speedMs) {
 }
 function getDynZoom(s) { const k = s*3.6; if (k<10) return 18; if (k<30) return 17.5; if (k<60) return 17; if (k<90) return 16.5; return 16; }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // المسارات
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 function setDestination(loc, name, isRecalc=false) {
+  hideLoading();
   currentDestination = loc;
   if (destMarker) destMarker.remove();
   const el = document.createElement('div');
@@ -1336,9 +1313,10 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
   try {
     const body = { locations: points.map(p=>({lat:p[0],lon:p[1]})), costing, units:'kilometers', language:'ar-SA', alternates:2, directions_options:{ units:'kilometers', language:'ar-SA' } };
     const r = await fetch('https://valhalla1.openstreetmap.de/route', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
-    if (!r.ok) throw new Error();
+    if (!r.ok) throw new Error('Valhalla HTTP error');
     const data = await r.json();
-    if (!data.trip?.legs?.length) throw new Error();
+    if (!data.trip?.legs?.length) throw new Error('No trip');
+    hideLoading();
     const main = buildValhallaRoute(data.trip);
     const alts = [];
     if (data.alternates?.length) data.alternates.forEach(a => { if (a.trip) alts.push(buildValhallaRoute(a.trip)); });
@@ -1366,19 +1344,23 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
     try {
       const r = await fetch(`https://router.project-osrm.org/route/v1/${profile}/${coordsStr}?overview=full&geometries=geojson&steps=true`);
       const data = await r.json();
-      if (!isRecalc) hideLoading();
-      if (!data.routes?.length) { alert('تعذر حساب المسار'); return; }
+      hideLoading();
+      if (!data.routes?.length) { showHint('⚠️ تعذر حساب المسار'); return; }
       const norm = normalizeOSRMRoute(data.routes[0]);
       currentRouteData = norm;
       currentRoutes = { fastest: norm, shortest: null };
       document.getElementById('infoFastest').textContent = `${(norm.distance/1000).toFixed(1)}كم · ${Math.round(norm.duration/60)}د`;
       document.getElementById('infoShortest').textContent = '—';
       document.getElementById('btnShortest').disabled = true;
+      document.getElementById('btnShortest').style.opacity = '0.4';
       drawRoute(norm);
       currentSteps = norm.steps; currentStepIndex=0; lastSpokenStep=-1;
       if (!isRecalc) { document.getElementById('routeOptions').classList.add('show'); document.getElementById('startBtn').classList.add('show'); speak('تم حساب المسار'); }
       map.fitBounds(norm.bounds, { padding:60, duration:800 });
-    } catch(e2) { if (!isRecalc) hideLoading(); alert('تعذر حساب المسار'); }
+    } catch(e2) {
+      hideLoading();
+      showHint('⚠️ تعذر الاتصال بخادم المسارات');
+    }
   }
 }
 function buildValhallaRoute(trip) {
@@ -1434,7 +1416,7 @@ function mapManeuver(t, m) {
   if (t==='arrive') return 'Arrive';
   if (t==='depart') return 'Depart';
   if (t==='roundabout'||t==='rotary') return 'Roundabout';
-  if (t==='turn'||t==='fork') {
+  if (t==='turn'||t==='fork'||t==='end of road') {
     if (m==='left') return 'TurnLeft'; if (m==='right') return 'TurnRight';
     if (m==='slight left') return 'SlightLeft'; if (m==='slight right') return 'SlightRight';
     if (m==='sharp left') return 'SharpLeft'; if (m==='sharp right') return 'SharpRight';
@@ -1446,13 +1428,13 @@ function translateInstruction(s) {
   if (t === 'arrive') return 'وصلت إلى وجهتك';
   if (t === 'depart') return `انطلق ${n}`;
   if (t === 'roundabout') return `ادخل الدوار ${n}`;
-  const d = { left:'يساراً', right:'يميناً', 'slight left':'قليلاً يساراً', 'slight right':'قليلاً يميناً', 'sharp left':'بحدة يساراً', 'sharp right':'بحدة يميناً', straight:'مستقيماً' }[m] || 'مستقيماً';
+  const d = { left:'يساراً', right:'يميناً', 'slight left':'قليلاً يساراً', 'slight right':'قليلاً يميناً', 'sharp left':'بحدة يساراً', 'sharp right':'بحدة يميناً', straight:'مستقيماً', uturn:'انعطف للخلف' }[m] || 'مستقيماً';
   return `انعطف ${d} ${n}`;
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // بدء التوجيه
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 document.getElementById('startBtn').onclick = async () => {
   if (!currentSteps.length) return;
   await keepScreenOn();
@@ -1483,6 +1465,7 @@ const stopConfirmDialog = document.getElementById('stopConfirmDialog');
 document.getElementById('stopConfirmCancel').onclick = () => stopConfirmDialog.classList.remove('show');
 document.getElementById('stopConfirmOk').onclick = () => { stopConfirmDialog.classList.remove('show'); stopNavigation(); };
 function stopNavigation() {
+  hideLoading();
   navigationActive = false;
   synth.cancel();
   document.body.classList.remove('navigating');
@@ -1581,14 +1564,13 @@ function checkOffRoute(loc) {
       if (currentDestination) { userLocation = loc; setDestination(currentDestination, null, true); }
     }
   } else offRouteCounter = 0;
-}
-
-// ═══════════════════════════════════════════════════════════
+}// ═══════════════════════════════════════════════════════════════
 // ربط الأزرار
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 document.querySelectorAll('.mode-btn').forEach(b => b.onclick = () => {
   const m = b.dataset.mode;
   if (m === currentTravelMode) return;
+  hideLoading();
   currentTravelMode = m;
   document.querySelectorAll('.mode-btn').forEach(x => x.classList.toggle('active', x.dataset.mode === m));
   playBeep(1000,100);
@@ -1643,8 +1625,9 @@ document.getElementById('locBtn').onclick = () => {
   }, err => { hideLoading(); alert('تعذر تحديد الموقع'); }, { enableHighAccuracy:true, timeout:20000 });
 };
 
-// النقر على الخريطة
-const mapPopupEl = document.getElementById('mapPopup');
+// ═══════════════════════════════════════════════════════════════
+// النقر على الخريطة (القائمة المنبثقة)
+// ═══════════════════════════════════════════════════════════════
 document.getElementById('popupStart').onclick = () => { if (popupLatLng) setManualStart([popupLatLng.lat, popupLatLng.lng]); hideMapPopup(); };
 document.getElementById('popupStop').onclick = () => { if (popupLatLng) addWaypoint([popupLatLng.lat, popupLatLng.lng], null); hideMapPopup(); };
 document.getElementById('popupDest').onclick = () => {
@@ -1655,12 +1638,12 @@ document.getElementById('popupDest').onclick = () => {
   hideMapPopup();
 };
 document.getElementById('popupSave').onclick = () => { if (popupLatLng) openNameDialog([popupLatLng.lat, popupLatLng.lng]); hideMapPopup(); };
-document.getElementById('addWaypointBtn').onclick = () => { pendingWaypointPick = true; showHint('📍 اضغط على الخريطة'); speak('اضغط على الخريطة'); };
+document.getElementById('addWaypointBtn').onclick = () => { pendingWaypointPick = true; showHint('📍 اضغط على الخريطة لإضافة نقطة توقف'); speak('اضغط على الخريطة لإضافة نقطة توقف'); };
 
 function addWaypoint(loc, name) {
   currentWaypoints.push({ loc, name: name || `نقطة ${currentWaypoints.length+1}` });
   updateWaypointsUI(); redrawWaypointMarkers(); updateURL();
-  showHint(`✅ تم إضافة نقطة ${currentWaypoints.length}`);
+  showHint(`✅ تم إضافة نقطة التوقف ${currentWaypoints.length}`);
   speak(`تم إضافة نقطة التوقف ${currentWaypoints.length}`);
   if (currentDestination) setDestination(currentDestination, null, true);
 }
@@ -1672,16 +1655,18 @@ function setManualStart(loc) {
   el.innerHTML = ICONS.depart;
   startMarker = new maplibregl.Marker({ element:el, anchor:'bottom' }).setLngLat([loc[1],loc[0]]).addTo(map);
   showHint('✅ تم تحديد نقطة الانطلاق');
+  speak('تم تحديد نقطة الانطلاق');
   if (currentDestination) setDestination(currentDestination);
 }
 
-// ═══════════════════════════════════════════════════════════
-// البحث
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// البحث العام (Nominatim)
+// ═══════════════════════════════════════════════════════════════
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
 async function searchPlaces(q) {
-  if (!q.trim() || !navigator.onLine) { showHint('⚠️ البحث يحتاج اتصال'); return; }
+  if (!q.trim()) return;
+  if (!navigator.onLine) { showHint('⚠️ البحث يحتاج اتصال'); return; }
   const box = document.getElementById('results');
   const list = document.getElementById('resultsList');
   const cnt = document.getElementById('resultsCount');
@@ -1704,7 +1689,7 @@ async function searchPlaces(q) {
       d.querySelector('.save-btn').onclick = (ev) => { ev.stopPropagation(); openNameDialog(loc, title); };
       list.appendChild(d);
     });
-  } catch(e) { list.innerHTML = '<div class="result-item"><div class="text">خطأ</div></div>'; }
+  } catch(e) { list.innerHTML = '<div class="result-item"><div class="text">خطأ في الاتصال</div></div>'; }
 }
 searchBtn.onclick = () => searchPlaces(searchInput.value);
 searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchPlaces(searchInput.value); });
@@ -1716,19 +1701,19 @@ document.addEventListener('click', e => {
   }
 });
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // حفظ الأماكن
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 const nameDialog = document.getElementById('nameDialog');
 const nameInput = document.getElementById('nameInput');
-let pendingSaveLocation = null;
-function openNameDialog(loc, dn='') {
-  pendingSaveLocation = loc;
+let pendingSaveLocation = null, pendingSaveCallback = null;
+function openNameDialog(loc, dn='', cb=null) {
+  pendingSaveLocation = loc; pendingSaveCallback = cb;
   nameInput.value = dn;
   nameDialog.classList.add('show');
   setTimeout(() => nameInput.focus(), 100);
 }
-document.getElementById('nameCancel').onclick = () => { nameDialog.classList.remove('show'); pendingSaveLocation = null; };
+document.getElementById('nameCancel').onclick = () => { nameDialog.classList.remove('show'); pendingSaveLocation = null; pendingSaveCallback = null; };
 document.getElementById('nameSave').onclick = () => {
   const n = nameInput.value.trim() || 'مكان محفوظ';
   if (pendingSaveLocation) {
@@ -1736,9 +1721,10 @@ document.getElementById('nameSave').onclick = () => {
     localStorage.setItem('kzdora_saved', JSON.stringify(savedPlaces));
     showHint('⭐ تم الحفظ');
     speak('تم حفظ ' + n);
+    if (pendingSaveCallback) pendingSaveCallback();
   }
   nameDialog.classList.remove('show');
-  pendingSaveLocation = null;
+  pendingSaveLocation = null; pendingSaveCallback = null;
 };
 nameInput.addEventListener('keypress', e => { if (e.key === 'Enter') document.getElementById('nameSave').click(); });
 const savedPanel = document.getElementById('savedPanel');
@@ -1748,7 +1734,7 @@ document.getElementById('savedClose').onclick = () => savedPanel.classList.remov
 savedPanel.onclick = e => { if (e.target === savedPanel) savedPanel.classList.remove('show'); };
 function renderSavedList() {
   savedList.innerHTML = '';
-  if (!savedPlaces.length) { savedList.innerHTML = '<div class="empty">لا توجد أماكن محفوظة.</div>'; return; }
+  if (!savedPlaces.length) { savedList.innerHTML = '<div class="empty">لا توجد أماكن محفوظة بعد.</div>'; return; }
   savedPlaces.forEach((p,i) => {
     const li = document.createElement('li');
     li.innerHTML = `<div class="star">${ICONS.waypoint}</div><div class="info"><div class="name">${p.name}</div><div class="coords">${p.loc[0].toFixed(4)}, ${p.loc[1].toFixed(4)}</div></div><button class="del-btn"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>`;
@@ -1758,17 +1744,17 @@ function renderSavedList() {
   });
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // الطوارئ
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 const emergencyPanel = document.getElementById('emergencyPanel');
 document.getElementById('emergencyHeaderBtn').onclick = () => { buildEmergencyPanel(); emergencyPanel.classList.add('show'); };
 document.getElementById('emergencyClose').onclick = () => emergencyPanel.classList.remove('show');
 emergencyPanel.onclick = e => { if (e.target === emergencyPanel) emergencyPanel.classList.remove('show'); };
 
-// ═══════════════════════════════════════════════════════════
-// التنزيل
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// التنزيل Offline
+// ═══════════════════════════════════════════════════════════════
 const downloadPanel = document.getElementById('downloadPanel');
 document.getElementById('downloadHeaderBtn').onclick = () => { updateOfflineStats(); downloadPanel.classList.add('show'); };
 document.getElementById('downloadClose').onclick = () => downloadPanel.classList.remove('show');
@@ -1789,9 +1775,9 @@ document.getElementById('clearTilesBtn').onclick = async () => {
   }
 };
 
-// ═══════════════════════════════════════════════════════════
-// الاتصال
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// حالة الاتصال
+// ═══════════════════════════════════════════════════════════════
 const offlineBadge = document.getElementById('offlineBadge');
 function updateOnline() {
   if (navigator.onLine) offlineBadge.classList.remove('show');
@@ -1801,9 +1787,9 @@ window.addEventListener('online', updateOnline);
 window.addEventListener('offline', updateOnline);
 updateOnline();
 
-// ═══════════════════════════════════════════════════════════
-// التثبيت
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// تثبيت التطبيق
+// ═══════════════════════════════════════════════════════════════
 let deferredInstallPrompt = null;
 const installPrompt = document.getElementById('installPrompt');
 const installHeaderBtn = document.getElementById('installHeaderBtn');
@@ -1840,9 +1826,9 @@ async function triggerInstall() {
 }
 document.getElementById('installCancel').onclick = () => installDialog.classList.remove('show');
 
-// ═══════════════════════════════════════════════════════════
-// الخروج
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// تأكيد الخروج
+// ═══════════════════════════════════════════════════════════════
 const exitDialog = document.getElementById('exitDialog');
 let exitTriggered = false;
 document.getElementById('exitCancel').onclick = () => { exitDialog.classList.remove('show'); exitTriggered = false; };
@@ -1858,9 +1844,9 @@ window.addEventListener('popstate', () => {
 });
 history.pushState(null,'',location.href);
 
-// ═══════════════════════════════════════════════════════════
-// التشغيل
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// التشغيل عند تحميل الصفحة
+// ═══════════════════════════════════════════════════════════════
 window.addEventListener('load', async () => {
   document.getElementById('travelModeBar').classList.add('show');
   document.getElementById('recenterBtn').classList.add('show');
@@ -1882,6 +1868,7 @@ window.addEventListener('load', async () => {
       }, err => {
         gpsStatus.classList.add('show');
         gpsText.textContent = 'اضغط زر الموقع للسماح';
+        speak('أهلاً بك في كزدورة');
       }, { enableHighAccuracy:true, timeout:15000 });
     }
   }, 800);
