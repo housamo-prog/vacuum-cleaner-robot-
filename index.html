@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="كزدورة">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.json">
-<title>كزدورة — ملاحة وخرائط</title>
+<title>كزدورة — ملاحة وخرائط متطورة</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
 :root{--panel:#fff;--text:#202124;--text-sub:#5f6368;--primary:#1a73e8;--primary-dark:#1557b0;--danger:#ea4335;--success:#34a853;--border:#f1f3f4;--input-bg:#f1f3f4;--gold:#fbbc04;--fuel:#ea8600;--pharmacy:#34a853;--hospital:#ea4335;--grocery:#7c4dff;--stop:#ff6d00;--emergency:#d32f2f;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
@@ -98,7 +98,8 @@ body.navigating #travelModeBar{transform:translate(-50%,250%);opacity:0;pointer-
 #speedometer{position:fixed;top:calc(180px + var(--safe-top));left:10px;z-index:999;background:var(--panel);padding:8px 14px;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.15);display:none;align-items:center;gap:8px;transition:transform .3s,opacity .3s}
 #speedometer.show{display:flex}
 body.navigating #speedometer{transform:translateY(-250%);opacity:0;pointer-events:none}
-#speedometer.over{background:#fce8e6}
+#speedometer.over{background:#fce8e6;animation:pulseOver 0.8s infinite alternate}
+@keyframes pulseOver{from{box-shadow:0 0 0px var(--danger)}to{box-shadow:0 0 14px var(--danger)}}
 #speedometer.over #speedValue{color:var(--danger)}
 #speedValue{font-size:26px;font-weight:800;color:var(--primary);min-width:45px;text-align:center;font-variant-numeric:tabular-nums}
 #speedUnit{font-size:11px;color:var(--text-sub);line-height:1.2}
@@ -108,8 +109,12 @@ body.navigating #speedometer{transform:translateY(-250%);opacity:0;pointer-event
 body.navigating #gpsStatus{transform:translateY(-250%);opacity:0;pointer-events:none}
 #gpsStatus .dot{width:8px;height:8px;border-radius:50%;background:var(--danger);animation:pulse 1.5s infinite}
 #gpsStatus.active .dot{background:var(--success)}
-
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* زر البوصلة وحاسبة الوقود المضاف حديثاً */
+#compassBtn{position:fixed;right:12px;bottom:calc(80px + var(--safe-bottom));z-index:999;background:var(--panel);color:var(--primary);border:none;cursor:pointer;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.25);transition:transform .3s}
+#compassBtn svg{width:26px;height:26px;fill:var(--danger);transition:transform .2s ease-out}
+body.navigating #compassBtn{bottom:calc(80px + var(--safe-bottom))}
 
 #mapPopup{position:fixed;z-index:2000;background:var(--panel);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.3);padding:6px;display:none;min-width:210px}
 #mapPopup.show{display:block}
@@ -121,24 +126,25 @@ body.navigating #gpsStatus{transform:translateY(-250%);opacity:0;pointer-events:
 .popup-item.save svg{fill:var(--gold)}
 .popup-item.stop svg{fill:var(--stop)}
 
-#savedPanel{position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.5);display:none;align-items:flex-end}
-#savedPanel.show{display:flex}
-#savedContent{background:var(--panel);width:100%;max-height:70vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
+#savedPanel,#historyPanel{position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.5);display:none;align-items:flex-end}
+#savedPanel.show,#historyPanel.show{display:flex}
+#savedContent,#historyContent{background:var(--panel);width:100%;max-height:70vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-#savedHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-#savedHeader h3{font-size:18px}
-#savedClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-#savedClose svg{width:18px;height:18px;fill:var(--text)}
-#savedList{list-style:none}
-#savedList li{padding:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;border-radius:10px}
-#savedList li:active{background:var(--input-bg)}
-#savedList li .star svg{width:20px;height:20px;fill:var(--gold)}
-#savedList li .info{flex:1}
-#savedList li .name{font-weight:500;font-size:14px}
-#savedList li .coords{font-size:11px;color:var(--text-sub);margin-top:3px}
+#savedHeader,#historyHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+#savedHeader h3,#historyHeader h3{font-size:18px}
+#savedClose,#historyClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+#savedClose svg,#historyClose svg{width:18px;height:18px;fill:var(--text)}
+#savedList,#historyList{list-style:none}
+#savedList li,#historyList li{padding:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;border-radius:10px}
+#savedList li:active,#historyList li:active{background:var(--input-bg)}
+#savedList li .star svg,#historyList li .hist-icon svg{width:20px;height:20px;fill:var(--gold)}
+#historyList li .hist-icon svg{fill:var(--primary)}
+#savedList li .info,#historyList li .info{flex:1}
+#savedList li .name,#historyList li .name{font-weight:500;font-size:14px}
+#savedList li .coords,#historyList li .sub-info{font-size:11px;color:var(--text-sub);margin-top:3px}
 #savedList li .del-btn{background:transparent;border:none;cursor:pointer;padding:8px}
 #savedList li .del-btn svg{width:18px;height:18px;fill:var(--danger)}
-#savedList .empty{text-align:center;color:var(--text-sub);padding:40px 20px;font-size:14px}
+#savedList .empty,#historyList .empty{text-align:center;color:var(--text-sub);padding:40px 20px;font-size:14px}
 
 #waypointsBar{position:fixed;bottom:calc(160px + var(--safe-bottom));left:10px;right:10px;z-index:1000;background:var(--panel);border-radius:14px;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,.2);display:none;transition:transform .3s,opacity .3s;max-height:30vh;overflow-y:auto}
 #waypointsBar.show{display:block}
@@ -231,15 +237,13 @@ body.navigating #recenterBtn{bottom:calc(20px + var(--safe-bottom))}
 #mapHint.show{display:block;animation:fadeInOut 3s ease-in-out}
 @keyframes fadeInOut{0%,100%{opacity:0}15%,85%{opacity:1}}
 
-#nameDialog,#exitDialog,#stopConfirmDialog,#installDialog,#emergencyPanel,#downloadPanel,#deleteConfirmDialog{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px}
+#nameDialog,#exitDialog,#stopConfirmDialog,#installDialog,#emergencyPanel,#downloadPanel,#deleteConfirmDialog,#fuelCalcPanel{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px}
 #stopConfirmDialog{z-index:4500}
 #installDialog{z-index:4600}
-#emergencyPanel{z-index:4800;background:rgba(0,0,0,.7);align-items:flex-end;padding:0}
-#downloadPanel{z-index:4800;background:rgba(0,0,0,.7);align-items:flex-end;padding:0}
+#emergencyPanel,#downloadPanel,#fuelCalcPanel{z-index:4800;background:rgba(0,0,0,.7);align-items:flex-end;padding:0}
 #deleteConfirmDialog{z-index:5000}
 #nameDialog.show,#exitDialog.show,#stopConfirmDialog.show,#installDialog.show,#deleteConfirmDialog.show{display:flex}
-#emergencyPanel.show{display:flex}
-#downloadPanel.show{display:flex}
+#emergencyPanel.show,#downloadPanel.show,#fuelCalcPanel.show{display:flex}
 #nameDialogBox,#exitBox,#stopConfirmBox,#installBox,#deleteConfirmBox{background:var(--panel);border-radius:18px;padding:22px;width:100%;max-width:340px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
 #nameDialogBox h3{font-size:16px;margin-bottom:12px}
 #nameInput{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:15px;outline:none;margin-bottom:14px}
@@ -267,12 +271,27 @@ body.dark #installBox .icon{background:#1a3a5c}
 #stopConfirmOk{background:#ff6d00;color:#fff}
 #installOk{background:var(--primary);color:#fff}
 
-#emergencyContent{background:var(--panel);width:100%;max-height:85vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
-#emergencyHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-#emergencyHeader h3{font-size:18px;display:flex;align-items:center;gap:8px}
+#fuelCalcContent{background:var(--panel);width:100%;max-height:80vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
+#fuelCalcHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+#fuelCalcHeader h3{font-size:18px;display:flex;align-items:center;gap:8px;color:var(--fuel)}
+#fuelCalcHeader h3 svg{width:22px;height:22px;fill:var(--fuel)}
+#fuelCalcClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+#fuelCalcClose svg{width:18px;height:18px;fill:var(--text)}
+.fuel-box{background:var(--input-bg);padding:14px;border-radius:12px;margin-bottom:12px}
+.fuel-box label{font-size:12px;color:var(--text-sub);display:block;margin-bottom:6px}
+.fuel-box input{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--panel);color:var(--text);font-family:inherit;font-size:15px;outline:none}
+.fuel-res-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.fuel-res-card{background:var(--input-bg);padding:12px;border-radius:12px;text-align:center}
+.fuel-res-card .val{font-size:18px;font-weight:800;color:var(--fuel)}
+.fuel-res-card .lbl{font-size:11px;color:var(--text-sub);margin-top:4px}
+
+#emergencyContent,#downloadContent{background:var(--panel);width:100%;max-height:80vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
+#emergencyHeader,#downloadHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+#emergencyHeader h3,#downloadHeader h3{font-size:18px;display:flex;align-items:center;gap:8px}
 #emergencyHeader h3 svg{width:22px;height:22px;fill:var(--emergency)}
-#emergencyClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-#emergencyClose svg{width:18px;height:18px;fill:var(--text)}
+#downloadHeader h3 svg{width:22px;height:22px;fill:var(--primary)}
+#emergencyClose,#downloadClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+#emergencyClose svg,#downloadClose svg{width:18px;height:18px;fill:var(--text)}
 .em-section{margin-bottom:20px}
 .em-section-title{font-size:13px;font-weight:700;color:var(--text-sub);margin-bottom:10px;padding-right:4px;display:flex;align-items:center;gap:6px}
 .em-section-title svg{width:16px;height:16px;fill:var(--text-sub)}
@@ -292,12 +311,6 @@ body.dark #installBox .icon{background:#1a3a5c}
 .em-btn.plumber .em-icon{background:#00838f}
 .em-btn.pharmacy .em-icon{background:#2e7d32}
 
-#downloadContent{background:var(--panel);width:100%;max-height:80vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
-#downloadHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-#downloadHeader h3{font-size:18px;display:flex;align-items:center;gap:8px}
-#downloadHeader h3 svg{width:22px;height:22px;fill:var(--primary)}
-#downloadClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-#downloadClose svg{width:18px;height:18px;fill:var(--text)}
 .download-info{background:var(--input-bg);border-radius:12px;padding:14px;margin-bottom:14px;font-size:13px;line-height:1.6;color:var(--text-sub)}
 .download-info strong{color:var(--text)}
 .download-btn{background:var(--primary);color:#fff;border:none;padding:14px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;transition:background .2s}
@@ -350,12 +363,18 @@ body.dark #installBox .icon{background:#1a3a5c}
 <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
 </div>
 <div class="title-block">
-<div class="title">كزدورة</div>
-<div class="subtitle">ملاحة وخرائط في سوريا</div>
+<div class="title">كزدورة Pro</div>
+<div class="subtitle">خرائط وملاحة متطورة</div>
 </div>
 <div class="actions">
 <button class="header-btn" id="installHeaderBtn" title="تثبيت التطبيق" style="display:none;">
 <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+</button>
+<button class="header-btn" id="fuelHeaderBtn" title="حاسبة الوقود" style="background:rgba(234,134,0,0.4);">
+<svg viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v16h10v-7.5h1.5v5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77zM12 10H6V5h6v5z"/></svg>
+</button>
+<button class="header-btn" id="historyHeaderBtn" title="سجل الرحلات">
+<svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
 </button>
 <button class="header-btn" id="downloadHeaderBtn" title="تنزيل الخريطة">
 <svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
@@ -376,7 +395,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 <button id="locBtn" class="icon-btn" title="موقعي الحالي">
 <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
 </button>
-<input id="searchInput" type="text" placeholder="ابحث عن مكان في سوريا..." />
+<input id="searchInput" type="text" placeholder="ابحث عن مكان، مدينة أو شارع..." />
 <button id="searchBtn" class="icon-btn" title="بحث">
 <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
 </button>
@@ -450,6 +469,10 @@ body.dark #installBox .icon{background:#1a3a5c}
 <span id="speedValue">0</span>
 <span id="speedUnit">كم/س<br>سرعة</span>
 </div>
+
+<button id="compassBtn" title="البوصلة والرؤية ثلاثية الأبعاد">
+<svg id="compassArrow" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+</button>
 
 <div id="gpsStatus"><span class="dot"></span><span id="gpsText">جاري الاتصال...</span></div>
 
@@ -551,6 +574,50 @@ body.dark #installBox .icon{background:#1a3a5c}
 </button>
 </div>
 <ul id="savedList"></ul>
+</div>
+</div>
+
+<div id="historyPanel">
+<div id="historyContent">
+<div id="historyHeader">
+<h3>📜 سجل الرحلات السابقة</h3>
+<button id="historyClose">
+<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+</button>
+</div>
+<ul id="historyList"></ul>
+</div>
+</div>
+
+<div id="fuelCalcPanel">
+<div id="fuelCalcContent">
+<div id="fuelCalcHeader">
+<h3>
+<svg viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v16h10v-7.5h1.5v5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77zM12 10H6V5h6v5z"/></svg>
+حاسبة الوقود وتكلفة الرحلة
+</h3>
+<button id="fuelCalcClose">
+<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+</button>
+</div>
+<div class="fuel-box">
+<label>معدل استهلاك السيارة (لتر لكل 100 كم):</label>
+<input type="number" id="fuelRate" value="8" step="0.5" />
+</div>
+<div class="fuel-box">
+<label>سعر لتر الوقود (ليرة/دولار):</label>
+<input type="number" id="fuelPrice" value="12500" step="100" />
+</div>
+<div class="fuel-res-grid">
+<div class="fuel-res-card">
+<div class="val" id="resFuelLiters">0 لتر</div>
+<div class="lbl">الوقود التقديري</div>
+</div>
+<div class="fuel-res-card">
+<div class="val" id="resFuelCost">0</div>
+<div class="lbl">التكلفة المتوقعة</div>
+</div>
+</div>
 </div>
 </div>
 
@@ -693,7 +760,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 <script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// إدارة الشاشة والخدمات الأساسية
+// منع إطفاء الشاشة
 // ═══════════════════════════════════════════════════════════════
 let noSleep = null, wakeLock = null;
 async function keepScreenOn() {
@@ -712,7 +779,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// IndexedDB للعمل بدون إنترنت
+// IndexedDB
 // ═══════════════════════════════════════════════════════════════
 const DB_NAME='kzdora_offline', DB_VERSION=1, TILE_STORE='tiles';
 let db = null;
@@ -783,7 +850,7 @@ async function updateOfflineStats() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// تنزيل الخرائط مع التحكم بالمعدل (Throttle)
+// تنزيل منطقة
 // ═══════════════════════════════════════════════════════════════
 let downloadCancelFlag = false;
 async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
@@ -846,7 +913,7 @@ async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
   document.getElementById('downloadFill').style.width = '100%';
   document.getElementById('downloadText').textContent = `✅ تم تنزيل ${saved} بلاطة جديدة`;
   setTimeout(() => document.getElementById('downloadProgress').classList.remove('show'), 3000);
-  speak('تم تنزيل خريطة العمل بدون إنترنت بنجاح');
+  speak('تم تنزيل الخريطة بنجاح');
   updateOfflineStats();
 }
 
@@ -894,7 +961,7 @@ const EM_ICONS = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// التوجيه الصوتي والإنذارات
+// الصوتيات والتنبيهات
 // ═══════════════════════════════════════════════════════════════
 const synth = window.speechSynthesis;
 let arabicVoice = null;
@@ -904,7 +971,6 @@ function pickArabicVoice() {
   arabicVoice = v.find(x => x.lang === 'ar-SA') || v.find(x => x.lang.startsWith('ar')) || null;
   if (!arabicVoice && !voiceWarned) {
     voiceWarned = true;
-    console.warn('[Kzdora] لا يوجد محرك صوت عربي مدمج');
   }
 }
 pickArabicVoice();
@@ -932,7 +998,7 @@ function playBeep(f = 880, d = 150) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// الأدوات الحسابية والتنسيق
+// الأدوات التنسيقية
 // ═══════════════════════════════════════════════════════════════
 let loadingTimeout = null;
 function showLoading(m) {
@@ -977,7 +1043,7 @@ function formatEta(s) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// حوار الحذف
+// حوارات التأكيد
 // ═══════════════════════════════════════════════════════════════
 const deleteConfirmDialog = document.getElementById('deleteConfirmDialog');
 let deleteConfirmCallback = null;
@@ -998,7 +1064,7 @@ document.getElementById('deleteConfirmOk').onclick = () => {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// الطوارئ
+// بيانات الطوارئ
 // ═══════════════════════════════════════════════════════════════
 const EMERGENCY_DATA = {
   numbers: [
@@ -1048,7 +1114,7 @@ function buildEmergencyPanel() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// الحالة العامة للتطبيق
+// الحالة العامة
 // ═══════════════════════════════════════════════════════════════
 let destMarker = null, startMarker = null;
 let waypointMarkers = [];
@@ -1074,13 +1140,15 @@ let recenterMode = 'follow';
 let activeCategory = null;
 let poiMarkers = [];
 let isDarkMode = false;
-const SPEED_LIMIT = 120;
+let speedLimit = 120;
+let overSpeedWarned = false;
 let offRouteCounter = 0, lastRouteRecalcTime = 0;
 const OFF_ROUTE_THRESHOLD_M = 80, OFF_ROUTE_COUNT = 3, ROUTE_RECALC_COOLDOWN = 15000, MIN_GPS_ACCURACY = 60;
 let savedPlaces = JSON.parse(localStorage.getItem('kzdora_saved') || '[]');
+let tripHistory = JSON.parse(localStorage.getItem('kzdora_history') || '[]');
 
 // ═══════════════════════════════════════════════════════════════
-// إدارة URL والحالة
+// الحالة ومزامنة الـ URL
 // ═══════════════════════════════════════════════════════════════
 function readStateFromURL() {
   const hash = location.hash.replace(/^#kzdora\??/, '');
@@ -1091,6 +1159,7 @@ function readStateFromURL() {
   else { const h = new Date().getHours(); setDarkMode(h < 6 || h >= 19); }
   if (mode === 'foot' || mode === 'driving') {
     currentTravelMode = mode;
+    speedLimit = mode === 'foot' ? 15 : 120;
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
   }
   if (wps) {
@@ -1116,7 +1185,7 @@ function updateURL() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// إدارة نقاط التوقف
+// نقاط التوقف
 // ═══════════════════════════════════════════════════════════════
 function updateWaypointsUI() {
   const list = document.getElementById('waypointsList');
@@ -1148,7 +1217,7 @@ function redrawWaypointMarkers() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// الخريطة
+// الخريطة والاتجاهات
 // ═══════════════════════════════════════════════════════════════
 const MAP_STYLE = {
   version: 8, name:'OSM',
@@ -1167,43 +1236,85 @@ const MAP_STYLE = {
 const DAMASCUS = [36.2765, 33.5138];
 const map = new maplibregl.Map({ container:'map', style:MAP_STYLE, center:DAMASCUS, zoom:13, pitch:0, bearing:0, attributionControl:false, antialias:true });
 
+map.on('rotate', () => {
+  const b = map.getBearing();
+  document.getElementById('compassArrow').style.transform = `rotate(${-b}deg)`;
+});
+
+document.getElementById('compassBtn').onclick = () => {
+  const p = map.getPitch();
+  if (p > 10) {
+    map.easeTo({ pitch: 0, bearing: 0, duration: 600 });
+  } else {
+    map.easeTo({ pitch: 55, bearing: lastHeading || 0, duration: 600 });
+  }
+};
+
 // ═══════════════════════════════════════════════════════════════
-// الأماكن القريبة (Overpass)
+// [محسن بالكامل] البحث عن الفئات والأماكن القريبة (Overpass + Fallback)
 // ═══════════════════════════════════════════════════════════════
 const CAT_LABELS = { fuel:'محطة وقود', pharmacy:'صيدلية', hospital:'مشفى', grocery:'بقالية', restaurant:'مطعم', atm:'صراف آلي', parking:'موقف سيارات', mosque:'مسجد', cafe:'مقهى', hotel:'فندق' };
 const OSM_TAGS = { fuel:'["amenity"="fuel"]', pharmacy:'["amenity"="pharmacy"]', hospital:'["amenity"~"hospital|clinic"]', grocery:'["shop"~"supermarket|convenience"]', restaurant:'["amenity"~"restaurant|fast_food"]', atm:'["amenity"~"atm|bank"]', parking:'["amenity"="parking"]', mosque:'["amenity"="place_of_worship"]["religion"="muslim"]', cafe:'["amenity"="cafe"]', hotel:'["tourism"~"hotel|guest_house"]' };
 
 async function searchNearby(cat) {
-  if (!navigator.onLine) { showHint('⚠️ البحث يحتاج اتصال'); return; }
   const center = userLocation || [map.getCenter().lat, map.getCenter().lng];
-  showLoading(`جاري البحث عن ${CAT_LABELS[cat]}...`);
+  showLoading(`جاري البحث عن ${CAT_LABELS[cat]} القريبة...`);
   const [lat,lng] = center;
-  const q = `[out:json][timeout:25];(node${OSM_TAGS[cat]}(around:3000,${lat},${lng});way${OSM_TAGS[cat]}(around:3000,${lat},${lng}););out center 40;`;
-  const servers = ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];
-  for (const srv of servers) {
+  
+  if (navigator.onLine) {
+    const q = `[out:json][timeout:25];(node${OSM_TAGS[cat]}(around:5000,${lat},${lng});way${OSM_TAGS[cat]}(around:5000,${lat},${lng}););out center 40;`;
+    const servers = [
+      'https://overpass-api.de/api/interpreter',
+      'https://overpass.kumi.systems/api/interpreter',
+      'https://overpass.private.coffee/api/interpreter'
+    ];
+    
+    for (const srv of servers) {
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 12000);
+        const r = await fetch(srv, { method:'POST', body:'data='+encodeURIComponent(q), headers:{'Content-Type':'application/x-www-form-urlencoded'}, signal:ctrl.signal });
+        clearTimeout(t);
+        if (!r.ok) continue;
+        const data = await r.json();
+        if (data.elements && data.elements.length) {
+          const results = data.elements.map(el => {
+            const plat = el.lat || (el.center && el.center.lat);
+            const plng = el.lon || (el.center && el.center.lon);
+            if (!plat || !plng) return null;
+            const name = el.tags?.name || el.tags?.['name:ar'] || el.tags?.['name:en'] || CAT_LABELS[cat];
+            return { name, lat:plat, lng:plng, dist:haversine(lat,lng,plat,plng), address:buildAddress(el.tags) };
+          }).filter(Boolean);
+          results.sort((a,b) => a.dist - b.dist);
+          hideLoading(); displayPoiResults(results, cat);
+          return;
+        }
+      } catch(e) { continue; }
+    }
+
+    // Fallback: Nominatim search if Overpass fails
     try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 12000);
-      const r = await fetch(srv, { method:'POST', body:'data='+encodeURIComponent(q), headers:{'Content-Type':'application/x-www-form-urlencoded'}, signal:ctrl.signal });
-      clearTimeout(t);
-      if (!r.ok) continue;
-      const data = await r.json();
-      if (data.elements && data.elements.length) {
-        const results = data.elements.map(el => {
-          const plat = el.lat || (el.center && el.center.lat);
-          const plng = el.lon || (el.center && el.center.lon);
-          if (!plat || !plng) return null;
-          const name = el.tags?.name || el.tags?.['name:ar'] || el.tags?.['name:en'] || CAT_LABELS[cat];
-          return { name, lat:plat, lng:plng, dist:haversine(lat,lng,plat,plng), address:buildAddress(el.tags) };
-        }).filter(Boolean);
+      const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(CAT_LABELS[cat])}&lat=${lat}&lon=${lng}&limit=15&accept-language=ar`);
+      const nomData = await nomRes.json();
+      if (nomData && nomData.length) {
+        const results = nomData.map(p => ({
+          name: p.display_name.split(',')[0],
+          lat: parseFloat(p.lat),
+          lng: parseFloat(p.lon),
+          dist: haversine(lat, lng, parseFloat(p.lat), parseFloat(p.lon)),
+          address: p.display_name
+        }));
         results.sort((a,b) => a.dist - b.dist);
         hideLoading(); displayPoiResults(results, cat);
         return;
       }
-    } catch(e) { continue; }
+    } catch(err) {}
   }
-  hideLoading(); showHint('⚠️ تعذر الاتصال بخادم الأماكن');
+
+  hideLoading();
+  showHint('⚠️ لم يتم العثور على نتائج قريبة أو لا يوجد اتصال');
 }
+
 function buildAddress(t) {
   if (!t) return '';
   const p = [];
@@ -1239,7 +1350,7 @@ function renderResultsList(results, cat) {
     const d = document.createElement('div');
     d.className = 'result-item';
     const dt = p.dist < 1 ? `${Math.round(p.dist*1000)} م` : `${p.dist.toFixed(1)} كم`;
-    d.innerHTML = `<div class="pin">${icon}</div><div class="text"><div class="title">${p.name}</div><div class="sub">${p.address||CAT_LABELS[cat]}</div></div><div class="dist-badge">${dt}</div><button class="save-btn" title="حفظ"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
+    d.innerHTML = `<div class="pin">${icon}</div><div class="text"><div class="title">${p.name}</div><div class="sub">${p.address||CAT_LABELS[cat]}</div></div><div class="dist-badge">${dt}</div><button class="save-btn"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
     d.querySelector('.text').onclick = () => { box.classList.remove('show'); if (pendingWaypointPick) addWaypoint([p.lat,p.lng], p.name); else setDestination([p.lat,p.lng], p.name); };
     d.querySelector('.dist-badge').onclick = (e) => { e.stopPropagation(); box.classList.remove('show'); if (pendingWaypointPick) addWaypoint([p.lat,p.lng], p.name); else setDestination([p.lat,p.lng], p.name); };
     d.querySelector('.save-btn').onclick = (e) => { e.stopPropagation(); openNameDialog([p.lat,p.lng], p.name); };
@@ -1308,7 +1419,7 @@ function setDarkMode(d) {
 themeHeaderBtn.onclick = () => { setDarkMode(!isDarkMode); updateURL(); };
 
 // ═══════════════════════════════════════════════════════════════
-// تتبع الموقع والـ GPS
+// تتبع الموقع والسرعة والتنبيهات
 // ═══════════════════════════════════════════════════════════════
 const gpsStatus = document.getElementById('gpsStatus');
 const gpsText = document.getElementById('gpsText');
@@ -1360,9 +1471,16 @@ function updateSpeedDisplay() {
   if (gpsFirstFix) speedometer.classList.add('show');
   speedValue.textContent = currentSpeed;
   document.getElementById('navSpeedVal').textContent = currentSpeed;
-  const over = currentSpeed > SPEED_LIMIT;
+  const over = currentSpeed > speedLimit;
   speedometer.classList.toggle('over', over);
   document.getElementById('navSpeedBadge').classList.toggle('over', over);
+  
+  if (over && !overSpeedWarned) {
+    overSpeedWarned = true;
+    playBeep(1200, 300);
+    speak('تنبيه: تحذير تجاوز السرعة المحددة', true);
+    setTimeout(() => { overSpeedWarned = false; }, 10000);
+  }
 }
 function updateUserLocation(loc, acc, h) {
   userLocation = loc;
@@ -1402,7 +1520,7 @@ function updateVehiclePosition(loc, heading, speedMs) {
   }
   
   if (recenterMode === 'follow' && navigationActive) {
-    map.easeTo({ center:[loc[1],loc[0]], zoom:getDynZoom(speedMs||0), bearing:lastHeading, pitch:60,
+    map.easeTo({ center:[loc[1],loc[0]], zoom:getDynZoom(speedMs||0), bearing:lastHeading, pitch:55,
       padding:{ top:0, bottom:window.innerHeight*0.4, left:0, right:0 }, duration:700 });
   }
 }
@@ -1419,6 +1537,11 @@ function setDestination(loc, name, isRecalc=false) {
   el.style.cssText = 'width:36px;height:36px;';
   el.innerHTML = ICONS.arrive;
   destMarker = new maplibregl.Marker({ element:el, anchor:'bottom' }).setLngLat([loc[1],loc[0]]).addTo(map);
+  
+  if (name) {
+    saveToHistory(name, loc);
+  }
+  
   updateURL();
   const start = (navigationActive && userLocation) ? userLocation : (manualStart || userLocation);
   if (!start) { speak('يرجى تحديد موقع الانطلاق'); showHint('📍 اضغط مطولاً على الخريطة لتحديد الانطلاق'); return; }
@@ -1428,6 +1551,15 @@ function setDestination(loc, name, isRecalc=false) {
   const costing = currentTravelMode === 'foot' ? 'pedestrian' : 'auto';
   fetchValhallaRoutes(pts, costing, isRecalc);
 }
+
+function saveToHistory(name, loc) {
+  const existingIndex = tripHistory.findIndex(h => h.name === name);
+  if (existingIndex > -1) tripHistory.splice(existingIndex, 1);
+  tripHistory.unshift({ name, loc, date: new Date().toLocaleDateString('ar-SY') });
+  if (tripHistory.length > 20) tripHistory.pop();
+  localStorage.setItem('kzdora_history', JSON.stringify(tripHistory));
+}
+
 async function fetchValhallaRoutes(points, costing, isRecalc) {
   try {
     const body = { locations: points.map(p=>({lat:p[0],lon:p[1]})), costing, units:'kilometers', language:'ar-SA', alternates:2, directions_options:{ units:'kilometers', language:'ar-SA' } };
@@ -1455,6 +1587,8 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
     document.querySelectorAll('.route-btn').forEach(b => b.classList.toggle('active', b.dataset.profile==='fastest'));
     drawRoute(fastest);
     currentSteps = fastest.steps; currentStepIndex=0; lastSpokenStep=-1;
+    calculateFuelEstimate(fastest.distance / 1000);
+
     if (!isRecalc) {
       document.getElementById('routeOptions').classList.add('show');
       document.getElementById('startBtn').classList.add('show');
@@ -1478,6 +1612,8 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
       document.getElementById('btnShortest').style.opacity = '0.4';
       drawRoute(norm);
       currentSteps = norm.steps; currentStepIndex=0; lastSpokenStep=-1;
+      calculateFuelEstimate(norm.distance / 1000);
+
       if (!isRecalc) { document.getElementById('routeOptions').classList.add('show'); document.getElementById('startBtn').classList.add('show'); speak('تم حساب المسار'); }
       map.fitBounds(norm.bounds, { padding:60, duration:800 });
     } catch(e2) {
@@ -1486,6 +1622,23 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
     }
   }
 }
+
+function calculateFuelEstimate(distKm) {
+  const rate = parseFloat(document.getElementById('fuelRate').value) || 8;
+  const price = parseFloat(document.getElementById('fuelPrice').value) || 12500;
+  const liters = (distKm * (rate / 100)).toFixed(1);
+  const cost = Math.round(liters * price);
+  document.getElementById('resFuelLiters').textContent = `${liters} لتر`;
+  document.getElementById('resFuelCost').textContent = `${cost.toLocaleString('ar-SY')} ل.س`;
+}
+
+document.getElementById('fuelRate').addEventListener('input', () => {
+  if (currentRouteData) calculateFuelEstimate(currentRouteData.distance / 1000);
+});
+document.getElementById('fuelPrice').addEventListener('input', () => {
+  if (currentRouteData) calculateFuelEstimate(currentRouteData.distance / 1000);
+});
+
 function buildValhallaRoute(trip) {
   const coords = [];
   trip.legs.forEach(l => decodePolyline(l.shape,6).forEach(c => coords.push(c)));
@@ -1556,7 +1709,7 @@ function translateInstruction(s) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// الملاحة والتوجيه المباشر
+// بدء الملاحة
 // ═══════════════════════════════════════════════════════════════
 document.getElementById('startBtn').onclick = async () => {
   if (!currentSteps.length) return;
@@ -1585,7 +1738,7 @@ document.getElementById('startBtn').onclick = async () => {
   playBeep(880,120);
   setTimeout(() => speak('بدء التوجيه'), 200);
   if (userLocation) {
-    map.easeTo({ center:[userLocation[1],userLocation[0]], zoom:17, bearing:lastHeading, pitch:60, padding:{ top:0, bottom:window.innerHeight*0.4, left:0, right:0 }, duration:1200 });
+    map.easeTo({ center:[userLocation[1],userLocation[0]], zoom:17, bearing:lastHeading, pitch:55, padding:{ top:0, bottom:window.innerHeight*0.4, left:0, right:0 }, duration:1200 });
   }
   map.on('dragstart', () => { if (navigationActive) { recenterMode = 'free'; document.getElementById('recenterBtn').classList.add('show'); } });
 };
@@ -1636,7 +1789,7 @@ document.getElementById('navStopFloat').onclick = () => stopConfirmDialog.classL
 document.getElementById('recenterBtn').onclick = () => {
   recenterMode = 'follow';
   document.getElementById('recenterBtn').classList.remove('show');
-  if (userLocation) map.easeTo({ center:[userLocation[1],userLocation[0]], zoom:17, bearing:lastHeading, pitch:60, padding:{ top:0, bottom:window.innerHeight*0.4, left:0, right:0 }, duration:800 });
+  if (userLocation) map.easeTo({ center:[userLocation[1],userLocation[0]], zoom:17, bearing:lastHeading, pitch:55, padding:{ top:0, bottom:window.innerHeight*0.4, left:0, right:0 }, duration:800 });
 };
 
 function checkProgress(loc) {
@@ -1711,6 +1864,7 @@ document.querySelectorAll('.mode-btn').forEach(b => b.onclick = () => {
   if (m === currentTravelMode) return;
   hideLoading();
   currentTravelMode = m;
+  speedLimit = m === 'foot' ? 15 : 120;
   document.querySelectorAll('.mode-btn').forEach(x => x.classList.toggle('active', x.dataset.mode === m));
   playBeep(1000,100);
   speak(m === 'foot' ? 'وضع المشي' : 'وضع السيارة');
@@ -1727,6 +1881,7 @@ document.querySelectorAll('.route-btn').forEach(b => b.onclick = () => {
     currentRouteData = r; currentRouteProfile = p;
     drawRoute(r);
     currentSteps = r.steps; currentStepIndex = 0; lastSpokenStep = -1;
+    calculateFuelEstimate(r.distance / 1000);
     if (navigationActive) updateNavigationUI();
     playBeep(1000,100);
     speak(`تم اختيار ${p === 'fastest' ? 'الأسرع' : 'البديل'}`);
@@ -1769,7 +1924,7 @@ document.getElementById('locBtn').onclick = () => {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// خيارات القائمة المنبثقة
+// القائمة المنبثقة للضغط المطول
 // ═══════════════════════════════════════════════════════════════
 document.getElementById('popupStart').onclick = () => { if (popupLatLng) setManualStart([popupLatLng.lat, popupLatLng.lng]); hideMapPopup(); };
 document.getElementById('popupStop').onclick = () => { if (popupLatLng) addWaypoint([popupLatLng.lat, popupLatLng.lng], null); hideMapPopup(); };
@@ -1803,16 +1958,16 @@ function setManualStart(loc) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// البحث العادي (Nominatim مع Throttle)
+// البحث المحسن (Nominatim مع Throttle)
 // ═══════════════════════════════════════════════════════════════
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
 let lastNominatimCall = 0;
-const NOMINATIM_THROTTLE_MS = 1100;
+const NOMINATIM_THROTTLE_MS = 1000;
 
 async function searchPlaces(q) {
   if (!q.trim()) return;
-  if (!navigator.onLine) { showHint('⚠️ البحث يحتاج اتصال'); return; }
+  if (!navigator.onLine) { showHint('⚠️ البحث يحتاج اتصال بالشبكة'); return; }
   const now = Date.now();
   const wait = NOMINATIM_THROTTLE_MS - (now - lastNominatimCall);
   if (wait > 0) await new Promise(r => setTimeout(r, wait));
@@ -1824,10 +1979,10 @@ async function searchPlaces(q) {
   box.classList.add('show');
   list.innerHTML = '<div class="result-item"><div class="text">⏳ جاري البحث...</div></div>';
   try {
-    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=sy&limit=10&accept-language=ar&addressdetails=1`, { headers:{ 'User-Agent':'Kzdora/1.0 (navigation-app)' } });
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=sy&limit=10&accept-language=ar&addressdetails=1`, { headers:{ 'User-Agent':'KzdoraPro/2.0 (navigation-app)' } });
     const data = await r.json();
     cnt.textContent = `(${data.length})`;
-    if (!data.length) { list.innerHTML = '<div class="result-item"><div class="text">لا توجد نتائج</div></div>'; return; }
+    if (!data.length) { list.innerHTML = '<div class="result-item"><div class="text">لا توجد نتائج مطابقة</div></div>'; return; }
     list.innerHTML = '';
     data.forEach(p => {
       const parts = p.display_name.split(',');
@@ -1840,7 +1995,7 @@ async function searchPlaces(q) {
       d.querySelector('.save-btn').onclick = (ev) => { ev.stopPropagation(); openNameDialog(loc, title); };
       list.appendChild(d);
     });
-  } catch(e) { list.innerHTML = '<div class="result-item"><div class="text">خطأ في الاتصال</div></div>'; }
+  } catch(e) { list.innerHTML = '<div class="result-item"><div class="text">خطأ في الاتصال بالسيرفر</div></div>'; }
 }
 searchBtn.onclick = () => searchPlaces(searchInput.value);
 searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchPlaces(searchInput.value); });
@@ -1853,7 +2008,7 @@ document.addEventListener('click', e => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// حفظ وإدارة الأماكن
+// الحفظ والسجل وحاسبة الوقود
 // ═══════════════════════════════════════════════════════════════
 const nameDialog = document.getElementById('nameDialog');
 const nameInput = document.getElementById('nameInput');
@@ -1871,7 +2026,7 @@ document.getElementById('nameSave').onclick = () => {
   if (pendingSaveLocation) {
     savedPlaces.push({ name:n, loc:pendingSaveLocation, ts:Date.now() });
     localStorage.setItem('kzdora_saved', JSON.stringify(savedPlaces));
-    showHint('⭐ تم الحفظ');
+    showHint('⭐ تم الحفظ في قائمة الأماكن');
     speak('تم حفظ ' + n);
     if (pendingSaveCallback) pendingSaveCallback();
   }
@@ -1905,9 +2060,31 @@ function renderSavedList() {
   });
 }
 
-// ═══════════════════════════════════════════════════════════════
-// اللوحات والأزرار الأخرى
-// ═══════════════════════════════════════════════════════════════
+// سجل الرحلات
+const historyPanel = document.getElementById('historyPanel');
+const historyList = document.getElementById('historyList');
+document.getElementById('historyHeaderBtn').onclick = () => { renderHistoryList(); historyPanel.classList.add('show'); };
+document.getElementById('historyClose').onclick = () => historyPanel.classList.remove('show');
+historyPanel.onclick = e => { if (e.target === historyPanel) historyPanel.classList.remove('show'); };
+
+function renderHistoryList() {
+  historyList.innerHTML = '';
+  if (!tripHistory.length) { historyList.innerHTML = '<div class="empty">لا يوجد سجل رحلات بعد.</div>'; return; }
+  tripHistory.forEach((h) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<div class="hist-icon">${ICONS.arrive}</div><div class="info"><div class="name">${h.name}</div><div class="sub-info">${h.date}</div></div>`;
+    li.onclick = () => { historyPanel.classList.remove('show'); setDestination(h.loc, h.name); };
+    historyList.appendChild(li);
+  });
+}
+
+// حاسبة الوقود
+const fuelCalcPanel = document.getElementById('fuelCalcPanel');
+document.getElementById('fuelHeaderBtn').onclick = () => fuelCalcPanel.classList.add('show');
+document.getElementById('fuelCalcClose').onclick = () => fuelCalcPanel.classList.remove('show');
+fuelCalcPanel.onclick = e => { if (e.target === fuelCalcPanel) fuelCalcPanel.classList.remove('show'); };
+
+// الطوارئ والتنزيل
 const emergencyPanel = document.getElementById('emergencyPanel');
 document.getElementById('emergencyHeaderBtn').onclick = () => { buildEmergencyPanel(); emergencyPanel.classList.add('show'); };
 document.getElementById('emergencyClose').onclick = () => emergencyPanel.classList.remove('show');
@@ -1930,7 +2107,7 @@ document.getElementById('clearTilesBtn').onclick = () => {
   showDeleteConfirm('مسح البلاطات', 'هل تريد مسح جميع البلاطات المحفوظة؟', async () => {
     await clearAllTiles();
     updateOfflineStats();
-    showHint('تم مسح الكاش');
+    showHint('تم مسح الكاش بنجاح');
   });
 };
 
@@ -1944,7 +2121,7 @@ window.addEventListener('offline', updateOnline);
 updateOnline();
 
 // ═══════════════════════════════════════════════════════════════
-// تثبيت التطبيق وخروج التطبيق
+// تثبيت التطبيق وتأكيد الخروج
 // ═══════════════════════════════════════════════════════════════
 let deferredInstallPrompt = null;
 const installPrompt = document.getElementById('installPrompt');
@@ -1966,7 +2143,7 @@ window.addEventListener('appinstalled', () => {
   deferredInstallPrompt = null;
   installPrompt.classList.remove('show');
   installHeaderBtn.style.display = 'none';
-  showHint('✅ تم تثبيت التطبيق');
+  showHint('✅ تم تثبيت التطبيق بنجاح');
 });
 installPrompt.onclick = () => { installPrompt.classList.remove('show'); triggerInstall(); };
 installHeaderBtn.onclick = () => triggerInstall();
@@ -1998,7 +2175,7 @@ window.addEventListener('popstate', () => {
 history.pushState(null,'',location.href);
 
 // ═══════════════════════════════════════════════════════════════
-// تهيئة التشغيل
+// التشغيل والتهيئة
 // ═══════════════════════════════════════════════════════════════
 map.on('load', () => {
   readStateFromURL();
@@ -2019,12 +2196,12 @@ window.addEventListener('load', async () => {
         updateUserLocation(loc, pos.coords.accuracy, pos.coords.heading);
         gpsStatus.classList.add('show','active');
         gpsText.textContent = `GPS · ${Math.round(pos.coords.accuracy)}م`;
-        speak('أهلاً بك في كزدورة');
+        speak('أهلاً بك في كزدورة برو');
         startGpsTracking();
       }, err => {
         gpsStatus.classList.add('show');
         gpsText.textContent = 'اضغط زر الموقع للسماح';
-        speak('أهلاً بك في كزدورة');
+        speak('أهلاً بك في كزدورة برو');
       }, { enableHighAccuracy:true, timeout:15000 });
     }
   }, 800);
