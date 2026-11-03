@@ -22,13 +22,16 @@ body.dark #map{background:#121212}
 body.dark #map .maplibregl-canvas{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
 body.dark .maplibregl-marker,body.dark .poi-marker{filter:invert(1) hue-rotate(180deg)}
 .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none!important}
+
 #offlineBadge{position:fixed;top:calc(66px + var(--safe-top));left:50%;transform:translateX(-50%);z-index:2000;background:rgba(234,67,53,.95);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;display:none;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 #offlineBadge.show{display:flex}
 #offlineBadge svg{width:14px;height:14px;fill:#fff}
+
 #installPrompt{position:fixed;bottom:calc(88px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(200%);z-index:1400;background:linear-gradient(135deg,#1a73e8,#0d47a1);color:#fff;padding:12px 20px;border-radius:50px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 24px rgba(26,115,232,.5);font-family:inherit;font-size:14px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0}
 #installPrompt.show{transform:translateX(-50%) translateY(0);opacity:1}
 #installPrompt svg{width:20px;height:20px;fill:#fff}
 body.navigating #installPrompt{display:none}
+
 #appHeader{position:fixed;top:0;left:0;right:0;z-index:1050;padding:calc(10px + var(--safe-top)) 14px 10px;background:linear-gradient(135deg,#1a73e8 0%,#0d47a1 100%);display:flex;align-items:center;gap:10px;box-shadow:0 2px 14px rgba(0,0,0,.25);color:#fff;transition:transform .35s,opacity .35s}
 body.navigating #appHeader{transform:translateY(-100%);opacity:0;pointer-events:none}
 #appHeader .logo{width:42px;height:42px;flex-shrink:0;background:rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.2)}
@@ -39,12 +42,14 @@ body.navigating #appHeader{transform:translateY(-100%);opacity:0;pointer-events:
 #appHeader .actions{display:flex;gap:6px}
 #appHeader .header-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.15);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
 #appHeader .header-btn svg{width:20px;height:20px;fill:#fff}
+
 #searchBar{position:fixed;top:calc(66px + var(--safe-top));left:10px;right:10px;z-index:1000;display:flex;gap:6px;align-items:center;background:var(--panel);border-radius:14px;padding:6px;box-shadow:0 2px 12px rgba(0,0,0,.15);transition:transform .3s,opacity .3s}
 body.navigating #searchBar{transform:translateY(-250%);opacity:0;pointer-events:none}
 #searchInput{flex:1;border:none;outline:none;padding:12px 14px;font-size:15px;border-radius:10px;background:var(--input-bg);font-family:inherit;color:var(--text)}
 #searchInput::placeholder{color:var(--text-sub)}
 .icon-btn{background:transparent;border:none;cursor:pointer;width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center}
 .icon-btn svg{width:22px;height:22px;fill:var(--primary)}
+
 #categoryBar{position:fixed;top:calc(124px + var(--safe-top));left:0;right:0;z-index:999;overflow-x:auto;overflow-y:hidden;padding:6px 10px 10px;display:flex;gap:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:transform .3s,opacity .3s}
 #categoryBar::-webkit-scrollbar{display:none}
 body.navigating #categoryBar{transform:translateY(-350%);opacity:0;pointer-events:none}
@@ -62,6 +67,7 @@ body.navigating #categoryBar{transform:translateY(-350%);opacity:0;pointer-event
 .cat-btn[data-cat="cafe"] svg{fill:#6d4c41}
 .cat-btn[data-cat="hotel"] svg{fill:#00838f}
 .cat-btn.active svg{fill:#fff}
+
 #results{position:fixed;top:calc(178px + var(--safe-top));left:10px;right:10px;z-index:1000;background:var(--panel);border-radius:14px;max-height:55vh;overflow-y:auto;display:none;box-shadow:0 4px 20px rgba(0,0,0,.2)}
 #results.show{display:block}
 .result-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;display:flex;gap:12px;align-items:center}
@@ -79,12 +85,14 @@ body.navigating #categoryBar{transform:translateY(-350%);opacity:0;pointer-event
 #resultsHeader .title-block span{color:var(--text-sub);font-weight:400}
 #resultsClose{background:var(--input-bg);border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 #resultsClose svg{width:16px;height:16px;fill:var(--text)}
+
 #travelModeBar{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:var(--panel);border-radius:28px;padding:6px;box-shadow:0 4px 24px rgba(0,0,0,.25);display:none;gap:4px;transition:transform .35s,opacity .35s}
 #travelModeBar.show{display:flex}
 body.navigating #travelModeBar{transform:translate(-50%,250%);opacity:0;pointer-events:none}
 .mode-btn{background:transparent;border:none;cursor:pointer;padding:10px 20px;border-radius:22px;display:flex;align-items:center;gap:8px;font-family:inherit;font-size:14px;font-weight:600;color:var(--text-sub)}
 .mode-btn.active{background:var(--primary);color:#fff}
 .mode-btn svg{width:20px;height:20px;fill:currentColor}
+
 #speedometer{position:fixed;top:calc(180px + var(--safe-top));left:10px;z-index:999;background:var(--panel);padding:8px 14px;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.15);display:none;align-items:center;gap:8px;transition:transform .3s,opacity .3s}
 #speedometer.show{display:flex}
 body.navigating #speedometer{transform:translateY(-250%);opacity:0;pointer-events:none}
@@ -92,12 +100,16 @@ body.navigating #speedometer{transform:translateY(-250%);opacity:0;pointer-event
 #speedometer.over #speedValue{color:var(--danger)}
 #speedValue{font-size:26px;font-weight:800;color:var(--primary);min-width:45px;text-align:center;font-variant-numeric:tabular-nums}
 #speedUnit{font-size:11px;color:var(--text-sub);line-height:1.2}
+
 #gpsStatus{position:fixed;top:calc(180px + var(--safe-top));right:10px;z-index:999;background:var(--panel);padding:8px 12px;border-radius:20px;font-size:11px;color:var(--text-sub);display:none;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:transform .3s,opacity .3s}
 #gpsStatus.show{display:flex}
 body.navigating #gpsStatus{transform:translateY(-250%);opacity:0;pointer-events:none}
 #gpsStatus .dot{width:8px;height:8px;border-radius:50%;background:var(--danger);animation:pulse 1.5s infinite}
 #gpsStatus.active .dot{background:var(--success)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}#mapPopup{position:fixed;z-index:2000;background:var(--panel);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.3);padding:6px;display:none;min-width:210px}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+#mapPopup{position:fixed;z-index:2000;background:var(--panel);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.3);padding:6px;display:none;min-width:210px}
 #mapPopup.show{display:block}
 .popup-item{background:transparent;border:none;cursor:pointer;padding:12px 14px;border-radius:10px;display:flex;align-items:center;gap:10px;font-family:inherit;font-size:14px;color:var(--text);width:100%;text-align:right}
 .popup-item:active{background:var(--input-bg)}
@@ -106,6 +118,7 @@ body.navigating #gpsStatus{transform:translateY(-250%);opacity:0;pointer-events:
 .popup-item.dest svg{fill:var(--danger)}
 .popup-item.save svg{fill:var(--gold)}
 .popup-item.stop svg{fill:var(--stop)}
+
 #savedPanel{position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.5);display:none;align-items:flex-end}
 #savedPanel.show{display:flex}
 #savedContent{background:var(--panel);width:100%;max-height:70vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
@@ -124,6 +137,7 @@ body.navigating #gpsStatus{transform:translateY(-250%);opacity:0;pointer-events:
 #savedList li .del-btn{background:transparent;border:none;cursor:pointer;padding:8px}
 #savedList li .del-btn svg{width:18px;height:18px;fill:var(--danger)}
 #savedList .empty{text-align:center;color:var(--text-sub);padding:40px 20px;font-size:14px}
+
 #waypointsBar{position:fixed;bottom:calc(160px + var(--safe-bottom));left:10px;right:10px;z-index:1000;background:var(--panel);border-radius:14px;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,.2);display:none;transition:transform .3s,opacity .3s;max-height:30vh;overflow-y:auto}
 #waypointsBar.show{display:block}
 body.navigating #waypointsBar{transform:translateY(250%);opacity:0;pointer-events:none}
@@ -134,6 +148,7 @@ body.navigating #waypointsBar{transform:translateY(250%);opacity:0;pointer-event
 .wp-item .wp-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wp-item .wp-del{background:transparent;border:none;cursor:pointer;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .wp-item .wp-del svg{width:14px;height:14px;fill:var(--danger)}
+
 #routeOptions{position:fixed;bottom:calc(88px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:var(--panel);border-radius:16px;padding:6px;box-shadow:0 4px 20px rgba(0,0,0,.2);display:none;gap:4px;transition:transform .3s,opacity .3s}
 #routeOptions.show{display:flex}
 body.navigating #routeOptions{transform:translate(-50%,250%);opacity:0;pointer-events:none}
@@ -143,10 +158,12 @@ body.navigating #routeOptions{transform:translate(-50%,250%);opacity:0;pointer-e
 .route-btn svg{width:16px;height:16px;fill:var(--text-sub)}
 .route-btn .info{font-size:9px;opacity:.85}
 .route-btn:disabled{opacity:.4;cursor:not-allowed}
+
 #startBtn{position:fixed;bottom:calc(160px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1001;background:var(--primary);color:#fff;border:none;padding:14px 28px 14px 22px;border-radius:50px;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(26,115,232,.4);display:none;font-family:inherit;align-items:center;gap:8px;transition:transform .3s,opacity .3s;white-space:nowrap}
 #startBtn.show{display:flex}
 body.navigating #startBtn{transform:translate(-50%,250%);opacity:0;pointer-events:none}
 #startBtn svg{width:20px;height:20px;fill:#fff}
+
 #navPanel{position:fixed;bottom:0;left:0;right:0;z-index:1000;background:var(--panel);border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,.2);padding:16px 18px calc(20px + var(--safe-bottom));display:none;max-height:45vh;overflow-y:auto}
 #navPanel.show{display:block}
 #navHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
@@ -164,6 +181,7 @@ body.dark #steps li.current{background:#1a3a5c;color:#8ab4f8}
 #steps li.current .icon svg{fill:#fff}
 #steps .info{flex:1}
 #steps .dist{color:var(--text-sub);font-size:12px;margin-top:3px;font-weight:400}
+
 #navTopBar{position:fixed;top:0;left:0;right:0;z-index:1100;padding:calc(14px + var(--safe-top)) 14px 14px;background:linear-gradient(180deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.6) 60%,transparent 100%);display:none;align-items:center;gap:14px;color:#fff}
 #navTopBar.show{display:flex}
 #navTopBar .turn-icon{width:82px;height:82px;flex-shrink:0;background:linear-gradient(135deg,#1a73e8,#0d47a1);border-radius:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(26,115,232,.55);border:2px solid rgba(255,255,255,.15)}
@@ -171,6 +189,7 @@ body.dark #steps li.current{background:#1a3a5c;color:#8ab4f8}
 #navTopBar .info{flex:1;min-width:0}
 #navTopBar .dist{font-size:38px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 3px 12px rgba(0,0,0,.9)}
 #navTopBar .instr{font-size:15px;margin-top:8px;text-shadow:0 2px 8px rgba(0,0,0,.9);background:rgba(0,0,0,.4);padding:6px 10px;border-radius:8px;display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
 #navBottomBar{position:fixed;bottom:0;left:0;right:0;z-index:1100;padding:10px 12px calc(14px + var(--safe-bottom));display:none}
 #navBottomBar.show{display:block}
 #navBottomCard{background:rgba(20,20,22,.96);border-radius:18px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 32px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.08);color:#fff}
@@ -183,59 +202,69 @@ body.dark #steps li.current{background:#1a3a5c;color:#8ab4f8}
 #navBottomCard .speed-badge.over{background:linear-gradient(135deg,#ea4335,#c5221f);color:#fff}
 #navBottomCard .speed-badge .val{font-size:24px;font-weight:900}
 #navBottomCard .speed-badge .lbl{font-size:9px;opacity:.85}
+
 #navStopFloat{position:fixed;top:calc(14px + var(--safe-top));left:14px;z-index:1200;background:rgba(234,67,53,.95);color:#fff;border:none;cursor:pointer;width:48px;height:48px;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.4)}
 #navStopFloat.show{display:flex}
 #navStopFloat svg{width:20px;height:20px;fill:#fff}
+
 #recenterBtn{position:fixed;right:12px;bottom:calc(20px + var(--safe-bottom));z-index:999;background:#fff;color:#1a73e8;border:none;cursor:pointer;width:52px;height:52px;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 #recenterBtn.show{display:flex}
 #recenterBtn svg{width:26px;height:26px;fill:#1a73e8}
 body.navigating #recenterBtn{bottom:calc(20px + var(--safe-bottom))}
+
 #loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3000;background:rgba(32,33,36,.92);color:#fff;padding:16px 24px;border-radius:14px;font-size:14px;display:none;align-items:center;gap:12px}
 #loading.show{display:flex}
 .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+
 .user-location-icon{position:relative;width:24px;height:24px}
 .user-location-icon .pulse{position:absolute;inset:0;border-radius:50%;background:rgba(26,115,232,.3);animation:pulseRing 2s ease-out infinite}
 @keyframes pulseRing{0%{transform:scale(1);opacity:.7}100%{transform:scale(3);opacity:0}}
 .user-location-icon .core{position:absolute;inset:4px;border-radius:50%;background:var(--primary);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}
-.vehicle-marker{width:64px;height:64px;display:flex;align-items:center;justify-content:center;transform-origin:center center}
+
+.vehicle-marker{width:64px;height:64px;display:flex;align-items:center;justify-content:center;transform-origin:center center;transition:transform .3s ease-out}
 .vehicle-marker svg{width:100%;height:100%;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5))}
+
 #mapHint{position:fixed;bottom:calc(230px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:998;background:rgba(32,33,36,.9);color:#fff;padding:8px 14px;border-radius:20px;font-size:12px;display:none;white-space:nowrap;pointer-events:none}
 #mapHint.show{display:block;animation:fadeInOut 3s ease-in-out}
 @keyframes fadeInOut{0%,100%{opacity:0}15%,85%{opacity:1}}
-#nameDialog,#exitDialog,#stopConfirmDialog,#installDialog,#emergencyPanel,#downloadPanel{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px}
+
+#nameDialog,#exitDialog,#stopConfirmDialog,#installDialog,#emergencyPanel,#downloadPanel,#deleteConfirmDialog{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px}
 #stopConfirmDialog{z-index:4500}
 #installDialog{z-index:4600}
 #emergencyPanel{z-index:4800;background:rgba(0,0,0,.7);align-items:flex-end;padding:0}
 #downloadPanel{z-index:4800;background:rgba(0,0,0,.7);align-items:flex-end;padding:0}
-#nameDialog.show,#exitDialog.show,#stopConfirmDialog.show,#installDialog.show{display:flex}
+#deleteConfirmDialog{z-index:5000}
+#nameDialog.show,#exitDialog.show,#stopConfirmDialog.show,#installDialog.show,#deleteConfirmDialog.show{display:flex}
 #emergencyPanel.show{display:flex}
 #downloadPanel.show{display:flex}
-#nameDialogBox,#exitBox,#stopConfirmBox,#installBox{background:var(--panel);border-radius:18px;padding:22px;width:100%;max-width:340px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+#nameDialogBox,#exitBox,#stopConfirmBox,#installBox,#deleteConfirmBox{background:var(--panel);border-radius:18px;padding:22px;width:100%;max-width:340px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
 #nameDialogBox h3{font-size:16px;margin-bottom:12px}
 #nameInput{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:15px;outline:none;margin-bottom:14px}
 #nameDialogBox .actions{display:flex;gap:8px;justify-content:flex-end}
 #nameDialogBox button{padding:10px 18px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:500}
 #nameCancel{background:var(--input-bg);color:var(--text)}
 #nameSave{background:var(--primary);color:#fff}
-#exitBox,#stopConfirmBox,#installBox{text-align:center}
-#exitBox .icon,#stopConfirmBox .icon,#installBox .icon{width:60px;height:60px;margin:0 auto 14px;background:#fce8e6;border-radius:50%;display:flex;align-items:center;justify-content:center}
+#exitBox,#stopConfirmBox,#installBox,#deleteConfirmBox{text-align:center}
+#exitBox .icon,#stopConfirmBox .icon,#installBox .icon,#deleteConfirmBox .icon{width:60px;height:60px;margin:0 auto 14px;background:#fce8e6;border-radius:50%;display:flex;align-items:center;justify-content:center}
 #stopConfirmBox .icon{background:#fff3e0}
 #installBox .icon{background:#e8f0fe}
-body.dark #exitBox .icon{background:#4a1e1c}
+#deleteConfirmBox .icon{background:#fce8e6}
+body.dark #exitBox .icon,body.dark #deleteConfirmBox .icon{background:#4a1e1c}
 body.dark #stopConfirmBox .icon{background:#4a3020}
 body.dark #installBox .icon{background:#1a3a5c}
-#exitBox .icon svg{width:30px;height:30px;fill:var(--danger)}
+#exitBox .icon svg,#deleteConfirmBox .icon svg{width:30px;height:30px;fill:var(--danger)}
 #stopConfirmBox .icon svg{width:30px;height:30px;fill:#ff6d00}
 #installBox .icon svg{width:30px;height:30px;fill:var(--primary)}
-#exitBox h3,#stopConfirmBox h3,#installBox h3{font-size:17px;margin-bottom:8px}
-#exitBox p,#stopConfirmBox p,#installBox p{font-size:13px;color:var(--text-sub);margin-bottom:20px;line-height:1.5}
-#exitBox .actions,#stopConfirmBox .actions,#installBox .actions{display:flex;gap:10px}
-#exitBox button,#stopConfirmBox button,#installBox button{flex:1;padding:12px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600}
-#exitCancel,#stopConfirmCancel,#installCancel{background:var(--input-bg);color:var(--text)}
-#exitConfirm{background:var(--danger);color:#fff}
+#exitBox h3,#stopConfirmBox h3,#installBox h3,#deleteConfirmBox h3{font-size:17px;margin-bottom:8px}
+#exitBox p,#stopConfirmBox p,#installBox p,#deleteConfirmBox p{font-size:13px;color:var(--text-sub);margin-bottom:20px;line-height:1.5}
+#exitBox .actions,#stopConfirmBox .actions,#installBox .actions,#deleteConfirmBox .actions{display:flex;gap:10px}
+#exitBox button,#stopConfirmBox button,#installBox button,#deleteConfirmBox button{flex:1;padding:12px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600}
+#exitCancel,#stopConfirmCancel,#installCancel,#deleteConfirmCancel{background:var(--input-bg);color:var(--text)}
+#exitConfirm,#deleteConfirmOk{background:var(--danger);color:#fff}
 #stopConfirmOk{background:#ff6d00;color:#fff}
 #installOk{background:var(--primary);color:#fff}
+
 #emergencyContent{background:var(--panel);width:100%;max-height:85vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
 #emergencyHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
 #emergencyHeader h3{font-size:18px;display:flex;align-items:center;gap:8px}
@@ -260,6 +289,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 .em-btn.electric .em-icon{background:#f9a825}
 .em-btn.plumber .em-icon{background:#00838f}
 .em-btn.pharmacy .em-icon{background:#2e7d32}
+
 #downloadContent{background:var(--panel);width:100%;max-height:80vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
 #downloadHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
 #downloadHeader h3{font-size:18px;display:flex;align-items:center;gap:8px}
@@ -282,6 +312,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 .download-stats .stat{flex:1;background:var(--input-bg);border-radius:12px;padding:12px;text-align:center}
 .download-stats .stat .val{font-size:20px;font-weight:800;color:var(--primary);font-variant-numeric:tabular-nums}
 .download-stats .stat .lbl{font-size:11px;color:var(--text-sub);margin-top:4px}
+
 .poi-marker{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2.5px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35)}
 .poi-marker svg{width:18px;height:18px;fill:#fff;transform:rotate(45deg)}
 .poi-marker.fuel{background:var(--fuel)}
@@ -418,7 +449,9 @@ body.dark #installBox .icon{background:#1a3a5c}
 <span id="speedUnit">كم/س<br>سرعة</span>
 </div>
 
-<div id="gpsStatus"><span class="dot"></span><span id="gpsText">جاري الاتصال...</span></div><div id="routeOptions">
+<div id="gpsStatus"><span class="dot"></span><span id="gpsText">جاري الاتصال...</span></div>
+
+<div id="routeOptions">
 <button class="route-btn active" data-profile="fastest">
 <svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
 <span>الأسرع</span>
@@ -633,12 +666,29 @@ body.dark #installBox .icon{background:#1a3a5c}
 </div>
 </div>
 
+<!-- حوار حذف مخصص بدلاً من confirm() -->
+<div id="deleteConfirmDialog">
+<div id="deleteConfirmBox">
+<div class="icon">
+<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+</div>
+<h3 id="deleteConfirmTitle">تأكيد الحذف</h3>
+<p id="deleteConfirmMsg">هل تريد الحذف؟</p>
+<div class="actions">
+<button id="deleteConfirmCancel">إلغاء</button>
+<button id="deleteConfirmOk">حذف</button>
+</div>
+</div>
+</div>
+
 <button id="recenterBtn">
 <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
 </button>
 
 <div id="mapHint"></div>
-<div id="loading"><div class="spinner"></div><span id="loadingText">جاري المعالجة...</span></div><script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<div id="loading"><div class="spinner"></div><span id="loadingText">جاري المعالجة...</span></div>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -722,27 +772,32 @@ async function updateOfflineStats() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// تنزيل منطقة للعمل بدون إنترنت
+// [إصلاح #5] تنزيل منطقة للعمل بدون إنترنت (مع throttle)
 // ═══════════════════════════════════════════════════════════════
 let downloadCancelFlag = false;
 async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
   if (!navigator.onLine) { showHint('⚠️ التنزيل يحتاج اتصال'); return; }
   const latDelta = radiusKm / 111;
-  const lngDelta = radiusKm / (111 * Math.cos(centerLat * Math.PI / 180));
+  const lngDelta = radiusKm / (111 * Math.max(0.001, Math.cos(centerLat * Math.PI / 180)));
   const bounds = { north: centerLat+latDelta, south: centerLat-latDelta, east: centerLng+lngDelta, west: centerLng-lngDelta };
   const zoomLevels = [13,14,15,16];
   const tileList = [];
+  
   for (const z of zoomLevels) {
     const n = Math.pow(2,z);
-    const xMin = Math.floor((bounds.west+180)/360*n);
-    const xMax = Math.floor((bounds.east+180)/360*n);
-    const yMin = Math.floor((1-Math.log(Math.tan(bounds.north*Math.PI/180)+1/Math.cos(bounds.north*Math.PI/180))/Math.PI)/2*n);
-    const yMax = Math.floor((1-Math.log(Math.tan(bounds.south*Math.PI/180)+1/Math.cos(bounds.south*Math.PI/180))/Math.PI)/2*n);
+    // [إصلاح #14] تثبيت x/y داخل الحدود
+    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+    const xMin = clamp(Math.floor((bounds.west+180)/360*n), 0, n-1);
+    const xMax = clamp(Math.floor((bounds.east+180)/360*n), 0, n-1);
+    const yMin = clamp(Math.floor((1-Math.log(Math.tan(bounds.north*Math.PI/180)+1/Math.cos(bounds.north*Math.PI/180))/Math.PI)/2*n), 0, n-1);
+    const yMax = clamp(Math.floor((1-Math.log(Math.tan(bounds.south*Math.PI/180)+1/Math.cos(bounds.south*Math.PI/180))/Math.PI)/2*n), 0, n-1);
     for (let x=xMin; x<=xMax; x++) for (let y=yMin; y<=yMax; y++) {
-      if (tileList.length >= 1200) break;
+      if (tileList.length >= 800) break;
       tileList.push({z,x,y});
     }
+    if (tileList.length >= 800) break;
   }
+  
   const total = tileList.length;
   if (total === 0) { showHint('⚠️ المنطقة صغيرة'); return; }
   document.getElementById('downloadProgress').classList.add('show');
@@ -755,7 +810,9 @@ async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
     document.getElementById('downloadFill').style.width = pct+'%';
     document.getElementById('downloadText').textContent = `جاري التنزيل: ${done} / ${total} (${pct}%)`;
   };
-  const batchSize = 8;
+  
+  // [إصلاح #5] throttle: دفعة 4 + تأخير 200ms بين الدفعات
+  const batchSize = 4;
   for (let i = 0; i < tileList.length; i += batchSize) {
     if (downloadCancelFlag) break;
     const batch = tileList.slice(i, i+batchSize);
@@ -774,7 +831,10 @@ async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
       } catch(e) {}
       done++; updateProgress();
     }));
+    // احترام سياسة OSM: تأخير صغير بين الدفعات
+    await new Promise(r => setTimeout(r, 200));
   }
+  
   document.getElementById('downloadFill').style.width = '100%';
   document.getElementById('downloadText').textContent = `✅ تم تنزيل ${saved} بلاطة جديدة`;
   setTimeout(() => document.getElementById('downloadProgress').classList.remove('show'), 3000);
@@ -823,14 +883,21 @@ const EM_ICONS = {
   electric: '<svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>',
   plumber: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 1.74.65 3.34 1.72 4.61C4.61 14.89 3 17.34 3 20h18c0-2.66-1.61-5.11-3.72-6.39C18.35 12.34 19 10.74 19 9c0-3.87-3.13-7-7-7z"/></svg>',
   pharmacy: '<svg viewBox="0 0 24 24"><path d="M21 5h-2.64l1.14-3.14L17.15 1l-1.46 4H3v2l2 6-2 6v2h18v-2l-2-6 2-6V5zm-5 9h-3v3h-2v-3H8v-2h3V9h2v3h3v2z"/></svg>'
-};// ═══════════════════════════════════════════════════════════════
+};
+
+// ═══════════════════════════════════════════════════════════════
 // التوجيه الصوتي
 // ═══════════════════════════════════════════════════════════════
 const synth = window.speechSynthesis;
 let arabicVoice = null;
+let voiceWarned = false;
 function pickArabicVoice() {
   const v = synth.getVoices();
   arabicVoice = v.find(x => x.lang === 'ar-SA') || v.find(x => x.lang.startsWith('ar')) || null;
+  if (!arabicVoice && !voiceWarned) {
+    voiceWarned = true;
+    console.warn('[Kzdora] لا يوجد صوت عربي متوفر على هذا الجهاز');
+  }
 }
 pickArabicVoice();
 if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = pickArabicVoice;
@@ -856,7 +923,7 @@ function playBeep(f = 880, d = 150) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// أدوات مساعدة + إدارة التحميل
+// أدوات مساعدة
 // ═══════════════════════════════════════════════════════════════
 let loadingTimeout = null;
 function showLoading(m) {
@@ -899,6 +966,27 @@ function formatEta(s) {
   const d = new Date(Date.now() + s * 1000);
   return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// [إصلاح #7] حوار حذف مخصص
+// ═══════════════════════════════════════════════════════════════
+const deleteConfirmDialog = document.getElementById('deleteConfirmDialog');
+let deleteConfirmCallback = null;
+function showDeleteConfirm(title, msg, cb) {
+  document.getElementById('deleteConfirmTitle').textContent = title;
+  document.getElementById('deleteConfirmMsg').textContent = msg;
+  deleteConfirmCallback = cb;
+  deleteConfirmDialog.classList.add('show');
+}
+document.getElementById('deleteConfirmCancel').onclick = () => {
+  deleteConfirmDialog.classList.remove('show');
+  deleteConfirmCallback = null;
+};
+document.getElementById('deleteConfirmOk').onclick = () => {
+  deleteConfirmDialog.classList.remove('show');
+  if (deleteConfirmCallback) deleteConfirmCallback();
+  deleteConfirmCallback = null;
+};
 
 // ═══════════════════════════════════════════════════════════════
 // بيانات الطوارئ
@@ -967,6 +1055,7 @@ let userMarker = null, vehicleMarker = null;
 let lastHeading = 0, gpsFirstFix = false;
 let lastPosition = null, lastPositionTime = null;
 let currentSpeed = 0;
+let speedInitialized = false; // [إصلاح #11]
 let currentRouteProfile = 'fastest';
 let currentRouteData = null;
 let currentRoutes = { fastest: null, shortest: null };
@@ -982,7 +1071,7 @@ const OFF_ROUTE_THRESHOLD_M = 80, OFF_ROUTE_COUNT = 3, ROUTE_RECALC_COOLDOWN = 1
 let savedPlaces = JSON.parse(localStorage.getItem('kzdora_saved') || '[]');
 
 // ═══════════════════════════════════════════════════════════════
-// قراءة URL
+// [إصلاح #16] قراءة URL بعد تحميل الخريطة
 // ═══════════════════════════════════════════════════════════════
 function readStateFromURL() {
   const hash = location.hash.replace(/^#kzdora\??/, '');
@@ -1004,7 +1093,7 @@ function readStateFromURL() {
   }
   if (dest) {
     const parts = dest.split(',').map(Number);
-    if (!isNaN(parts[0]) && !isNaN(parts[1])) setTimeout(() => setDestination([parts[0],parts[1]], null), 2000);
+    if (!isNaN(parts[0]) && !isNaN(parts[1])) setTimeout(() => setDestination([parts[0],parts[1]], null), 1500);
   }
 }
 function updateURL() {
@@ -1080,7 +1169,8 @@ async function searchNearby(cat) {
   const center = userLocation || [map.getCenter().lat, map.getCenter().lng];
   showLoading(`جاري البحث عن ${CAT_LABELS[cat]}...`);
   const [lat,lng] = center;
-  const q = `[out:json][timeout:25];(node${OSM_TAGS[cat]}(around:5000,${lat},${lng});way${OSM_TAGS[cat]}(around:5000,${lat},${lng}););out center 40;`;
+  // [إصلاح #12] radius أقصر = 3 كم
+  const q = `[out:json][timeout:25];(node${OSM_TAGS[cat]}(around:3000,${lat},${lng});way${OSM_TAGS[cat]}(around:3000,${lat},${lng}););out center 40;`;
   const servers = ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];
   for (const srv of servers) {
     try {
@@ -1151,18 +1241,29 @@ function renderResultsList(results, cat) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// الضغط المطول
+// [إصلاح #4 + #9 + #10] الضغط المطول + منبثقة
 // ═══════════════════════════════════════════════════════════════
 const mapPopup = document.getElementById('mapPopup');
 let popupLatLng = null, pressTimer = null, pressStartPoint = null;
+
 function showMapPopup(ll, x, y) {
   popupLatLng = ll;
-  mapPopup.style.left = Math.min(Math.max(10,x-100), window.innerWidth-220)+'px';
-  mapPopup.style.top = Math.min(Math.max(100,y), window.innerHeight-260)+'px';
+  // [إصلاح #9] حساب ديناميكي للحدود
+  const searchBar = document.getElementById('searchBar');
+  const header = document.getElementById('appHeader');
+  const minTop = (header ? header.getBoundingClientRect().bottom : 0) + 60;
+  const popupHeight = 220;
+  const left = Math.min(Math.max(10, x - 100), window.innerWidth - 220);
+  const top = Math.min(Math.max(minTop, y), window.innerHeight - popupHeight - 20);
+  mapPopup.style.left = left + 'px';
+  mapPopup.style.top = top + 'px';
   mapPopup.classList.add('show');
 }
 function hideMapPopup() { mapPopup.classList.remove('show'); }
+
 function handlePressStart(e) {
+  // [إصلاح #10] منع التكرار على أجهزة touch
+  if ('ontouchstart' in window && e.originalEvent?.type === 'mousedown') return;
   if (e.originalEvent?.touches?.length > 1) return;
   pressStartPoint = e.point;
   clearTimeout(pressTimer);
@@ -1181,7 +1282,9 @@ map.on('touchmove', handlePressMove); map.on('mousemove', handlePressMove);
 map.on('touchend', handlePressEnd); map.on('mouseup', handlePressEnd);
 map.on('dragstart', handlePressEnd); map.on('movestart', handlePressEnd); map.on('zoomstart', handlePressEnd);
 map.on('click', (e) => {
-  if (e.originalEvent?.target?.closest?.('.maplibregl-marker')) return;
+  // [إصلاح #15] حماية من SVG
+  const target = e.originalEvent?.target;
+  if (target && target.closest && target.closest('.maplibregl-marker')) return;
   if (pendingWaypointPick) { addWaypoint([e.lngLat.lat, e.lngLat.lng], null); pendingWaypointPick = false; return; }
   hideMapPopup();
 });
@@ -1197,7 +1300,9 @@ function setDarkMode(d) {
   document.body.classList.toggle('dark', d);
   themeIconHeader.innerHTML = d ? ICONS.sun : ICONS.moon;
 }
-themeHeaderBtn.onclick = () => { setDarkMode(!isDarkMode); updateURL(); };// ═══════════════════════════════════════════════════════════════
+themeHeaderBtn.onclick = () => { setDarkMode(!isDarkMode); updateURL(); };
+
+// ═══════════════════════════════════════════════════════════════
 // GPS
 // ═══════════════════════════════════════════════════════════════
 const gpsStatus = document.getElementById('gpsStatus');
@@ -1236,7 +1341,13 @@ function updateSpeed(pos) {
     const dt = (now - lastPositionTime)/1000;
     if (dt > 0.5 && dt < 10) sk = (haversine(lastPosition[0],lastPosition[1],loc[0],loc[1])*1000/dt)*3.6;
   }
-  currentSpeed = Math.round(currentSpeed*0.6 + sk*0.4);
+  // [إصلاح #11] تهيئة صحيحة
+  if (!speedInitialized) {
+    currentSpeed = Math.round(sk);
+    speedInitialized = true;
+  } else {
+    currentSpeed = Math.round(currentSpeed*0.6 + sk*0.4);
+  }
   if (currentSpeed < 2) currentSpeed = 0;
   lastPosition = loc; lastPositionTime = now;
   updateSpeedDisplay();
@@ -1257,6 +1368,10 @@ function updateUserLocation(loc, acc, h) {
     userMarker = new maplibregl.Marker({ element:el, anchor:'center' }).setLngLat([loc[1],loc[0]]).addTo(map);
   } else userMarker.setLngLat([loc[1],loc[0]]);
 }
+
+// ═══════════════════════════════════════════════════════════════
+// [إصلاح #6] تحديث موضع المركبة بدون innerHTML متكرر
+// ═══════════════════════════════════════════════════════════════
 function updateVehiclePosition(loc, heading, speedMs) {
   let nh = heading;
   if (nh == null || isNaN(nh) || nh < 0) {
@@ -1272,16 +1387,20 @@ function updateVehiclePosition(loc, heading, speedMs) {
     lastHeading = (lastHeading + d*0.4 + 360) % 360;
   }
   if (userMarker) { userMarker.remove(); userMarker = null; }
+  
   const svg = currentTravelMode === 'foot' ? WALK_ICON : CAR_ICON_TOPVIEW;
-  const html = `<div class="vehicle-marker" style="transform: rotate(${lastHeading}deg);">${svg}</div>`;
   if (!vehicleMarker) {
     const el = document.createElement('div');
-    el.innerHTML = html;
+    el.className = 'vehicle-marker';
+    el.innerHTML = svg;
     vehicleMarker = new maplibregl.Marker({ element:el, anchor:'center' }).setLngLat([loc[1],loc[0]]).addTo(map);
   } else {
     vehicleMarker.setLngLat([loc[1],loc[0]]);
-    vehicleMarker.getElement().innerHTML = html;
+    // [إصلاح #6] تحديث transform فقط بدون إعادة كتابة HTML
+    const inner = vehicleMarker.getElement().querySelector('.vehicle-marker') || vehicleMarker.getElement();
+    if (inner) inner.style.transform = `rotate(${lastHeading}deg)`;
   }
+  
   if (recenterMode === 'follow' && navigationActive) {
     map.easeTo({ center:[loc[1],loc[0]], zoom:getDynZoom(speedMs||0), bearing:lastHeading, pitch:60,
       padding:{ top:0, bottom:window.innerHeight*0.4, left:0, right:0 }, duration:700 });
@@ -1319,7 +1438,12 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
     hideLoading();
     const main = buildValhallaRoute(data.trip);
     const alts = [];
-    if (data.alternates?.length) data.alternates.forEach(a => { if (a.trip) alts.push(buildValhallaRoute(a.trip)); });
+    // [إصلاح #13] تحقق قبل البناء
+    if (data.alternates?.length) {
+      data.alternates.forEach(a => {
+        if (a && a.trip && a.trip.legs && a.trip.legs.length) alts.push(buildValhallaRoute(a.trip));
+      });
+    }
     const all = [main, ...alts].sort((a,b) => a.duration - b.duration);
     const fastest = all[0];
     const alt = all.length > 1 ? all.slice(1).reduce((s,r) => r.distance < s.distance ? r : s, all[1]) : null;
@@ -1433,10 +1557,16 @@ function translateInstruction(s) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// بدء التوجيه
+// [إصلاح #3] بدء التوجيه مع التحقق من الموقع
 // ═══════════════════════════════════════════════════════════════
 document.getElementById('startBtn').onclick = async () => {
   if (!currentSteps.length) return;
+  // [إصلاح #3] تحقق من وجود موقع حقيقي
+  if (!userLocation && !manualStart) {
+    speak('يرجى تحديد موقعك أولاً');
+    showHint('📍 اضغط زر الموقع أو اضغط مطولاً على الخريطة لتحديد الانطلاق');
+    return;
+  }
   await keepScreenOn();
   if (userLocation) { map.flyTo({ center:[userLocation[1],userLocation[0]], zoom:17, duration:800 }); await new Promise(r => setTimeout(r, 800)); }
   navigationActive = true;
@@ -1549,12 +1679,22 @@ function updateTripInfo(loc) {
 function getIcon(t) {
   return { Straight:ICONS.straight, TurnLeft:ICONS.turnLeft, TurnRight:ICONS.turnRight, SlightLeft:ICONS.slightLeft, SlightRight:ICONS.slightRight, SharpLeft:ICONS.sharpLeft, SharpRight:ICONS.sharpRight, Roundabout:ICONS.roundabout, Arrive:ICONS.arrive, Depart:ICONS.depart }[t] || ICONS.straight;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// [إصلاح #2] checkOffRoute - تحسين أداء البحث عن أقرب نقطة
+// ═══════════════════════════════════════════════════════════════
 function checkOffRoute(loc) {
   if (!navigationActive || !currentRouteData) return;
   if (Date.now() - lastRouteRecalcTime < ROUTE_RECALC_COOLDOWN) return;
   const coords = currentRouteData.geometry.coordinates;
   let md = Infinity;
-  for (let i = 0; i < coords.length; i += 3) { const d = haversine(loc[0],loc[1],coords[i][1],coords[i][0]); if (d < md) md = d; }
+  // [إصلاح #2] نأخذ عينة كل 5 نقاط بدلاً من كل 3 (أسرع 40%)
+  const step = 5;
+  for (let i = 0; i < coords.length; i += step) {
+    const d = haversine(loc[0],loc[1],coords[i][1],coords[i][0]);
+    if (d < md) md = d;
+    if (md < OFF_ROUTE_THRESHOLD_M/1000) break; // خروج مبكر إذا كنا على المسار
+  }
   if (md > OFF_ROUTE_THRESHOLD_M/1000) {
     offRouteCounter++;
     if (offRouteCounter >= OFF_ROUTE_COUNT) {
@@ -1564,7 +1704,9 @@ function checkOffRoute(loc) {
       if (currentDestination) { userLocation = loc; setDestination(currentDestination, null, true); }
     }
   } else offRouteCounter = 0;
-}// ═══════════════════════════════════════════════════════════════
+}
+
+// ═══════════════════════════════════════════════════════════════
 // ربط الأزرار
 // ═══════════════════════════════════════════════════════════════
 document.querySelectorAll('.mode-btn').forEach(b => b.onclick = () => {
@@ -1614,7 +1756,7 @@ document.getElementById('resultsClose').onclick = () => {
   clearPoiMarkers();
 };
 document.getElementById('locBtn').onclick = () => {
-  if (!navigator.geolocation) { alert('GPS غير مدعوم'); return; }
+  if (!navigator.geolocation) { showHint('⚠️ GPS غير مدعوم على هذا الجهاز'); return; }
   showLoading('جاري تحديد موقعك...');
   navigator.geolocation.getCurrentPosition(pos => {
     hideLoading();
@@ -1622,11 +1764,11 @@ document.getElementById('locBtn').onclick = () => {
     map.flyTo({ center:[loc[1],loc[0]], zoom:16, duration:800 });
     updateUserLocation(loc, pos.coords.accuracy, pos.coords.heading);
     if (watchId === null) startGpsTracking();
-  }, err => { hideLoading(); alert('تعذر تحديد الموقع'); }, { enableHighAccuracy:true, timeout:20000 });
+  }, err => { hideLoading(); showHint('⚠️ تعذر تحديد الموقع — تحقق من الصلاحيات'); }, { enableHighAccuracy:true, timeout:20000 });
 };
 
 // ═══════════════════════════════════════════════════════════════
-// النقر على الخريطة (القائمة المنبثقة)
+// القائمة المنبثقة
 // ═══════════════════════════════════════════════════════════════
 document.getElementById('popupStart').onclick = () => { if (popupLatLng) setManualStart([popupLatLng.lat, popupLatLng.lng]); hideMapPopup(); };
 document.getElementById('popupStop').onclick = () => { if (popupLatLng) addWaypoint([popupLatLng.lat, popupLatLng.lng], null); hideMapPopup(); };
@@ -1660,20 +1802,29 @@ function setManualStart(loc) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// البحث العام (Nominatim)
+// [إصلاح #4] البحث العام مع throttle على Nominatim
 // ═══════════════════════════════════════════════════════════════
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
+let lastNominatimCall = 0;
+const NOMINATIM_THROTTLE_MS = 1100;
+
 async function searchPlaces(q) {
   if (!q.trim()) return;
   if (!navigator.onLine) { showHint('⚠️ البحث يحتاج اتصال'); return; }
+  // [إصلاح #4] throttle
+  const now = Date.now();
+  const wait = NOMINATIM_THROTTLE_MS - (now - lastNominatimCall);
+  if (wait > 0) await new Promise(r => setTimeout(r, wait));
+  lastNominatimCall = Date.now();
+  
   const box = document.getElementById('results');
   const list = document.getElementById('resultsList');
   const cnt = document.getElementById('resultsCount');
   box.classList.add('show');
   list.innerHTML = '<div class="result-item"><div class="text">⏳ جاري البحث...</div></div>';
   try {
-    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=sy&limit=10&accept-language=ar&addressdetails=1`, { headers:{ 'User-Agent':'Kzdora/1.0' } });
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=sy&limit=10&accept-language=ar&addressdetails=1`, { headers:{ 'User-Agent':'Kzdora/1.0 (navigation-app)' } });
     const data = await r.json();
     cnt.textContent = `(${data.length})`;
     if (!data.length) { list.innerHTML = '<div class="result-item"><div class="text">لا توجد نتائج</div></div>'; return; }
@@ -1739,7 +1890,15 @@ function renderSavedList() {
     const li = document.createElement('li');
     li.innerHTML = `<div class="star">${ICONS.waypoint}</div><div class="info"><div class="name">${p.name}</div><div class="coords">${p.loc[0].toFixed(4)}, ${p.loc[1].toFixed(4)}</div></div><button class="del-btn"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>`;
     li.querySelector('.info').onclick = () => { savedPanel.classList.remove('show'); setDestination(p.loc, p.name); };
-    li.querySelector('.del-btn').onclick = ev => { ev.stopPropagation(); if (confirm('حذف؟')) { savedPlaces.splice(i,1); localStorage.setItem('kzdora_saved', JSON.stringify(savedPlaces)); renderSavedList(); } };
+    // [إصلاح #7] استخدام الحوار المخصص
+    li.querySelector('.del-btn').onclick = ev => {
+      ev.stopPropagation();
+      showDeleteConfirm('حذف المكان', `هل تريد حذف "${p.name}"؟`, () => {
+        savedPlaces.splice(i,1);
+        localStorage.setItem('kzdora_saved', JSON.stringify(savedPlaces));
+        renderSavedList();
+      });
+    };
     savedList.appendChild(li);
   });
 }
@@ -1767,12 +1926,13 @@ document.getElementById('downloadCenterBtn').onclick = () => {
   const c = map.getCenter();
   downloadAreaForOffline(c.lat, c.lng, 2.5);
 };
-document.getElementById('clearTilesBtn').onclick = async () => {
-  if (confirm('مسح جميع البلاطات المحفوظة؟')) {
+document.getElementById('clearTilesBtn').onclick = () => {
+  // [إصلاح #7] حوار مخصص
+  showDeleteConfirm('مسح البلاطات', 'هل تريد مسح جميع البلاطات المحفوظة؟', async () => {
     await clearAllTiles();
     updateOfflineStats();
     showHint('تم مسح الكاش');
-  }
+  });
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -1847,13 +2007,17 @@ history.pushState(null,'',location.href);
 // ═══════════════════════════════════════════════════════════════
 // التشغيل عند تحميل الصفحة
 // ═══════════════════════════════════════════════════════════════
+// [إصلاح #16] انتظار تحميل الخريطة قبل قراءة URL
+map.on('load', () => {
+  readStateFromURL();
+});
+
 window.addEventListener('load', async () => {
   document.getElementById('travelModeBar').classList.add('show');
   document.getElementById('recenterBtn').classList.add('show');
   await keepScreenOn();
   initDB().then(() => updateOfflineStats()).catch(() => {});
   if (isIOS && !isStandalone) installHeaderBtn.style.display = 'flex';
-  readStateFromURL();
   setTimeout(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
