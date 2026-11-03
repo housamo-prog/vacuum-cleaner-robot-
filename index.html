@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -16,14 +17,14 @@
 :root{--panel:#fff;--text:#202124;--text-sub:#5f6368;--primary:#1a73e8;--primary-dark:#1557b0;--danger:#ea4335;--success:#34a853;--border:#f1f3f4;--input-bg:#f1f3f4;--gold:#fbbc04;--fuel:#ea8600;--pharmacy:#34a853;--hospital:#ea4335;--grocery:#7c4dff;--stop:#ff6d00;--emergency:#d32f2f;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
 body.dark{--panel:#1e1e1e;--text:#e8eaed;--text-sub:#9aa0a6;--primary:#8ab4f8;--border:#2d2d2d;--input-bg:#2d2d2d}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;width:100%;font-family:-apple-system,'Segoe UI',Tahoma,Arial,sans-serif;overflow:hidden;background:#e8eaed;color:var(--text);overscroll-behavior:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;position:fixed}
+html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;overflow:hidden;background:#e8eaed;color:var(--text);overscroll-behavior:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;position:fixed}
 #map{position:fixed;inset:0;width:100vw;height:100vh;z-index:1;background:#e8eaed}
 body.dark #map{background:#121212}
 body.dark #map .maplibregl-canvas{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
 body.dark .maplibregl-marker,body.dark .poi-marker{filter:invert(1) hue-rotate(180deg)}
 .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none!important}
 
-#offlineBadge{position:fixed;top:calc(66px + var(--safe-top));left:50%;transform:translateX(-50%);z-index:2000;background:rgba(234,67,53,.95);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;display:none;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+#offlineBadge{position:fixed;top:calc(66px + var(--safe-top));left:50%;transform:translateX(-50%);z-index:2000;background:rgba(234,67,53,.95);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;display:none;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,0,0,.3);backdrop-filter:blur(4px)}
 #offlineBadge.show{display:flex}
 #offlineBadge svg{width:14px;height:14px;fill:#fff}
 
@@ -40,7 +41,8 @@ body.navigating #appHeader{transform:translateY(-100%);opacity:0;pointer-events:
 #appHeader .title{font-size:19px;font-weight:800}
 #appHeader .subtitle{font-size:11px;opacity:.9;margin-top:2px}
 #appHeader .actions{display:flex;gap:6px}
-#appHeader .header-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.15);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#appHeader .header-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.15);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+#appHeader .header-btn:active{background:rgba(255,255,255,.3)}
 #appHeader .header-btn svg{width:20px;height:20px;fill:#fff}
 
 #searchBar{position:fixed;top:calc(66px + var(--safe-top));left:10px;right:10px;z-index:1000;display:flex;gap:6px;align-items:center;background:var(--panel);border-radius:14px;padding:6px;box-shadow:0 2px 12px rgba(0,0,0,.15);transition:transform .3s,opacity .3s}
@@ -361,21 +363,21 @@ body.dark #installBox .icon{background:#1a3a5c}
 <button class="header-btn" id="emergencyHeaderBtn" title="الطوارئ" style="background:rgba(211,47,47,0.5);">
 <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
 </button>
-<button class="header-btn" id="savedHeaderBtn">
+<button class="header-btn" id="savedHeaderBtn" title="الأماكن المحفوظة">
 <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
 </button>
-<button class="header-btn" id="themeHeaderBtn">
+<button class="header-btn" id="themeHeaderBtn" title="تبديل المظهر">
 <svg id="themeIconHeader" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
 </button>
 </div>
 </header>
 
 <div id="searchBar">
-<button id="locBtn" class="icon-btn">
+<button id="locBtn" class="icon-btn" title="موقعي الحالي">
 <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
 </button>
 <input id="searchInput" type="text" placeholder="ابحث عن مكان في سوريا..." />
-<button id="searchBtn" class="icon-btn">
+<button id="searchBtn" class="icon-btn" title="بحث">
 <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
 </button>
 </div>
@@ -402,7 +404,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 <span>مطعم</span>
 </button>
 <button class="cat-btn" data-cat="atm">
-<svg viewBox="0 0 24 24"><path d="M11.5 1L2 6v2h19V6l-9.5-5zM2 19h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h1v-2H2v2zm18-8H2v5h18v-5zm-2 2h-3v-1h3v1z"/></svg>
+<svg viewBox="0 0 24 24"><path d="M11.5 1L2 6v2h19V6l-9.5-5zM2 19h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h1v-2H2v2zm18-8H2v5h18v-5zm-2 2h-3v-1h3v1z"/></svg>
 <span>صراف آلي</span>
 </button>
 <button class="cat-btn" data-cat="parking">
@@ -666,7 +668,6 @@ body.dark #installBox .icon{background:#1a3a5c}
 </div>
 </div>
 
-<!-- حوار حذف مخصص بدلاً من confirm() -->
 <div id="deleteConfirmDialog">
 <div id="deleteConfirmBox">
 <div class="icon">
@@ -692,7 +693,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 <script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// منع إطفاء الشاشة
+// إدارة الشاشة والخدمات الأساسية
 // ═══════════════════════════════════════════════════════════════
 let noSleep = null, wakeLock = null;
 async function keepScreenOn() {
@@ -703,18 +704,20 @@ function allowScreenOff() {
   try { if (wakeLock) { wakeLock.release(); wakeLock = null; } if (noSleep) noSleep.disable(); } catch(e) {}
 }
 document.addEventListener('visibilitychange', async () => {
-  if (document.visibilityState === 'visible' && wakeLock === null) await keepScreenOn();
+  if (document.visibilityState === 'visible' && wakeLock === null && navigationActive) await keepScreenOn();
 });
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
 }
 
 // ═══════════════════════════════════════════════════════════════
-// IndexedDB
+// IndexedDB للعمل بدون إنترنت
 // ═══════════════════════════════════════════════════════════════
 const DB_NAME='kzdora_offline', DB_VERSION=1, TILE_STORE='tiles';
 let db = null;
 async function initDB() {
+  if (db) return db;
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onerror = () => reject(req.error);
@@ -726,44 +729,52 @@ async function initDB() {
   });
 }
 async function saveTileToDB(key, blob, size) {
-  if (!db) await initDB();
-  return new Promise((resolve) => {
-    const tx = db.transaction(TILE_STORE, 'readwrite');
-    tx.objectStore(TILE_STORE).put({ key, blob, size, ts: Date.now() });
-    tx.oncomplete = () => resolve(true);
-    tx.onerror = () => resolve(false);
-  });
+  try {
+    if (!db) await initDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(TILE_STORE, 'readwrite');
+      tx.objectStore(TILE_STORE).put({ key, blob, size, ts: Date.now() });
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    });
+  } catch(e) { return false; }
 }
 async function getTileFromDB(key) {
-  if (!db) await initDB();
-  return new Promise((resolve) => {
-    const tx = db.transaction(TILE_STORE, 'readonly');
-    const req = tx.objectStore(TILE_STORE).get(key);
-    req.onsuccess = () => resolve(req.result || null);
-    req.onerror = () => resolve(null);
-  });
+  try {
+    if (!db) await initDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(TILE_STORE, 'readonly');
+      const req = tx.objectStore(TILE_STORE).get(key);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  } catch(e) { return null; }
 }
 async function getTilesStats() {
-  if (!db) await initDB();
-  return new Promise((resolve) => {
-    const tx = db.transaction(TILE_STORE, 'readonly');
-    const req = tx.objectStore(TILE_STORE).getAll();
-    req.onsuccess = () => {
-      const tiles = req.result || [];
-      const size = tiles.reduce((s,t) => s + (t.size||0), 0);
-      resolve({ count: tiles.length, size });
-    };
-    req.onerror = () => resolve({ count: 0, size: 0 });
-  });
+  try {
+    if (!db) await initDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(TILE_STORE, 'readonly');
+      const req = tx.objectStore(TILE_STORE).getAll();
+      req.onsuccess = () => {
+        const tiles = req.result || [];
+        const size = tiles.reduce((s,t) => s + (t.size||0), 0);
+        resolve({ count: tiles.length, size });
+      };
+      req.onerror = () => resolve({ count: 0, size: 0 });
+    });
+  } catch(e) { return { count: 0, size: 0 }; }
 }
 async function clearAllTiles() {
-  if (!db) await initDB();
-  return new Promise((resolve) => {
-    const tx = db.transaction(TILE_STORE, 'readwrite');
-    tx.objectStore(TILE_STORE).clear();
-    tx.oncomplete = () => resolve(true);
-    tx.onerror = () => resolve(false);
-  });
+  try {
+    if (!db) await initDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(TILE_STORE, 'readwrite');
+      tx.objectStore(TILE_STORE).clear();
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    });
+  } catch(e) { return false; }
 }
 async function updateOfflineStats() {
   const stats = await getTilesStats();
@@ -772,7 +783,7 @@ async function updateOfflineStats() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// [إصلاح #5] تنزيل منطقة للعمل بدون إنترنت (مع throttle)
+// تنزيل الخرائط مع التحكم بالمعدل (Throttle)
 // ═══════════════════════════════════════════════════════════════
 let downloadCancelFlag = false;
 async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
@@ -785,7 +796,6 @@ async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
   
   for (const z of zoomLevels) {
     const n = Math.pow(2,z);
-    // [إصلاح #14] تثبيت x/y داخل الحدود
     const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
     const xMin = clamp(Math.floor((bounds.west+180)/360*n), 0, n-1);
     const xMax = clamp(Math.floor((bounds.east+180)/360*n), 0, n-1);
@@ -799,7 +809,7 @@ async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
   }
   
   const total = tileList.length;
-  if (total === 0) { showHint('⚠️ المنطقة صغيرة'); return; }
+  if (total === 0) { showHint('⚠️ المنطقة صغيرة جداً'); return; }
   document.getElementById('downloadProgress').classList.add('show');
   document.getElementById('downloadFill').style.width = '0%';
   document.getElementById('downloadText').textContent = `جاري التنزيل: 0 / ${total}`;
@@ -811,7 +821,6 @@ async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
     document.getElementById('downloadText').textContent = `جاري التنزيل: ${done} / ${total} (${pct}%)`;
   };
   
-  // [إصلاح #5] throttle: دفعة 4 + تأخير 200ms بين الدفعات
   const batchSize = 4;
   for (let i = 0; i < tileList.length; i += batchSize) {
     if (downloadCancelFlag) break;
@@ -831,19 +840,18 @@ async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
       } catch(e) {}
       done++; updateProgress();
     }));
-    // احترام سياسة OSM: تأخير صغير بين الدفعات
     await new Promise(r => setTimeout(r, 200));
   }
   
   document.getElementById('downloadFill').style.width = '100%';
   document.getElementById('downloadText').textContent = `✅ تم تنزيل ${saved} بلاطة جديدة`;
   setTimeout(() => document.getElementById('downloadProgress').classList.remove('show'), 3000);
-  speak('تم تنزيل منطقة العمل بدون إنترنت');
+  speak('تم تنزيل خريطة العمل بدون إنترنت بنجاح');
   updateOfflineStats();
 }
 
 // ═══════════════════════════════════════════════════════════════
-// الأيقونات
+// الأيقونات والوسائط
 // ═══════════════════════════════════════════════════════════════
 const ICONS = {
   straight: '<svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.59 5.58L20 12l-8-8-8 8z"/></svg>',
@@ -866,7 +874,7 @@ const POI_ICONS_MAP = {
   hospital: '<svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10z"/></svg>',
   grocery: '<svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>',
   restaurant: '<svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>',
-  atm: '<svg viewBox="0 0 24 24"><path d="M11.5 1L2 6v2h19V6l-9.5-5zM2 19h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h1v-2H2v2zm18-8H2v5h18v-5zm-2 2h-3v-1h3v1z"/></svg>',
+  atm: '<svg viewBox="0 0 24 24"><path d="M11.5 1L2 6v2h19V6l-9.5-5zM2 19h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h1v-2H2v2zm18-8H2v5h18v-5zm-2 2h-3v-1h3v1z"/></svg>',
   parking: '<svg viewBox="0 0 24 24"><path d="M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z"/></svg>',
   mosque: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 1.74.65 3.34 1.72 4.61C4.61 14.89 3 17.34 3 20h18c0-2.66-1.61-5.11-3.72-6.39C18.35 12.34 19 10.74 19 9c0-3.87-3.13-7-7-7zm0 15c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>',
   cafe: '<svg viewBox="0 0 24 24"><path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"/></svg>',
@@ -886,7 +894,7 @@ const EM_ICONS = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// التوجيه الصوتي
+// التوجيه الصوتي والإنذارات
 // ═══════════════════════════════════════════════════════════════
 const synth = window.speechSynthesis;
 let arabicVoice = null;
@@ -896,11 +904,12 @@ function pickArabicVoice() {
   arabicVoice = v.find(x => x.lang === 'ar-SA') || v.find(x => x.lang.startsWith('ar')) || null;
   if (!arabicVoice && !voiceWarned) {
     voiceWarned = true;
-    console.warn('[Kzdora] لا يوجد صوت عربي متوفر على هذا الجهاز');
+    console.warn('[Kzdora] لا يوجد محرك صوت عربي مدمج');
   }
 }
 pickArabicVoice();
 if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = pickArabicVoice;
+
 function speak(text, priority = false) {
   if (!text) return;
   if (priority) synth.cancel();
@@ -923,7 +932,7 @@ function playBeep(f = 880, d = 150) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// أدوات مساعدة
+// الأدوات الحسابية والتنسيق
 // ═══════════════════════════════════════════════════════════════
 let loadingTimeout = null;
 function showLoading(m) {
@@ -968,7 +977,7 @@ function formatEta(s) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// [إصلاح #7] حوار حذف مخصص
+// حوار الحذف
 // ═══════════════════════════════════════════════════════════════
 const deleteConfirmDialog = document.getElementById('deleteConfirmDialog');
 let deleteConfirmCallback = null;
@@ -989,7 +998,7 @@ document.getElementById('deleteConfirmOk').onclick = () => {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// بيانات الطوارئ
+// الطوارئ
 // ═══════════════════════════════════════════════════════════════
 const EMERGENCY_DATA = {
   numbers: [
@@ -1039,7 +1048,7 @@ function buildEmergencyPanel() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// الحالة العامة
+// الحالة العامة للتطبيق
 // ═══════════════════════════════════════════════════════════════
 let destMarker = null, startMarker = null;
 let waypointMarkers = [];
@@ -1055,7 +1064,7 @@ let userMarker = null, vehicleMarker = null;
 let lastHeading = 0, gpsFirstFix = false;
 let lastPosition = null, lastPositionTime = null;
 let currentSpeed = 0;
-let speedInitialized = false; // [إصلاح #11]
+let speedInitialized = false;
 let currentRouteProfile = 'fastest';
 let currentRouteData = null;
 let currentRoutes = { fastest: null, shortest: null };
@@ -1071,7 +1080,7 @@ const OFF_ROUTE_THRESHOLD_M = 80, OFF_ROUTE_COUNT = 3, ROUTE_RECALC_COOLDOWN = 1
 let savedPlaces = JSON.parse(localStorage.getItem('kzdora_saved') || '[]');
 
 // ═══════════════════════════════════════════════════════════════
-// [إصلاح #16] قراءة URL بعد تحميل الخريطة
+// إدارة URL والحالة
 // ═══════════════════════════════════════════════════════════════
 function readStateFromURL() {
   const hash = location.hash.replace(/^#kzdora\??/, '');
@@ -1107,7 +1116,7 @@ function updateURL() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// نقاط التوقف
+// إدارة نقاط التوقف
 // ═══════════════════════════════════════════════════════════════
 function updateWaypointsUI() {
   const list = document.getElementById('waypointsList');
@@ -1159,7 +1168,7 @@ const DAMASCUS = [36.2765, 33.5138];
 const map = new maplibregl.Map({ container:'map', style:MAP_STYLE, center:DAMASCUS, zoom:13, pitch:0, bearing:0, attributionControl:false, antialias:true });
 
 // ═══════════════════════════════════════════════════════════════
-// POI
+// الأماكن القريبة (Overpass)
 // ═══════════════════════════════════════════════════════════════
 const CAT_LABELS = { fuel:'محطة وقود', pharmacy:'صيدلية', hospital:'مشفى', grocery:'بقالية', restaurant:'مطعم', atm:'صراف آلي', parking:'موقف سيارات', mosque:'مسجد', cafe:'مقهى', hotel:'فندق' };
 const OSM_TAGS = { fuel:'["amenity"="fuel"]', pharmacy:'["amenity"="pharmacy"]', hospital:'["amenity"~"hospital|clinic"]', grocery:'["shop"~"supermarket|convenience"]', restaurant:'["amenity"~"restaurant|fast_food"]', atm:'["amenity"~"atm|bank"]', parking:'["amenity"="parking"]', mosque:'["amenity"="place_of_worship"]["religion"="muslim"]', cafe:'["amenity"="cafe"]', hotel:'["tourism"~"hotel|guest_house"]' };
@@ -1169,7 +1178,6 @@ async function searchNearby(cat) {
   const center = userLocation || [map.getCenter().lat, map.getCenter().lng];
   showLoading(`جاري البحث عن ${CAT_LABELS[cat]}...`);
   const [lat,lng] = center;
-  // [إصلاح #12] radius أقصر = 3 كم
   const q = `[out:json][timeout:25];(node${OSM_TAGS[cat]}(around:3000,${lat},${lng});way${OSM_TAGS[cat]}(around:3000,${lat},${lng}););out center 40;`;
   const servers = ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];
   for (const srv of servers) {
@@ -1194,7 +1202,7 @@ async function searchNearby(cat) {
       }
     } catch(e) { continue; }
   }
-  hideLoading(); showHint('⚠️ تعذر الاتصال');
+  hideLoading(); showHint('⚠️ تعذر الاتصال بخادم الأماكن');
 }
 function buildAddress(t) {
   if (!t) return '';
@@ -1231,7 +1239,7 @@ function renderResultsList(results, cat) {
     const d = document.createElement('div');
     d.className = 'result-item';
     const dt = p.dist < 1 ? `${Math.round(p.dist*1000)} م` : `${p.dist.toFixed(1)} كم`;
-    d.innerHTML = `<div class="pin">${icon}</div><div class="text"><div class="title">${p.name}</div><div class="sub">${p.address||CAT_LABELS[cat]}</div></div><div class="dist-badge">${dt}</div><button class="save-btn"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
+    d.innerHTML = `<div class="pin">${icon}</div><div class="text"><div class="title">${p.name}</div><div class="sub">${p.address||CAT_LABELS[cat]}</div></div><div class="dist-badge">${dt}</div><button class="save-btn" title="حفظ"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
     d.querySelector('.text').onclick = () => { box.classList.remove('show'); if (pendingWaypointPick) addWaypoint([p.lat,p.lng], p.name); else setDestination([p.lat,p.lng], p.name); };
     d.querySelector('.dist-badge').onclick = (e) => { e.stopPropagation(); box.classList.remove('show'); if (pendingWaypointPick) addWaypoint([p.lat,p.lng], p.name); else setDestination([p.lat,p.lng], p.name); };
     d.querySelector('.save-btn').onclick = (e) => { e.stopPropagation(); openNameDialog([p.lat,p.lng], p.name); };
@@ -1241,15 +1249,13 @@ function renderResultsList(results, cat) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// [إصلاح #4 + #9 + #10] الضغط المطول + منبثقة
+// القائمة المنبثقة للضغط المطول
 // ═══════════════════════════════════════════════════════════════
 const mapPopup = document.getElementById('mapPopup');
 let popupLatLng = null, pressTimer = null, pressStartPoint = null;
 
 function showMapPopup(ll, x, y) {
   popupLatLng = ll;
-  // [إصلاح #9] حساب ديناميكي للحدود
-  const searchBar = document.getElementById('searchBar');
   const header = document.getElementById('appHeader');
   const minTop = (header ? header.getBoundingClientRect().bottom : 0) + 60;
   const popupHeight = 220;
@@ -1262,7 +1268,6 @@ function showMapPopup(ll, x, y) {
 function hideMapPopup() { mapPopup.classList.remove('show'); }
 
 function handlePressStart(e) {
-  // [إصلاح #10] منع التكرار على أجهزة touch
   if ('ontouchstart' in window && e.originalEvent?.type === 'mousedown') return;
   if (e.originalEvent?.touches?.length > 1) return;
   pressStartPoint = e.point;
@@ -1277,12 +1282,12 @@ function handlePressMove(e) {
   if (Math.abs(e.point.x-pressStartPoint.x) > 8 || Math.abs(e.point.y-pressStartPoint.y) > 8) clearTimeout(pressTimer);
 }
 function handlePressEnd() { clearTimeout(pressTimer); pressStartPoint = null; }
+
 map.on('touchstart', handlePressStart); map.on('mousedown', handlePressStart);
 map.on('touchmove', handlePressMove); map.on('mousemove', handlePressMove);
 map.on('touchend', handlePressEnd); map.on('mouseup', handlePressEnd);
 map.on('dragstart', handlePressEnd); map.on('movestart', handlePressEnd); map.on('zoomstart', handlePressEnd);
 map.on('click', (e) => {
-  // [إصلاح #15] حماية من SVG
   const target = e.originalEvent?.target;
   if (target && target.closest && target.closest('.maplibregl-marker')) return;
   if (pendingWaypointPick) { addWaypoint([e.lngLat.lat, e.lngLat.lng], null); pendingWaypointPick = false; return; }
@@ -1291,7 +1296,7 @@ map.on('click', (e) => {
 map.on('contextmenu', e => { e.preventDefault(); showMapPopup({ lat:e.lngLat.lat, lng:e.lngLat.lng }, e.point.x, e.point.y); });
 
 // ═══════════════════════════════════════════════════════════════
-// الوضع الليلي
+// المظهر والوضع الليلي
 // ═══════════════════════════════════════════════════════════════
 const themeHeaderBtn = document.getElementById('themeHeaderBtn');
 const themeIconHeader = document.getElementById('themeIconHeader');
@@ -1303,7 +1308,7 @@ function setDarkMode(d) {
 themeHeaderBtn.onclick = () => { setDarkMode(!isDarkMode); updateURL(); };
 
 // ═══════════════════════════════════════════════════════════════
-// GPS
+// تتبع الموقع والـ GPS
 // ═══════════════════════════════════════════════════════════════
 const gpsStatus = document.getElementById('gpsStatus');
 const gpsText = document.getElementById('gpsText');
@@ -1341,7 +1346,6 @@ function updateSpeed(pos) {
     const dt = (now - lastPositionTime)/1000;
     if (dt > 0.5 && dt < 10) sk = (haversine(lastPosition[0],lastPosition[1],loc[0],loc[1])*1000/dt)*3.6;
   }
-  // [إصلاح #11] تهيئة صحيحة
   if (!speedInitialized) {
     currentSpeed = Math.round(sk);
     speedInitialized = true;
@@ -1369,9 +1373,6 @@ function updateUserLocation(loc, acc, h) {
   } else userMarker.setLngLat([loc[1],loc[0]]);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// [إصلاح #6] تحديث موضع المركبة بدون innerHTML متكرر
-// ═══════════════════════════════════════════════════════════════
 function updateVehiclePosition(loc, heading, speedMs) {
   let nh = heading;
   if (nh == null || isNaN(nh) || nh < 0) {
@@ -1396,7 +1397,6 @@ function updateVehiclePosition(loc, heading, speedMs) {
     vehicleMarker = new maplibregl.Marker({ element:el, anchor:'center' }).setLngLat([loc[1],loc[0]]).addTo(map);
   } else {
     vehicleMarker.setLngLat([loc[1],loc[0]]);
-    // [إصلاح #6] تحديث transform فقط بدون إعادة كتابة HTML
     const inner = vehicleMarker.getElement().querySelector('.vehicle-marker') || vehicleMarker.getElement();
     if (inner) inner.style.transform = `rotate(${lastHeading}deg)`;
   }
@@ -1409,7 +1409,7 @@ function updateVehiclePosition(loc, heading, speedMs) {
 function getDynZoom(s) { const k = s*3.6; if (k<10) return 18; if (k<30) return 17.5; if (k<60) return 17; if (k<90) return 16.5; return 16; }
 
 // ═══════════════════════════════════════════════════════════════
-// المسارات
+// المسارات والتوجيه
 // ═══════════════════════════════════════════════════════════════
 function setDestination(loc, name, isRecalc=false) {
   hideLoading();
@@ -1421,7 +1421,7 @@ function setDestination(loc, name, isRecalc=false) {
   destMarker = new maplibregl.Marker({ element:el, anchor:'bottom' }).setLngLat([loc[1],loc[0]]).addTo(map);
   updateURL();
   const start = (navigationActive && userLocation) ? userLocation : (manualStart || userLocation);
-  if (!start) { speak('يرجى تحديد موقع الانطلاق'); showHint('📍 اضغط مطولاً على الخريطة'); return; }
+  if (!start) { speak('يرجى تحديد موقع الانطلاق'); showHint('📍 اضغط مطولاً على الخريطة لتحديد الانطلاق'); return; }
   if (!isRecalc) showLoading('جاري حساب المسار...');
   if (!isRecalc) { document.getElementById('routeOptions').classList.remove('show'); document.getElementById('startBtn').classList.remove('show'); }
   const pts = [start, ...currentWaypoints.map(w=>w.loc), loc];
@@ -1438,7 +1438,6 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
     hideLoading();
     const main = buildValhallaRoute(data.trip);
     const alts = [];
-    // [إصلاح #13] تحقق قبل البناء
     if (data.alternates?.length) {
       data.alternates.forEach(a => {
         if (a && a.trip && a.trip.legs && a.trip.legs.length) alts.push(buildValhallaRoute(a.trip));
@@ -1460,7 +1459,7 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
       document.getElementById('routeOptions').classList.add('show');
       document.getElementById('startBtn').classList.add('show');
       speak(`تم حساب المسار. الأسرع ${(fastest.distance/1000).toFixed(1)} كيلومتر`);
-    } else { currentStepIndex=0; lastSpokenStep=-1; updateNavigationUI(); speak('تم إعادة الحساب'); }
+    } else { currentStepIndex=0; lastSpokenStep=-1; updateNavigationUI(); speak('تم إعادة حساب المسار'); }
     map.fitBounds(fastest.bounds, { padding:60, duration:800 });
   } catch(e) {
     const coordsStr = points.map(p=>`${p[1]},${p[0]}`).join(';');
@@ -1557,11 +1556,10 @@ function translateInstruction(s) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// [إصلاح #3] بدء التوجيه مع التحقق من الموقع
+// الملاحة والتوجيه المباشر
 // ═══════════════════════════════════════════════════════════════
 document.getElementById('startBtn').onclick = async () => {
   if (!currentSteps.length) return;
-  // [إصلاح #3] تحقق من وجود موقع حقيقي
   if (!userLocation && !manualStart) {
     speak('يرجى تحديد موقعك أولاً');
     showHint('📍 اضغط زر الموقع أو اضغط مطولاً على الخريطة لتحديد الانطلاق');
@@ -1591,9 +1589,11 @@ document.getElementById('startBtn').onclick = async () => {
   }
   map.on('dragstart', () => { if (navigationActive) { recenterMode = 'free'; document.getElementById('recenterBtn').classList.add('show'); } });
 };
+
 const stopConfirmDialog = document.getElementById('stopConfirmDialog');
 document.getElementById('stopConfirmCancel').onclick = () => stopConfirmDialog.classList.remove('show');
 document.getElementById('stopConfirmOk').onclick = () => { stopConfirmDialog.classList.remove('show'); stopNavigation(); };
+
 function stopNavigation() {
   hideLoading();
   navigationActive = false;
@@ -1638,6 +1638,7 @@ document.getElementById('recenterBtn').onclick = () => {
   document.getElementById('recenterBtn').classList.remove('show');
   if (userLocation) map.easeTo({ center:[userLocation[1],userLocation[0]], zoom:17, bearing:lastHeading, pitch:60, padding:{ top:0, bottom:window.innerHeight*0.4, left:0, right:0 }, duration:800 });
 };
+
 function checkProgress(loc) {
   if (!currentSteps.length) return;
   let ni = 0, minD = Infinity;
@@ -1680,20 +1681,16 @@ function getIcon(t) {
   return { Straight:ICONS.straight, TurnLeft:ICONS.turnLeft, TurnRight:ICONS.turnRight, SlightLeft:ICONS.slightLeft, SlightRight:ICONS.slightRight, SharpLeft:ICONS.sharpLeft, SharpRight:ICONS.sharpRight, Roundabout:ICONS.roundabout, Arrive:ICONS.arrive, Depart:ICONS.depart }[t] || ICONS.straight;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// [إصلاح #2] checkOffRoute - تحسين أداء البحث عن أقرب نقطة
-// ═══════════════════════════════════════════════════════════════
 function checkOffRoute(loc) {
   if (!navigationActive || !currentRouteData) return;
   if (Date.now() - lastRouteRecalcTime < ROUTE_RECALC_COOLDOWN) return;
   const coords = currentRouteData.geometry.coordinates;
   let md = Infinity;
-  // [إصلاح #2] نأخذ عينة كل 5 نقاط بدلاً من كل 3 (أسرع 40%)
   const step = 5;
   for (let i = 0; i < coords.length; i += step) {
     const d = haversine(loc[0],loc[1],coords[i][1],coords[i][0]);
     if (d < md) md = d;
-    if (md < OFF_ROUTE_THRESHOLD_M/1000) break; // خروج مبكر إذا كنا على المسار
+    if (md < OFF_ROUTE_THRESHOLD_M/1000) break;
   }
   if (md > OFF_ROUTE_THRESHOLD_M/1000) {
     offRouteCounter++;
@@ -1707,7 +1704,7 @@ function checkOffRoute(loc) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ربط الأزرار
+// الأزرار والتفاعلات
 // ═══════════════════════════════════════════════════════════════
 document.querySelectorAll('.mode-btn').forEach(b => b.onclick = () => {
   const m = b.dataset.mode;
@@ -1720,6 +1717,7 @@ document.querySelectorAll('.mode-btn').forEach(b => b.onclick = () => {
   updateURL();
   if (currentDestination) setDestination(currentDestination);
 });
+
 document.querySelectorAll('.route-btn').forEach(b => b.onclick = () => {
   if (b.disabled) return;
   const p = b.dataset.profile;
@@ -1734,6 +1732,7 @@ document.querySelectorAll('.route-btn').forEach(b => b.onclick = () => {
     speak(`تم اختيار ${p === 'fastest' ? 'الأسرع' : 'البديل'}`);
   }
 });
+
 document.querySelectorAll('.cat-btn').forEach(b => b.onclick = () => {
   const c = b.dataset.cat;
   if (activeCategory === c) {
@@ -1749,12 +1748,14 @@ document.querySelectorAll('.cat-btn').forEach(b => b.onclick = () => {
   clearPoiMarkers();
   searchNearby(c);
 });
+
 document.getElementById('resultsClose').onclick = () => {
   document.getElementById('results').classList.remove('show');
   activeCategory = null;
   document.querySelectorAll('.cat-btn').forEach(x => x.classList.remove('active'));
   clearPoiMarkers();
 };
+
 document.getElementById('locBtn').onclick = () => {
   if (!navigator.geolocation) { showHint('⚠️ GPS غير مدعوم على هذا الجهاز'); return; }
   showLoading('جاري تحديد موقعك...');
@@ -1768,7 +1769,7 @@ document.getElementById('locBtn').onclick = () => {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// القائمة المنبثقة
+// خيارات القائمة المنبثقة
 // ═══════════════════════════════════════════════════════════════
 document.getElementById('popupStart').onclick = () => { if (popupLatLng) setManualStart([popupLatLng.lat, popupLatLng.lng]); hideMapPopup(); };
 document.getElementById('popupStop').onclick = () => { if (popupLatLng) addWaypoint([popupLatLng.lat, popupLatLng.lng], null); hideMapPopup(); };
@@ -1802,7 +1803,7 @@ function setManualStart(loc) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// [إصلاح #4] البحث العام مع throttle على Nominatim
+// البحث العادي (Nominatim مع Throttle)
 // ═══════════════════════════════════════════════════════════════
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
@@ -1812,7 +1813,6 @@ const NOMINATIM_THROTTLE_MS = 1100;
 async function searchPlaces(q) {
   if (!q.trim()) return;
   if (!navigator.onLine) { showHint('⚠️ البحث يحتاج اتصال'); return; }
-  // [إصلاح #4] throttle
   const now = Date.now();
   const wait = NOMINATIM_THROTTLE_MS - (now - lastNominatimCall);
   if (wait > 0) await new Promise(r => setTimeout(r, wait));
@@ -1835,7 +1835,7 @@ async function searchPlaces(q) {
       const loc = [parseFloat(p.lat), parseFloat(p.lon)];
       const d = document.createElement('div');
       d.className = 'result-item';
-      d.innerHTML = `<div class="pin">${ICONS.arrive}</div><div class="text"><div class="title">${title}</div><div class="sub">${sub}</div></div><button class="save-btn"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
+      d.innerHTML = `<div class="pin">${ICONS.arrive}</div><div class="text"><div class="title">${title}</div><div class="sub">${sub}</div></div><button class="save-btn" title="حفظ"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
       d.querySelector('.text').onclick = () => { box.classList.remove('show'); searchInput.value = title; if (pendingWaypointPick) addWaypoint(loc, title); else setDestination(loc, title); };
       d.querySelector('.save-btn').onclick = (ev) => { ev.stopPropagation(); openNameDialog(loc, title); };
       list.appendChild(d);
@@ -1853,11 +1853,12 @@ document.addEventListener('click', e => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// حفظ الأماكن
+// حفظ وإدارة الأماكن
 // ═══════════════════════════════════════════════════════════════
 const nameDialog = document.getElementById('nameDialog');
 const nameInput = document.getElementById('nameInput');
 let pendingSaveLocation = null, pendingSaveCallback = null;
+
 function openNameDialog(loc, dn='', cb=null) {
   pendingSaveLocation = loc; pendingSaveCallback = cb;
   nameInput.value = dn;
@@ -1878,19 +1879,20 @@ document.getElementById('nameSave').onclick = () => {
   pendingSaveLocation = null; pendingSaveCallback = null;
 };
 nameInput.addEventListener('keypress', e => { if (e.key === 'Enter') document.getElementById('nameSave').click(); });
+
 const savedPanel = document.getElementById('savedPanel');
 const savedList = document.getElementById('savedList');
 document.getElementById('savedHeaderBtn').onclick = () => { renderSavedList(); savedPanel.classList.add('show'); };
 document.getElementById('savedClose').onclick = () => savedPanel.classList.remove('show');
 savedPanel.onclick = e => { if (e.target === savedPanel) savedPanel.classList.remove('show'); };
+
 function renderSavedList() {
   savedList.innerHTML = '';
   if (!savedPlaces.length) { savedList.innerHTML = '<div class="empty">لا توجد أماكن محفوظة بعد.</div>'; return; }
   savedPlaces.forEach((p,i) => {
     const li = document.createElement('li');
-    li.innerHTML = `<div class="star">${ICONS.waypoint}</div><div class="info"><div class="name">${p.name}</div><div class="coords">${p.loc[0].toFixed(4)}, ${p.loc[1].toFixed(4)}</div></div><button class="del-btn"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>`;
+    li.innerHTML = `<div class="star">${ICONS.waypoint}</div><div class="info"><div class="name">${p.name}</div><div class="coords">${p.loc[0].toFixed(4)}, ${p.loc[1].toFixed(4)}</div></div><button class="del-btn" title="حذف"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>`;
     li.querySelector('.info').onclick = () => { savedPanel.classList.remove('show'); setDestination(p.loc, p.name); };
-    // [إصلاح #7] استخدام الحوار المخصص
     li.querySelector('.del-btn').onclick = ev => {
       ev.stopPropagation();
       showDeleteConfirm('حذف المكان', `هل تريد حذف "${p.name}"؟`, () => {
@@ -1904,20 +1906,18 @@ function renderSavedList() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// الطوارئ
+// اللوحات والأزرار الأخرى
 // ═══════════════════════════════════════════════════════════════
 const emergencyPanel = document.getElementById('emergencyPanel');
 document.getElementById('emergencyHeaderBtn').onclick = () => { buildEmergencyPanel(); emergencyPanel.classList.add('show'); };
 document.getElementById('emergencyClose').onclick = () => emergencyPanel.classList.remove('show');
 emergencyPanel.onclick = e => { if (e.target === emergencyPanel) emergencyPanel.classList.remove('show'); };
 
-// ═══════════════════════════════════════════════════════════════
-// التنزيل Offline
-// ═══════════════════════════════════════════════════════════════
 const downloadPanel = document.getElementById('downloadPanel');
 document.getElementById('downloadHeaderBtn').onclick = () => { updateOfflineStats(); downloadPanel.classList.add('show'); };
 document.getElementById('downloadClose').onclick = () => downloadPanel.classList.remove('show');
 downloadPanel.onclick = e => { if (e.target === downloadPanel) downloadPanel.classList.remove('show'); };
+
 document.getElementById('downloadAreaBtn').onclick = () => {
   if (!userLocation) { showHint('📍 في انتظار تحديد موقعك...'); return; }
   downloadAreaForOffline(userLocation[0], userLocation[1], 2.5);
@@ -1927,7 +1927,6 @@ document.getElementById('downloadCenterBtn').onclick = () => {
   downloadAreaForOffline(c.lat, c.lng, 2.5);
 };
 document.getElementById('clearTilesBtn').onclick = () => {
-  // [إصلاح #7] حوار مخصص
   showDeleteConfirm('مسح البلاطات', 'هل تريد مسح جميع البلاطات المحفوظة؟', async () => {
     await clearAllTiles();
     updateOfflineStats();
@@ -1935,9 +1934,6 @@ document.getElementById('clearTilesBtn').onclick = () => {
   });
 };
 
-// ═══════════════════════════════════════════════════════════════
-// حالة الاتصال
-// ═══════════════════════════════════════════════════════════════
 const offlineBadge = document.getElementById('offlineBadge');
 function updateOnline() {
   if (navigator.onLine) offlineBadge.classList.remove('show');
@@ -1948,7 +1944,7 @@ window.addEventListener('offline', updateOnline);
 updateOnline();
 
 // ═══════════════════════════════════════════════════════════════
-// تثبيت التطبيق
+// تثبيت التطبيق وخروج التطبيق
 // ═══════════════════════════════════════════════════════════════
 let deferredInstallPrompt = null;
 const installPrompt = document.getElementById('installPrompt');
@@ -1986,9 +1982,6 @@ async function triggerInstall() {
 }
 document.getElementById('installCancel').onclick = () => installDialog.classList.remove('show');
 
-// ═══════════════════════════════════════════════════════════════
-// تأكيد الخروج
-// ═══════════════════════════════════════════════════════════════
 const exitDialog = document.getElementById('exitDialog');
 let exitTriggered = false;
 document.getElementById('exitCancel').onclick = () => { exitDialog.classList.remove('show'); exitTriggered = false; };
@@ -2005,9 +1998,8 @@ window.addEventListener('popstate', () => {
 history.pushState(null,'',location.href);
 
 // ═══════════════════════════════════════════════════════════════
-// التشغيل عند تحميل الصفحة
+// تهيئة التشغيل
 // ═══════════════════════════════════════════════════════════════
-// [إصلاح #16] انتظار تحميل الخريطة قبل قراءة URL
 map.on('load', () => {
   readStateFromURL();
 });
