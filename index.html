@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1a73e8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="كزدورة">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
 <title>كزدورة — ملاحة وخرائط</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
@@ -22,6 +23,7 @@ body.dark #map{background:#121212}
 body.dark #map .maplibregl-canvas{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
 body.dark .maplibregl-marker,body.dark .poi-marker{filter:invert(1) hue-rotate(180deg)}
 .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none!important}
+#osmCredit{position:fixed;left:6px;bottom:calc(2px + var(--safe-bottom));z-index:2000;font-size:10px;background:rgba(255,255,255,.8);padding:1px 6px;border-radius:6px}#osmCredit a{color:#333;text-decoration:none}body.navigating #osmCredit{bottom:calc(88px + var(--safe-bottom))}
 
 #offlineBadge{position:fixed;top:calc(66px + var(--safe-top));left:50%;transform:translateX(-50%);z-index:2000;background:rgba(234,67,53,.95);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;display:none;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 #offlineBadge.show{display:flex}
@@ -693,16 +695,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 // ═══════════════════════════════════════════════════════════════
 // قاعدة البيانات المحلية الاحتياطية للأماكن (Offline Database)
 // ═══════════════════════════════════════════════════════════════
-const OFFLINE_DB = [
-  { cat: 'fuel', name: 'محطة الشامي للوقود', lat: 36.2154, lng: 37.1425, address: 'شارع النيل' },
-  { cat: 'fuel', name: 'محطة الراموسة', lat: 36.1750, lng: 37.1280, address: 'الراموسة' },
-  { cat: 'fuel', name: 'محطة وقود الشهباء', lat: 36.2310, lng: 37.1550, address: 'حلب الجديدة' },
-  { cat: 'pharmacy', name: 'صيدلية الأمل', lat: 36.2080, lng: 37.1350, address: 'الجميلية' },
-  { cat: 'pharmacy', name: 'صيدلية الشفاء (مناوبة)', lat: 36.2200, lng: 37.1480, address: 'الفرقان' },
-  { cat: 'hospital', name: 'مشفى حلب الجامعي', lat: 36.2110, lng: 37.1240, address: 'المحافظة' },
-  { cat: 'hospital', name: 'مشفى الرازي', lat: 36.2040, lng: 37.1410, address: 'شارع بارون' },
-  { cat: 'grocery', name: 'سوبرماركت المدينة', lat: 36.2180, lng: 37.1400, address: 'السبيل' }
-];
+const OFFLINE_DB = []; // أضف أماكن حقيقية فقط بعد التحقق منها ميدانياً
 
 // ═══════════════════════════════════════════════════════════════
 // منع إطفاء الشاشة
@@ -793,7 +786,7 @@ async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
   const latDelta = radiusKm / 111;
   const lngDelta = radiusKm / (111 * Math.max(0.001, Math.cos(centerLat * Math.PI / 180)));
   const bounds = { north: centerLat+latDelta, south: centerLat-latDelta, east: centerLng+lngDelta, west: centerLng-lngDelta };
-  const zoomLevels = [13,14,15,16];
+  const zoomLevels = [13,14,15,16,17];
   const tileList = [];
   
   for (const z of zoomLevels) {
@@ -804,10 +797,10 @@ async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
     const yMin = clamp(Math.floor((1-Math.log(Math.tan(bounds.north*Math.PI/180)+1/Math.cos(bounds.north*Math.PI/180))/Math.PI)/2*n), 0, n-1);
     const yMax = clamp(Math.floor((1-Math.log(Math.tan(bounds.south*Math.PI/180)+1/Math.cos(bounds.south*Math.PI/180))/Math.PI)/2*n), 0, n-1);
     for (let x=xMin; x<=xMax; x++) for (let y=yMin; y<=yMax; y++) {
-      if (tileList.length >= 800) break;
+      if (tileList.length >= 1200) break;
       tileList.push({z,x,y});
     }
-    if (tileList.length >= 800) break;
+    if (tileList.length >= 1200) break;
   }
   
   const total = tileList.length;
@@ -833,7 +826,7 @@ async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
       if (existing) { done++; updateProgress(); return; }
       const srv = ['a','b','c'][Math.floor(Math.random()*3)];
       try {
-        const r = await fetch(`https://${srv}.tile.openstreetmap.org/${t.z}/${t.x}/${t.y}.png`);
+        const r = await fetch(tileUrl(t.z,t.x,t.y));
         if (r.ok) {
           const blob = await r.blob();
           await saveTileToDB(key, blob, blob.size);
@@ -931,6 +924,7 @@ function playBeep(f = 880, d = 150) {
 // ═══════════════════════════════════════════════════════════════
 // أدوات مساعدة
 // ═══════════════════════════════════════════════════════════════
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let loadingTimeout = null;
 function showLoading(m) {
   document.getElementById('loadingText').textContent = m;
@@ -1004,12 +998,7 @@ const EMERGENCY_DATA = {
     { type: 'fire', label: 'الإطفاء', number: '113', icon: 'fire' },
     { type: 'emergency', label: 'طوارئ عامة', number: '112', icon: 'emergency' }
   ],
-  services: [
-    { type: 'tow', label: 'سحب سيارات', number: '0921234567', icon: 'tow' },
-    { type: 'electric', label: 'كهربائي طوارئ', number: '0931234567', icon: 'electric' },
-    { type: 'plumber', label: 'سباك طوارئ', number: '0941234567', icon: 'plumber' },
-    { type: 'pharmacy', label: 'صيدلية مناوبة', number: '0951234567', icon: 'pharmacy' }
-  ]
+  services: [] // أضف أرقاماً حقيقية موثّقة فقط
 };
 function buildEmergencyPanel() {
   const body = document.getElementById('emergencyBody');
@@ -1028,6 +1017,7 @@ function buildEmergencyPanel() {
   });
   sec1.appendChild(g1);
   body.appendChild(sec1);
+  if (!EMERGENCY_DATA.services.length) return;
   const sec2 = document.createElement('div');
   sec2.className = 'em-section';
   sec2.innerHTML = `<div class="em-section-title"><svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>خدمات محلية</div>`;
@@ -1079,12 +1069,25 @@ let savedPlaces = JSON.parse(localStorage.getItem('kzdora_saved') || '[]');
 // ═══════════════════════════════════════════════════════════════
 // الخريطة
 // ═══════════════════════════════════════════════════════════════
+const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'; // غيّره لمزوّد بلاط مناسب للإنتاج
+const tileUrl = (z,x,y) => TILE_URL.replace('{z}',z).replace('{x}',x).replace('{y}',y);
+maplibregl.addProtocol('osmdb', async (params) => {
+  const [z,x,y] = params.url.replace('osmdb://','').split('/').map(Number);
+  const key = `${z}/${x}/${y}`;
+  const hit = await getTileFromDB(key).catch(() => null);
+  if (hit && hit.blob) return { data: await hit.blob.arrayBuffer() };
+  const r = await fetch(tileUrl(z,x,y));
+  if (!r.ok) throw new Error('tile ' + r.status);
+  const blob = await r.blob();
+  saveTileToDB(key, blob, blob.size);
+  return { data: await blob.arrayBuffer() };
+});
 const MAP_STYLE = {
   version: 8, name:'OSM',
   sources: {
     'osm': {
       type:'raster',
-      tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png','https://b.tile.openstreetmap.org/{z}/{x}/{y}.png','https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+      tiles: ['osmdb://{z}/{x}/{y}'],
       tileSize: 256, maxzoom: 19
     }
   },
@@ -1093,7 +1096,7 @@ const MAP_STYLE = {
     { id:'osm-layer', type:'raster', source:'osm' }
   ]
 };
-const DAMASCUS = [36.2765, 33.5138];
+const DAMASCUS = [37.1612, 36.2021]; // مركز حلب [lng,lat]
 const map = new maplibregl.Map({ container:'map', style:MAP_STYLE, center:DAMASCUS, zoom:13, pitch:0, bearing:0, attributionControl:false, antialias:true });
 
 // ═══════════════════════════════════════════════════════════════
@@ -1200,7 +1203,7 @@ function renderResultsList(results, cat) {
     const d = document.createElement('div');
     d.className = 'result-item';
     const dt = p.dist < 1 ? `${Math.round(p.dist*1000)} م` : `${p.dist.toFixed(1)} كم`;
-    d.innerHTML = `<div class="pin">${icon}</div><div class="text"><div class="title">${p.name}</div><div class="sub">${p.address||CAT_LABELS[cat]}</div></div><div class="dist-badge">${dt}</div><button class="save-btn"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
+    d.innerHTML = `<div class="pin">${icon}</div><div class="text"><div class="title">${esc(p.name)}</div><div class="sub">${esc(p.address||CAT_LABELS[cat])}</div></div><div class="dist-badge">${dt}</div><button class="save-btn"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
     d.querySelector('.text').onclick = () => { box.classList.remove('show'); if (pendingWaypointPick) addWaypoint([p.lat,p.lng], p.name); else setDestination([p.lat,p.lng], p.name); };
     d.querySelector('.dist-badge').onclick = (e) => { e.stopPropagation(); box.classList.remove('show'); if (pendingWaypointPick) addWaypoint([p.lat,p.lng], p.name); else setDestination([p.lat,p.lng], p.name); };
     d.querySelector('.save-btn').onclick = (e) => { e.stopPropagation(); openNameDialog([p.lat,p.lng], p.name); };
@@ -1219,7 +1222,7 @@ function showMapPopup(ll, x, y) {
   popupLatLng = ll;
   const header = document.getElementById('appHeader');
   const minTop = (header ? header.getBoundingClientRect().bottom : 0) + 60;
-  const popupHeight = 220;
+  const popupHeight = 270;
   const left = Math.min(Math.max(10, x - 100), window.innerWidth - 220);
   const top = Math.min(Math.max(minTop, y), window.innerHeight - popupHeight - 20);
   mapPopup.style.left = left + 'px';
@@ -1227,6 +1230,13 @@ function showMapPopup(ll, x, y) {
   mapPopup.classList.add('show');
 }
 function hideMapPopup() { mapPopup.classList.remove('show'); }
+(() => {
+  const b = document.createElement('button'); b.className = 'popup-item'; b.textContent = '📤 مشاركة الموقع عبر واتساب';
+  b.onclick = () => { if (popupLatLng) { const a = popupLatLng.lat.toFixed(6), o = popupLatLng.lng.toFixed(6); window.open('https://wa.me/?text=' + encodeURIComponent('موقعي: https://www.openstreetmap.org/?mlat=' + a + '&mlon=' + o + '#map=18/' + a + '/' + o)); } hideMapPopup(); };
+  mapPopup.appendChild(b);
+  const c = document.createElement('div'); c.id = 'osmCredit'; c.innerHTML = '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© مساهمو OpenStreetMap</a>';
+  document.body.appendChild(c);
+})();
 
 function handlePressStart(e) {
   if ('ontouchstart' in window && e.originalEvent?.type === 'mousedown') return;
@@ -1443,17 +1453,18 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
 }
 
 function buildValhallaRoute(trip) {
-  const coords = [];
-  trip.legs.forEach(l => decodePolyline(l.shape,6).forEach(c => coords.push(c)));
+  const coords = [], steps = [];
+  trip.legs.forEach(l => {
+    const base = coords.length;
+    decodePolyline(l.shape,6).forEach(c => coords.push(c));
+    l.maneuvers.forEach(m => {
+      const c = coords[Math.min(base + (m.begin_shape_index||0), coords.length-1)];
+      steps.push({ type:mapValhallaType(m.type), text:m.instruction||'تابع', distance:(m.length||0)*1000, duration:m.time||0, location:c?[c[1],c[0]]:null });
+    });
+  });
   let minLng=Infinity,minLat=Infinity,maxLng=-Infinity,maxLat=-Infinity;
   coords.forEach(c => { if (c[0]<minLng) minLng=c[0]; if (c[1]<minLat) minLat=c[1]; if (c[0]>maxLng) maxLng=c[0]; if (c[1]>maxLat) maxLat=c[1]; });
-  const steps = [];
-  trip.legs.forEach(l => l.maneuvers.forEach(m => {
-    const idx = Math.min(m.begin_shape_index||0, coords.length-1);
-    const c = coords[idx];
-    steps.push({ type:mapValhallaType(m.type), text:m.instruction||'تابع', distance:(m.length||0)*1000, duration:m.time||0, location:c?[c[1],c[0]]:null });
-  }));
-  return { geometry:{ type:'LineString', coordinates:coords }, distance:trip.summary.length*1000, duration:trip.summary.time, bounds:[[minLng,minLat],[maxLng,maxLat]], steps:steps.filter(s=>s.location) };
+  return { geometry:{ type:'LineString', coordinates:coords }, distance:trip.summary.length*1000, duration:trip.summary.time, bounds:[[minLng,minLat],[maxLng,maxLat]], steps:steps.filter(s => s.location) };
 }
 function normalizeOSRMRoute(r) {
   const steps = [];
@@ -1543,9 +1554,9 @@ document.getElementById('startBtn').onclick = async () => {
   if (userLocation) {
     map.easeTo({ center:[userLocation[1],userLocation[0]], zoom:17, bearing:lastHeading, pitch:60, padding:{ top:0, bottom:window.innerHeight*0.4, left:0, right:0 }, duration:1200 });
   }
-  map.on('dragstart', () => { if (navigationActive) { recenterMode = 'free'; document.getElementById('recenterBtn').classList.add('show'); } });
 };
 
+map.on('dragstart', () => { if (navigationActive) { recenterMode = 'free'; document.getElementById('recenterBtn').classList.add('show'); } });
 const stopConfirmDialog = document.getElementById('stopConfirmDialog');
 document.getElementById('stopConfirmCancel').onclick = () => stopConfirmDialog.classList.remove('show');
 document.getElementById('stopConfirmOk').onclick = () => { stopConfirmDialog.classList.remove('show'); stopNavigation(); };
@@ -1598,7 +1609,8 @@ document.getElementById('recenterBtn').onclick = () => {
 function checkProgress(loc) {
   if (!currentSteps.length) return;
   let ni = 0, minD = Infinity;
-  currentSteps.forEach((s,i) => { if (!s.location) return; const d = haversine(loc[0],loc[1],s.location[1],s.location[0]); if (d < minD) { minD = d; ni = i; } });
+  ni = currentStepIndex;
+  for (let i = currentStepIndex; i < Math.min(currentSteps.length, currentStepIndex + 6); i++) { const s = currentSteps[i]; if (!s.location) continue; const d = haversine(loc[0],loc[1],s.location[1],s.location[0]); if (d < minD) { minD = d; ni = i; } }
   if (ni !== currentStepIndex) { currentStepIndex = ni; updateNavigationUI(); }
   if (ni < currentSteps.length - 1) {
     const ns = currentSteps[ni+1];
@@ -1630,7 +1642,13 @@ function updateNavigationUI() {
 function updateTripInfo(loc) {
   if (!currentSteps.length) return;
   let rd = 0, rt = 0;
-  for (let i = currentStepIndex; i < currentSteps.length; i++) { rd += currentSteps[i].distance; rt += currentSteps[i].duration; }
+  const nx = currentSteps[currentStepIndex+1];
+  if (nx && nx.location) {
+    const toNext = haversine(loc[0],loc[1],nx.location[1],nx.location[0])*1000, cur = currentSteps[currentStepIndex];
+    rd += toNext; rt += cur.duration * (cur.distance ? Math.min(1, toNext/cur.distance) : 1);
+    document.getElementById('navCurrentDist').textContent = formatDist(toNext);
+  }
+  for (let i = currentStepIndex+1; i < currentSteps.length; i++) { rd += currentSteps[i].distance; rt += currentSteps[i].duration; }
   document.getElementById('navRemaining').textContent = rd >= 1000 ? (rd/1000).toFixed(1)+' كم' : Math.round(rd)+' م';
   document.getElementById('navEta').textContent = formatEta(rt);
 }
@@ -1643,9 +1661,12 @@ function checkOffRoute(loc) {
   if (Date.now() - lastRouteRecalcTime < ROUTE_RECALC_COOLDOWN) return;
   const coords = currentRouteData.geometry.coordinates;
   let md = Infinity;
-  const step = 5;
-  for (let i = 0; i < coords.length; i += step) {
-    const d = haversine(loc[0],loc[1],coords[i][1],coords[i][0]);
+  const kx = Math.cos(loc[0]*Math.PI/180) * 111.32, ky = 110.57;
+  for (let i = 0; i < coords.length - 1; i++) {
+    const ax=(coords[i][0]-loc[1])*kx, ay=(coords[i][1]-loc[0])*ky, bx=(coords[i+1][0]-loc[1])*kx, by=(coords[i+1][1]-loc[0])*ky;
+    const dx=bx-ax, dy=by-ay, l2=dx*dx+dy*dy;
+    const t = l2 ? Math.max(0, Math.min(1, -(ax*dx+ay*dy)/l2)) : 0;
+    const d = Math.hypot(ax+t*dx, ay+t*dy);
     if (d < md) md = d;
     if (md < OFF_ROUTE_THRESHOLD_M/1000) break;
   }
@@ -1784,7 +1805,7 @@ async function searchPlaces(q) {
       const loc = [parseFloat(p.lat), parseFloat(p.lon)];
       const d = document.createElement('div');
       d.className = 'result-item';
-      d.innerHTML = `<div class="pin">${ICONS.arrive}</div><div class="text"><div class="title">${title}</div><div class="sub">${sub}</div></div><button class="save-btn"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
+      d.innerHTML = `<div class="pin">${ICONS.arrive}</div><div class="text"><div class="title">${esc(title)}</div><div class="sub">${esc(sub)}</div></div><button class="save-btn"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
       d.querySelector('.text').onclick = () => { box.classList.remove('show'); searchInput.value = title; setDestination(loc, title); };
       d.querySelector('.save-btn').onclick = (ev) => { ev.stopPropagation(); openNameDialog(loc, title); };
       list.appendChild(d);
@@ -1832,7 +1853,7 @@ function renderSavedList() {
   if (!savedPlaces.length) { savedList.innerHTML = '<div class="empty">لا توجد أماكن محفوظة بعد.</div>'; return; }
   savedPlaces.forEach((p,i) => {
     const li = document.createElement('li');
-    li.innerHTML = `<div class="star">${ICONS.waypoint}</div><div class="info"><div class="name">${p.name}</div><div class="coords">${p.loc[0].toFixed(4)}, ${p.loc[1].toFixed(4)}</div></div><button class="del-btn"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>`;
+    li.innerHTML = `<div class="star">${ICONS.waypoint}</div><div class="info"><div class="name">${esc(p.name)}</div><div class="coords">${p.loc[0].toFixed(4)}, ${p.loc[1].toFixed(4)}</div></div><button class="del-btn"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>`;
     li.querySelector('.info').onclick = () => { savedPanel.classList.remove('show'); setDestination(p.loc, p.name); };
     li.querySelector('.del-btn').onclick = ev => {
       ev.stopPropagation();
