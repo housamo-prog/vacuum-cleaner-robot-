@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#1a73e8">
+<meta name="theme-color" content="#0f62fe">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,321 +11,344 @@
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg">
-<title>كزدورة — ملاحة وخرائط</title>
+<title>كزدورة — ملاحة وخرائط ذكية</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
-:root{--panel:#fff;--text:#202124;--text-sub:#5f6368;--primary:#1a73e8;--primary-dark:#1557b0;--danger:#ea4335;--success:#34a853;--border:#f1f3f4;--input-bg:#f1f3f4;--gold:#fbbc04;--fuel:#ea8600;--pharmacy:#34a853;--hospital:#ea4335;--grocery:#7c4dff;--stop:#ff6d00;--emergency:#d32f2f;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
-body.dark{--panel:#1e1e1e;--text:#e8eaed;--text-sub:#9aa0a6;--primary:#8ab4f8;--border:#2d2d2d;--input-bg:#2d2d2d}
+:root{
+  --panel:rgba(255,255,255,.92);
+  --panel-solid:#ffffff;
+  --text:#111827;
+  --text-sub:#4b5563;
+  --primary:#0f62fe;
+  --primary-dark:#0043ce;
+  --primary-soft:rgba(15,98,254,.12);
+  --danger:#dc2626;
+  --success:#16a34a;
+  --warning:#d97706;
+  --border:rgba(17,24,39,.08);
+  --input-bg:rgba(17,24,39,.06);
+  --gold:#eab308;
+  --fuel:#ea580c;
+  --pharmacy:#16a34a;
+  --hospital:#dc2626;
+  --grocery:#7c3aed;
+  --stop:#f97316;
+  --emergency:#b91c1c;
+  --shadow-sm:0 4px 14px rgba(15,23,42,.08);
+  --shadow-md:0 10px 28px rgba(15,23,42,.14);
+  --shadow-lg:0 18px 42px rgba(15,23,42,.22);
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px)
+}
+body.dark{
+  --panel:rgba(24,24,27,.9);
+  --panel-solid:#18181b;
+  --text:#f4f4f5;
+  --text-sub:#a1a1aa;
+  --primary:#60a5fa;
+  --primary-dark:#3b82f6;
+  --primary-soft:rgba(96,165,250,.16);
+  --border:rgba(255,255,255,.1);
+  --input-bg:rgba(255,255,255,.08);
+  --shadow-sm:0 4px 16px rgba(0,0,0,.35);
+  --shadow-md:0 12px 32px rgba(0,0,0,.5);
+  --shadow-lg:0 20px 48px rgba(0,0,0,.65)
+}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;width:100%;font-family:-apple-system,'Segoe UI',Tahoma,Arial,sans-serif;overflow:hidden;background:#e8eaed;color:var(--text);overscroll-behavior:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;position:fixed}
-#map{position:fixed;inset:0;width:100%;height:100%;z-index:1;background:#e8eaed}
-body.dark #map{background:#121212}
-body.dark #map .maplibregl-canvas{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
-body.dark .maplibregl-marker,body.dark .poi-marker{filter:invert(1) hue-rotate(180deg)}
+html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Tahoma,Arial,sans-serif;overflow:hidden;background:#e5e7eb;color:var(--text);overscroll-behavior:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;position:fixed}
+#map{position:fixed;inset:0;width:100%;height:100%;z-index:1;background:#e5e7eb}
+body.dark #map{background:#09090b}
+body.dark #map .maplibregl-canvas{filter:invert(.92) hue-rotate(180deg) brightness(.9) contrast(.95)}
+body.dark .maplibregl-marker,body.dark .poi-marker{filter:invert(.92) hue-rotate(180deg)}
 .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none!important}
-#osmCredit{position:fixed;left:6px;bottom:calc(2px + var(--safe-bottom));z-index:2000;font-size:10px;background:rgba(255,255,255,.8);padding:1px 6px;border-radius:6px}#osmCredit a{color:#333;text-decoration:none}body.navigating #osmCredit{bottom:calc(88px + var(--safe-bottom))}
 
-#offlineBadge{position:fixed;top:calc(66px + var(--safe-top));left:50%;transform:translateX(-50%);z-index:2000;background:rgba(234,67,53,.95);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;display:none;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+#osmCredit{position:fixed;left:8px;bottom:calc(4px + var(--safe-bottom));z-index:2000;font-size:10px;background:var(--panel);backdrop-filter:blur(10px);padding:2px 8px;border-radius:999px;border:1px solid var(--border)}
+#osmCredit a{color:var(--text-sub);text-decoration:none}
+body.navigating #osmCredit{bottom:calc(92px + var(--safe-bottom))}
+
+#offlineBadge{position:fixed;top:calc(74px + var(--safe-top));left:50%;transform:translateX(-50%);z-index:2000;background:rgba(220,38,38,.95);backdrop-filter:blur(10px);color:#fff;padding:7px 15px;border-radius:999px;font-size:12px;font-weight:600;display:none;align-items:center;gap:6px;box-shadow:var(--shadow-md)}
 #offlineBadge.show{display:flex}
 #offlineBadge svg{width:14px;height:14px;fill:#fff}
 
-#installPrompt{position:fixed;bottom:calc(88px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(200%);z-index:1400;background:linear-gradient(135deg,#1a73e8,#0d47a1);color:#fff;padding:12px 20px;border-radius:50px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 24px rgba(26,115,232,.5);font-family:inherit;font-size:14px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;pointer-events:none}
+#installPrompt{position:fixed;bottom:calc(92px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(220%);z-index:1400;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:12px 20px;border-radius:999px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 26px rgba(15,98,254,.4);font-family:inherit;font-size:13px;font-weight:700;border:1px solid rgba(255,255,255,.22);cursor:pointer;white-space:nowrap;transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;pointer-events:none}
 #installPrompt.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
-#installPrompt svg{width:20px;height:20px;fill:#fff}
+#installPrompt svg{width:18px;height:18px;fill:#fff}
 body.navigating #installPrompt{display:none}
 
-#appHeader{position:fixed;top:0;left:0;right:0;z-index:1050;padding:calc(10px + var(--safe-top)) 14px 10px;background:linear-gradient(135deg,#1a73e8 0%,#0d47a1 100%);display:flex;align-items:center;gap:10px;box-shadow:0 2px 14px rgba(0,0,0,.25);color:#fff;transition:transform .35s,opacity .35s}
+#appHeader{position:fixed;top:0;left:0;right:0;z-index:1050;padding:calc(10px + var(--safe-top)) 14px 12px;background:linear-gradient(135deg,#0f62fe 0%,#002d9c 100%);display:flex;align-items:center;gap:11px;box-shadow:var(--shadow-md);color:#fff;transition:transform .35s,opacity .35s}
 body.navigating #appHeader{transform:translateY(-100%);opacity:0;pointer-events:none}
-#appHeader .logo{width:42px;height:42px;flex-shrink:0;background:rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.2)}
-#appHeader .logo svg{width:26px;height:26px;fill:#fff}
+#appHeader .logo{width:42px;height:42px;flex-shrink:0;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border-radius:14px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.28)}
+#appHeader .logo svg{width:24px;height:24px;fill:#fff}
 #appHeader .title-block{flex:1;min-width:0}
-#appHeader .title{font-size:19px;font-weight:800}
+#appHeader .title{font-size:18px;font-weight:800;letter-spacing:-.2px;display:flex;align-items:center;gap:6px}
+#appHeader .pill-badge{font-size:10px;font-weight:700;background:rgba(255,255,255,.2);padding:2px 7px;border-radius:999px}
 #appHeader .subtitle{font-size:11px;opacity:.9;margin-top:2px}
 #appHeader .actions{display:flex;gap:6px}
-#appHeader .header-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.15);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
-#appHeader .header-btn svg{width:20px;height:20px;fill:#fff}
+#appHeader .header-btn{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.18);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,background .2s}
+#appHeader .header-btn:active{transform:scale(.93);background:rgba(255,255,255,.26)}
+#appHeader .header-btn svg{width:19px;height:19px;fill:#fff}
 
-#searchBar{position:fixed;top:calc(66px + var(--safe-top));left:10px;right:10px;z-index:1000;display:flex;gap:6px;align-items:center;background:var(--panel);border-radius:14px;padding:6px;box-shadow:0 2px 12px rgba(0,0,0,.15);transition:transform .3s,opacity .3s}
+#searchBar{position:fixed;top:calc(68px + var(--safe-top));left:10px;right:10px;z-index:1000;display:flex;gap:6px;align-items:center;background:var(--panel);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:18px;padding:6px;box-shadow:var(--shadow-md);transition:transform .3s,opacity .3s}
 body.navigating #searchBar{transform:translateY(-250%);opacity:0;pointer-events:none}
-#searchInput{flex:1;border:none;outline:none;padding:12px 14px;font-size:15px;border-radius:10px;background:var(--input-bg);font-family:inherit;color:var(--text)}
+#searchInput{flex:1;border:none;outline:none;padding:11px 14px;font-size:14px;font-weight:500;border-radius:13px;background:var(--input-bg);font-family:inherit;color:var(--text)}
 #searchInput::placeholder{color:var(--text-sub)}
-.icon-btn{background:transparent;border:none;cursor:pointer;width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center}
-.icon-btn svg{width:22px;height:22px;fill:var(--primary)}
+.icon-btn{background:transparent;border:none;cursor:pointer;width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;transition:background .15s,transform .12s}
+.icon-btn:active{transform:scale(.92);background:var(--primary-soft)}
+.icon-btn svg{width:21px;height:21px;fill:var(--primary)}
 
-#categoryBar{position:fixed;top:calc(124px + var(--safe-top));left:0;right:0;z-index:999;overflow-x:auto;overflow-y:hidden;padding:6px 10px 10px;display:flex;gap:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:transform .3s,opacity .3s}
+#categoryBar{position:fixed;top:calc(128px + var(--safe-top));left:0;right:0;z-index:999;overflow-x:auto;overflow-y:hidden;padding:4px 10px 10px;display:flex;gap:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:transform .3s,opacity .3s}
 #categoryBar::-webkit-scrollbar{display:none}
 body.navigating #categoryBar{transform:translateY(-350%);opacity:0;pointer-events:none}
-.cat-btn{flex-shrink:0;background:var(--panel);border:none;cursor:pointer;padding:8px 14px 8px 10px;border-radius:22px;display:flex;align-items:center;gap:6px;font-family:inherit;font-size:13px;font-weight:500;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.12);white-space:nowrap;border:1.5px solid transparent}
-.cat-btn.active{background:var(--primary);color:#fff}
-.cat-btn svg{width:18px;height:18px;flex-shrink:0}
+.cat-btn{flex-shrink:0;background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--border);cursor:pointer;padding:8px 13px 8px 11px;border-radius:999px;display:flex;align-items:center;gap:6px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--text);box-shadow:var(--shadow-sm);white-space:nowrap;transition:transform .14s,background .2s,color .2s}
+.cat-btn:active{transform:scale(.95)}
+.cat-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 6px 18px rgba(15,98,254,.32)}
+.cat-btn svg{width:17px;height:17px;flex-shrink:0}
 .cat-btn[data-cat="fuel"] svg{fill:var(--fuel)}
 .cat-btn[data-cat="pharmacy"] svg{fill:var(--pharmacy)}
 .cat-btn[data-cat="hospital"] svg{fill:var(--hospital)}
 .cat-btn[data-cat="grocery"] svg{fill:var(--grocery)}
-.cat-btn[data-cat="restaurant"] svg{fill:#ff6d00}
-.cat-btn[data-cat="atm"] svg{fill:#00897b}
-.cat-btn[data-cat="parking"] svg{fill:#3949ab}
-.cat-btn[data-cat="mosque"] svg{fill:#5d4037}
-.cat-btn[data-cat="cafe"] svg{fill:#6d4c41}
-.cat-btn[data-cat="hotel"] svg{fill:#00838f}
+.cat-btn[data-cat="restaurant"] svg{fill:#ea580c}
+.cat-btn[data-cat="atm"] svg{fill:#0d9488}
+.cat-btn[data-cat="parking"] svg{fill:#4f46e5}
+.cat-btn[data-cat="mosque"] svg{fill:#78350f}
+.cat-btn[data-cat="cafe"] svg{fill:#92400e}
+.cat-btn[data-cat="hotel"] svg{fill:#0284c7}
 .cat-btn.active svg{fill:#fff}
 
-#results{position:fixed;top:calc(178px + var(--safe-top));left:10px;right:10px;z-index:1000;background:var(--panel);border-radius:14px;max-height:55vh;overflow-y:auto;display:none;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+#results{position:fixed;top:calc(180px + var(--safe-top));left:10px;right:10px;z-index:1000;background:var(--panel-solid);border:1px solid var(--border);border-radius:18px;max-height:54vh;overflow-y:auto;display:none;box-shadow:var(--shadow-lg)}
 #results.show{display:block}
-.result-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;display:flex;gap:12px;align-items:center}
+.result-item{padding:12px 15px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;display:flex;gap:12px;align-items:center;transition:background .12s}
+.result-item:last-child{border-bottom:none}
 .result-item:active{background:var(--input-bg)}
 .result-item .pin svg{width:22px;height:22px;flex-shrink:0}
 .result-item .text{flex:1;line-height:1.4;min-width:0}
-.result-item .title{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.result-item .sub{font-size:12px;color:var(--text-sub);margin-top:2px}
-.result-item .dist-badge{background:var(--input-bg);color:var(--primary);padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;flex-shrink:0}
-.result-item .save-btn{background:transparent;border:none;cursor:pointer;padding:8px}
-.result-item .save-btn svg{width:18px;height:18px;fill:var(--text-sub)}
-.result-item .save-btn.saved svg{fill:var(--gold)}
-#resultsHeader{position:sticky;top:0;z-index:2;background:var(--panel);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);border-radius:14px 14px 0 0}
-#resultsHeader .title-block{font-size:13px;font-weight:600}
-#resultsHeader .title-block span{color:var(--text-sub);font-weight:400}
+.result-item .title{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.result-item .sub{font-size:11.5px;color:var(--text-sub);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.result-item .dist-badge{background:var(--primary-soft);color:var(--primary);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;flex-shrink:0}
+.result-item .save-btn{background:var(--input-bg);border:none;cursor:pointer;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.result-item .save-btn svg{width:17px;height:17px;fill:var(--text-sub)}
+#resultsHeader{position:sticky;top:0;z-index:2;background:var(--panel-solid);padding:11px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+#resultsHeader .title-block{font-size:13px;font-weight:700}
+#resultsHeader .title-block span{color:var(--text-sub);font-weight:500}
 #resultsClose{background:var(--input-bg);border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 #resultsClose svg{width:16px;height:16px;fill:var(--text)}
 
-#travelModeBar{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:var(--panel);border-radius:28px;padding:6px;box-shadow:0 4px 24px rgba(0,0,0,.25);display:none;gap:4px;transition:transform .35s,opacity .35s}
+#travelModeBar{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:var(--panel);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:999px;padding:5px;box-shadow:var(--shadow-lg);display:none;gap:4px;transition:transform .35s,opacity .35s}
 #travelModeBar.show{display:flex}
 body.navigating #travelModeBar{transform:translate(-50%,250%);opacity:0;pointer-events:none}
-.mode-btn{background:transparent;border:none;cursor:pointer;padding:10px 20px;border-radius:22px;display:flex;align-items:center;gap:8px;font-family:inherit;font-size:14px;font-weight:600;color:var(--text-sub)}
-.mode-btn.active{background:var(--primary);color:#fff}
-.mode-btn svg{width:20px;height:20px;fill:currentColor}
+.mode-btn{background:transparent;border:none;cursor:pointer;padding:10px 18px;border-radius:999px;display:flex;align-items:center;gap:7px;font-family:inherit;font-size:13px;font-weight:700;color:var(--text-sub);transition:background .18s,color .18s}
+.mode-btn.active{background:var(--primary);color:#fff;box-shadow:0 4px 14px rgba(15,98,254,.35)}
+.mode-btn svg{width:19px;height:19px;fill:currentColor}
 
-#speedometer{position:fixed;top:calc(180px + var(--safe-top));left:10px;z-index:999;background:var(--panel);padding:8px 14px;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.15);display:none;align-items:center;gap:8px;transition:transform .3s,opacity .3s}
+#speedometer{position:fixed;top:calc(182px + var(--safe-top));left:10px;z-index:999;background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--border);padding:8px 13px;border-radius:16px;box-shadow:var(--shadow-sm);display:none;align-items:center;gap:8px;transition:transform .3s,opacity .3s}
 #speedometer.show{display:flex}
 body.navigating #speedometer{transform:translateY(-250%);opacity:0;pointer-events:none}
-#speedometer.over{background:#fce8e6}
+#speedometer.over{background:rgba(220,38,38,.14);border-color:rgba(220,38,38,.35)}
 #speedometer.over #speedValue{color:var(--danger)}
-#speedValue{font-size:26px;font-weight:800;color:var(--primary);min-width:45px;text-align:center;font-variant-numeric:tabular-nums}
-#speedUnit{font-size:11px;color:var(--text-sub);line-height:1.2}
+#speedValue{font-size:24px;font-weight:900;color:var(--primary);min-width:40px;text-align:center;font-variant-numeric:tabular-nums}
+#speedUnit{font-size:10.5px;color:var(--text-sub);line-height:1.25;font-weight:600}
 
-#gpsStatus{position:fixed;top:calc(180px + var(--safe-top));right:10px;z-index:999;background:var(--panel);padding:8px 12px;border-radius:20px;font-size:11px;color:var(--text-sub);display:none;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:transform .3s,opacity .3s}
+#gpsStatus{position:fixed;top:calc(182px + var(--safe-top));right:10px;z-index:999;background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--border);padding:8px 12px;border-radius:999px;font-size:11px;font-weight:600;color:var(--text-sub);display:none;align-items:center;gap:6px;box-shadow:var(--shadow-sm);transition:transform .3s,opacity .3s}
 #gpsStatus.show{display:flex}
 body.navigating #gpsStatus{transform:translateY(-250%);opacity:0;pointer-events:none}
 #gpsStatus .dot{width:8px;height:8px;border-radius:50%;background:var(--danger);animation:pulse 1.5s infinite}
 #gpsStatus.active .dot{background:var(--success)}
-
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-#mapPopup{position:fixed;z-index:2000;background:var(--panel);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.3);padding:6px;display:none;min-width:210px}
+#mapPopup{position:fixed;z-index:2000;background:var(--panel-solid);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-lg);padding:6px;display:none;min-width:220px}
 #mapPopup.show{display:block}
-.popup-item{background:transparent;border:none;cursor:pointer;padding:12px 14px;border-radius:10px;display:flex;align-items:center;gap:10px;font-family:inherit;font-size:14px;color:var(--text);width:100%;text-align:right}
+.popup-item{background:transparent;border:none;cursor:pointer;padding:11px 14px;border-radius:12px;display:flex;align-items:center;gap:10px;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--text);width:100%;text-align:right;transition:background .12s}
 .popup-item:active{background:var(--input-bg)}
-.popup-item svg{width:20px;height:20px;flex-shrink:0}
+.popup-item svg{width:19px;height:19px;flex-shrink:0}
 .popup-item.start svg{fill:var(--success)}
 .popup-item.dest svg{fill:var(--danger)}
 .popup-item.save svg{fill:var(--gold)}
 .popup-item.stop svg{fill:var(--stop)}
 
-#savedPanel{position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.5);display:none;align-items:flex-end}
+#savedPanel{position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:none;align-items:flex-end}
 #savedPanel.show{display:flex}
-#savedContent{background:var(--panel);width:100%;max-height:70vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
+#savedContent{background:var(--panel-solid);width:100%;max-height:70vh;border-radius:24px 24px 0 0;padding:18px;animation:slideUp .28s ease-out;overflow-y:auto;box-shadow:var(--shadow-lg)}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-#savedHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-#savedHeader h3{font-size:18px}
+#savedHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+#savedHeader h3{font-size:17px;font-weight:800}
 #savedClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 #savedClose svg{width:18px;height:18px;fill:var(--text)}
 #savedList{list-style:none}
-#savedList li{padding:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;border-radius:10px}
+#savedList li{padding:13px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;border-radius:12px}
 #savedList li:active{background:var(--input-bg)}
 #savedList li .star svg{width:20px;height:20px;fill:var(--gold)}
 #savedList li .info{flex:1}
-#savedList li .name{font-weight:500;font-size:14px}
-#savedList li .coords{font-size:11px;color:var(--text-sub);margin-top:3px}
-#savedList li .del-btn{background:transparent;border:none;cursor:pointer;padding:8px}
-#savedList li .del-btn svg{width:18px;height:18px;fill:var(--danger)}
+#savedList li .name{font-weight:700;font-size:14px}
+#savedList li .coords{font-size:11px;color:var(--text-sub);margin-top:2px;font-variant-numeric:tabular-nums}
+#savedList li .del-btn{background:rgba(220,38,38,.1);border:none;cursor:pointer;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+#savedList li .del-btn svg{width:17px;height:17px;fill:var(--danger)}
 #savedList .empty{text-align:center;color:var(--text-sub);padding:40px 20px;font-size:14px}
 
-#waypointsBar{position:fixed;bottom:calc(225px + var(--safe-bottom));left:10px;right:10px;z-index:1000;background:var(--panel);border-radius:14px;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,.2);display:none;transition:transform .3s,opacity .3s;max-height:24vh;overflow-y:auto}
+#waypointsBar{position:fixed;bottom:calc(228px + var(--safe-bottom));left:10px;right:10px;z-index:1000;background:var(--panel);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:18px;padding:10px;box-shadow:var(--shadow-md);display:none;transition:transform .3s,opacity .3s;max-height:24vh;overflow-y:auto}
 #waypointsBar.show{display:block}
 body.navigating #waypointsBar{transform:translateY(250%);opacity:0;pointer-events:none}
-#waypointsBar .wp-title{font-size:12px;font-weight:600;color:var(--text-sub);padding:4px 8px 8px;display:flex;justify-content:space-between;align-items:center}
-#waypointsBar .wp-title button{background:transparent;border:none;cursor:pointer;font-size:12px;color:var(--primary);font-weight:600;font-family:inherit}
-.wp-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;font-size:13px;background:var(--input-bg);margin-bottom:6px}
+#waypointsBar .wp-title{font-size:12px;font-weight:700;color:var(--text-sub);padding:2px 6px 8px;display:flex;justify-content:space-between;align-items:center}
+#waypointsBar .wp-title button{background:var(--primary-soft);border:none;cursor:pointer;font-size:11.5px;color:var(--primary);font-weight:700;font-family:inherit;padding:4px 10px;border-radius:999px}
+.wp-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;font-size:13px;font-weight:600;background:var(--input-bg);margin-bottom:6px}
 .wp-item:last-child{margin-bottom:0}
-.wp-item .wp-num{width:24px;height:24px;border-radius:50%;background:var(--stop);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.wp-item .wp-num{width:24px;height:24px;border-radius:50%;background:var(--stop);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
 .wp-item .wp-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.wp-item .wp-del{background:transparent;border:none;cursor:pointer;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.wp-item .wp-del svg{width:14px;height:14px;fill:var(--danger)}
+.wp-item .wp-del{background:transparent;border:none;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.wp-item .wp-del svg{width:15px;height:15px;fill:var(--danger)}
 
-#routeOptions{position:fixed;bottom:calc(88px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:var(--panel);border-radius:16px;padding:6px;box-shadow:0 4px 20px rgba(0,0,0,.2);display:none;gap:4px;transition:transform .3s,opacity .3s}
+#routeOptions{position:fixed;bottom:calc(90px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:var(--panel);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:20px;padding:6px;box-shadow:var(--shadow-md);display:none;gap:5px;transition:transform .3s,opacity .3s}
 #routeOptions.show{display:flex}
 body.navigating #routeOptions{transform:translate(-50%,250%);opacity:0;pointer-events:none}
-.route-btn{background:transparent;border:none;cursor:pointer;padding:8px 12px;border-radius:10px;font-size:11px;font-weight:500;font-family:inherit;color:var(--text-sub);display:flex;flex-direction:column;align-items:center;gap:2px;min-width:72px}
-.route-btn.active{background:var(--primary);color:#fff}
+.route-btn{background:transparent;border:none;cursor:pointer;padding:8px 14px;border-radius:14px;font-size:11.5px;font-weight:700;font-family:inherit;color:var(--text-sub);display:flex;flex-direction:column;align-items:center;gap:3px;min-width:84px;transition:background .15s,color .15s}
+.route-btn.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(15,98,254,.3)}
 .route-btn.active svg{fill:#fff}
 .route-btn svg{width:16px;height:16px;fill:var(--text-sub)}
-.route-btn .info{font-size:9px;opacity:.85}
+.route-btn .info{font-size:10px;opacity:.9;font-variant-numeric:tabular-nums}
 .route-btn:disabled{opacity:.4;cursor:not-allowed}
 
-#startBtn{position:fixed;bottom:calc(160px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1001;background:var(--primary);color:#fff;border:none;padding:14px 28px 14px 22px;border-radius:50px;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(26,115,232,.4);display:none;font-family:inherit;align-items:center;gap:8px;transition:transform .3s,opacity .3s;white-space:nowrap}
+#startBtn{position:fixed;bottom:calc(164px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1001;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;border:1px solid rgba(255,255,255,.2);padding:13px 26px 13px 20px;border-radius:999px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(15,98,254,.42);display:none;font-family:inherit;align-items:center;gap:8px;transition:transform .2s,opacity .3s;white-space:nowrap}
+#startBtn:active{transform:translateX(-50%) scale(.96)}
 #startBtn.show{display:flex}
 body.navigating #startBtn{transform:translate(-50%,250%);opacity:0;pointer-events:none}
-#startBtn svg{width:20px;height:20px;fill:#fff}
+#startBtn svg{width:19px;height:19px;fill:#fff}
 
-#navPanel{position:fixed;bottom:0;left:0;right:0;z-index:1000;background:var(--panel);border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,.2);padding:16px 18px calc(20px + var(--safe-bottom));display:none;max-height:45vh;overflow-y:auto}
-#navPanel.show{display:block}
-#navHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-#navDistance{font-size:20px;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:8px}
-#navDistance svg{width:20px;height:20px;fill:var(--primary)}
-#stopBtn{background:#fce8e6;color:#c5221f;border:none;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}
-body.dark #stopBtn{background:#4a1e1c;color:#f28b82}
-#steps{list-style:none}
-#steps li{padding:12px 14px;border-bottom:1px solid var(--border);font-size:14px;display:flex;gap:12px;align-items:flex-start;border-radius:10px}
-#steps li.current{background:#e8f0fe;color:#0d47a1;font-weight:600}
-body.dark #steps li.current{background:#1a3a5c;color:#8ab4f8}
-#steps .icon{min-width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--input-bg);border-radius:8px}
-#steps li.current .icon{background:var(--primary)}
-#steps .icon svg{width:20px;height:20px;fill:var(--text-sub)}
-#steps li.current .icon svg{fill:#fff}
-#steps .info{flex:1}
-#steps .dist{color:var(--text-sub);font-size:12px;margin-top:3px;font-weight:400}
-
-#navTopBar{position:fixed;top:0;left:0;right:0;z-index:1100;padding:calc(14px + var(--safe-top)) 14px 14px;background:linear-gradient(180deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.6) 60%,transparent 100%);display:none;align-items:center;gap:14px;color:#fff}
+#navTopBar{position:fixed;top:0;left:0;right:0;z-index:1100;padding:calc(14px + var(--safe-top)) 14px 16px;background:linear-gradient(180deg,rgba(9,13,22,.95) 0%,rgba(9,13,22,.68) 65%,transparent 100%);display:none;align-items:center;gap:14px;color:#fff}
 #navTopBar.show{display:flex}
-#navTopBar .turn-icon{width:82px;height:82px;flex-shrink:0;background:linear-gradient(135deg,#1a73e8,#0d47a1);border-radius:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(26,115,232,.55);border:2px solid rgba(255,255,255,.15)}
-#navTopBar .turn-icon svg{width:54px;height:54px;fill:#fff}
+#navTopBar .turn-icon{width:78px;height:78px;flex-shrink:0;background:linear-gradient(135deg,#0f62fe,#002d9c);border-radius:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(15,98,254,.5);border:1.5px solid rgba(255,255,255,.22)}
+#navTopBar .turn-icon svg{width:48px;height:48px;fill:#fff}
 #navTopBar .info{flex:1;min-width:0}
-#navTopBar .dist{font-size:38px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 3px 12px rgba(0,0,0,.9)}
-#navTopBar .instr{font-size:15px;margin-top:8px;text-shadow:0 2px 8px rgba(0,0,0,.9);background:rgba(0,0,0,.4);padding:6px 10px;border-radius:8px;display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#navTopBar .dist{font-size:36px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 3px 12px rgba(0,0,0,.85)}
+#navTopBar .instr{font-size:14.5px;font-weight:600;margin-top:8px;text-shadow:0 2px 8px rgba(0,0,0,.85);background:rgba(255,255,255,.12);backdrop-filter:blur(8px);padding:6px 11px;border-radius:10px;display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 #navBottomBar{position:fixed;bottom:0;left:0;right:0;z-index:1100;padding:10px 12px calc(14px + var(--safe-bottom));display:none}
 #navBottomBar.show{display:block}
-#navBottomCard{background:rgba(20,20,22,.96);border-radius:18px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 32px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.08);color:#fff}
+#navBottomCard{background:rgba(15,23,42,.95);backdrop-filter:blur(16px);border-radius:20px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-lg);border:1px solid rgba(255,255,255,.12);color:#fff}
 #navBottomCard .stat{flex:1;display:flex;flex-direction:column;align-items:center}
-#navBottomCard .stat .val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
-#navBottomCard .stat .lbl{font-size:10px;opacity:.7;margin-top:3px}
-#navBottomCard .stat .val.eta{color:#8ab4f8}
-#navBottomCard .divider{width:1px;height:36px;background:rgba(255,255,255,.1)}
-#navBottomCard .speed-badge{background:linear-gradient(135deg,#fff,#e8eaed);color:#1a73e8;padding:6px 14px;border-radius:12px;display:flex;flex-direction:column;align-items:center;min-width:72px}
-#navBottomCard .speed-badge.over{background:linear-gradient(135deg,#ea4335,#c5221f);color:#fff}
-#navBottomCard .speed-badge .val{font-size:24px;font-weight:900}
-#navBottomCard .speed-badge .lbl{font-size:9px;opacity:.85}
+#navBottomCard .stat .val{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+#navBottomCard .stat .lbl{font-size:10px;opacity:.72;margin-top:3px;font-weight:600}
+#navBottomCard .stat .val.eta{color:#60a5fa}
+#navBottomCard .divider{width:1px;height:36px;background:rgba(255,255,255,.12)}
+#navBottomCard .speed-badge{background:linear-gradient(135deg,#ffffff,#e2e8f0);color:#0f62fe;padding:6px 14px;border-radius:14px;display:flex;flex-direction:column;align-items:center;min-width:72px}
+#navBottomCard .speed-badge.over{background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff}
+#navBottomCard .speed-badge .val{font-size:23px;font-weight:900;font-variant-numeric:tabular-nums}
+#navBottomCard .speed-badge .lbl{font-size:9px;opacity:.85;font-weight:700}
 
-#navStopFloat{position:fixed;top:calc(14px + var(--safe-top));left:14px;z-index:1200;background:rgba(234,67,53,.95);color:#fff;border:none;cursor:pointer;width:48px;height:48px;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+#navStopFloat{position:fixed;top:calc(16px + var(--safe-top));left:14px;z-index:1200;background:rgba(220,38,38,.95);color:#fff;border:1px solid rgba(255,255,255,.22);cursor:pointer;width:46px;height:46px;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(220,38,38,.45)}
 #navStopFloat.show{display:flex}
 #navStopFloat svg{width:20px;height:20px;fill:#fff}
 
-#recenterBtn{position:fixed;right:12px;bottom:calc(20px + var(--safe-bottom));z-index:999;background:#fff;color:#1a73e8;border:none;cursor:pointer;width:52px;height:52px;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+#recenterBtn{position:fixed;right:12px;bottom:calc(20px + var(--safe-bottom));z-index:999;background:var(--panel);backdrop-filter:blur(12px);color:var(--primary);border:1px solid var(--border);cursor:pointer;width:50px;height:50px;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow-md)}
 #recenterBtn.show{display:flex}
-#recenterBtn svg{width:26px;height:26px;fill:#1a73e8}
-body.navigating #recenterBtn{bottom:calc(20px + var(--safe-bottom))}
+#recenterBtn svg{width:24px;height:24px;fill:var(--primary)}
 
-#loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3000;background:rgba(32,33,36,.92);color:#fff;padding:16px 24px;border-radius:14px;font-size:14px;display:none;align-items:center;gap:12px}
+#loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3000;background:rgba(15,23,42,.92);backdrop-filter:blur(10px);color:#fff;padding:15px 22px;border-radius:16px;font-size:13.5px;font-weight:600;display:none;align-items:center;gap:12px;box-shadow:var(--shadow-lg)}
 #loading.show{display:flex}
-.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .75s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .user-location-icon{position:relative;width:24px;height:24px}
-.user-location-icon .pulse{position:absolute;inset:0;border-radius:50%;background:rgba(26,115,232,.3);animation:pulseRing 2s ease-out infinite}
-@keyframes pulseRing{0%{transform:scale(1);opacity:.7}100%{transform:scale(3);opacity:0}}
-.user-location-icon .core{position:absolute;inset:4px;border-radius:50%;background:var(--primary);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.user-location-icon .pulse{position:absolute;inset:0;border-radius:50%;background:rgba(15,98,254,.32);animation:pulseRing 2s ease-out infinite}
+@keyframes pulseRing{0%{transform:scale(1);opacity:.75}100%{transform:scale(3);opacity:0}}
+.user-location-icon .core{position:absolute;inset:4px;border-radius:50%;background:var(--primary);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
 
 .vehicle-marker{width:64px;height:64px;display:flex;align-items:center;justify-content:center}
 .vehicle-rotator{width:64px;height:64px;display:flex;align-items:center;justify-content:center;transform-origin:center center;transition:transform .25s ease-out}
 .vehicle-rotator svg{width:100%;height:100%;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5))}
 
-#mapHint{position:fixed;bottom:calc(230px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:998;background:rgba(32,33,36,.9);color:#fff;padding:8px 14px;border-radius:20px;font-size:12px;display:none;white-space:nowrap;pointer-events:none}
-#mapHint.show{display:block;animation:fadeInOut 3s ease-in-out}
-@keyframes fadeInOut{0%,100%{opacity:0}15%,85%{opacity:1}}
+#mapHint{position:fixed;bottom:calc(232px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(10px);z-index:2500;background:rgba(15,23,42,.94);backdrop-filter:blur(12px);color:#fff;padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:600;display:none;white-space:nowrap;pointer-events:none;box-shadow:var(--shadow-lg);border:1px solid rgba(255,255,255,.12)}
+#mapHint.show{display:block;animation:toastPop 3s ease forwards}
+@keyframes toastPop{0%{opacity:0;transform:translateX(-50%) translateY(12px)}12%,88%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(-8px)}}
 
-#nameDialog,#exitDialog,#stopConfirmDialog,#installDialog,#emergencyPanel,#downloadPanel,#deleteConfirmDialog{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px}
+#nameDialog,#stopConfirmDialog,#installDialog,#emergencyPanel,#downloadPanel,#deleteConfirmDialog{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
 #stopConfirmDialog{z-index:4500}
 #installDialog{z-index:4600}
-#emergencyPanel{z-index:4800;background:rgba(0,0,0,.7);align-items:flex-end;padding:0}
-#downloadPanel{z-index:4800;background:rgba(0,0,0,.7);align-items:flex-end;padding:0}
+#emergencyPanel,#downloadPanel{z-index:4800;background:rgba(0,0,0,.65);align-items:flex-end;padding:0}
 #deleteConfirmDialog{z-index:5000}
-#nameDialog.show,#exitDialog.show,#stopConfirmDialog.show,#installDialog.show,#deleteConfirmDialog.show{display:flex}
-#emergencyPanel.show{display:flex}
-#downloadPanel.show{display:flex}
-#nameDialogBox,#exitBox,#stopConfirmBox,#installBox,#deleteConfirmBox{background:var(--panel);border-radius:18px;padding:22px;width:100%;max-width:340px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
-#nameDialogBox h3{font-size:16px;margin-bottom:12px}
-#nameInput{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:15px;outline:none;margin-bottom:14px}
+#nameDialog.show,#stopConfirmDialog.show,#installDialog.show,#deleteConfirmDialog.show,#emergencyPanel.show,#downloadPanel.show{display:flex}
+
+#nameDialogBox,#stopConfirmBox,#installBox,#deleteConfirmBox{background:var(--panel-solid);border:1px solid var(--border);border-radius:22px;padding:22px;width:100%;max-width:340px;box-shadow:var(--shadow-lg)}
+#nameDialogBox h3{font-size:16px;font-weight:800;margin-bottom:12px}
+#nameInput{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:14px;font-weight:600;outline:none;margin-bottom:14px}
 #nameDialogBox .actions{display:flex;gap:8px;justify-content:flex-end}
-#nameDialogBox button{padding:10px 18px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:500}
+#nameDialogBox button{padding:10px 18px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:700}
 #nameCancel{background:var(--input-bg);color:var(--text)}
 #nameSave{background:var(--primary);color:#fff}
-#exitBox,#stopConfirmBox,#installBox,#deleteConfirmBox{text-align:center}
-#exitBox .icon,#stopConfirmBox .icon,#installBox .icon,#deleteConfirmBox .icon{width:60px;height:60px;margin:0 auto 14px;background:#fce8e6;border-radius:50%;display:flex;align-items:center;justify-content:center}
-#stopConfirmBox .icon{background:#fff3e0}
-#installBox .icon{background:#e8f0fe}
-#deleteConfirmBox .icon{background:#fce8e6}
-body.dark #exitBox .icon,body.dark #deleteConfirmBox .icon{background:#4a1e1c}
-body.dark #stopConfirmBox .icon{background:#4a3020}
-body.dark #installBox .icon{background:#1a3a5c}
-#exitBox .icon svg,#deleteConfirmBox .icon svg{width:30px;height:30px;fill:var(--danger)}
-#stopConfirmBox .icon svg{width:30px;height:30px;fill:#ff6d00}
-#installBox .icon svg{width:30px;height:30px;fill:var(--primary)}
-#exitBox h3,#stopConfirmBox h3,#installBox h3,#deleteConfirmBox h3{font-size:17px;margin-bottom:8px}
-#exitBox p,#stopConfirmBox p,#installBox p,#deleteConfirmBox p{font-size:13px;color:var(--text-sub);margin-bottom:20px;line-height:1.5}
-#exitBox .actions,#stopConfirmBox .actions,#installBox .actions,#deleteConfirmBox .actions{display:flex;gap:10px}
-#exitBox button,#stopConfirmBox button,#installBox button,#deleteConfirmBox button{flex:1;padding:12px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600}
-#exitCancel,#stopConfirmCancel,#installCancel,#deleteConfirmCancel{background:var(--input-bg);color:var(--text)}
-#exitConfirm,#deleteConfirmOk{background:var(--danger);color:#fff}
-#stopConfirmOk{background:#ff6d00;color:#fff}
+
+#stopConfirmBox,#installBox,#deleteConfirmBox{text-align:center}
+#stopConfirmBox .icon,#installBox .icon,#deleteConfirmBox .icon{width:58px;height:58px;margin:0 auto 14px;border-radius:18px;display:flex;align-items:center;justify-content:center}
+#stopConfirmBox .icon{background:rgba(249,115,22,.14)}
+#installBox .icon{background:var(--primary-soft)}
+#deleteConfirmBox .icon{background:rgba(220,38,38,.14)}
+#deleteConfirmBox .icon svg{width:28px;height:28px;fill:var(--danger)}
+#stopConfirmBox .icon svg{width:28px;height:28px;fill:var(--stop)}
+#installBox .icon svg{width:28px;height:28px;fill:var(--primary)}
+#stopConfirmBox h3,#installBox h3,#deleteConfirmBox h3{font-size:17px;font-weight:800;margin-bottom:8px}
+#stopConfirmBox p,#installBox p,#deleteConfirmBox p{font-size:13px;color:var(--text-sub);margin-bottom:20px;line-height:1.55}
+#stopConfirmBox .actions,#installBox .actions,#deleteConfirmBox .actions{display:flex;gap:10px}
+#stopConfirmBox button,#installBox button,#deleteConfirmBox button{flex:1;padding:12px;border-radius:13px;border:none;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:700}
+#stopConfirmCancel,#installCancel,#deleteConfirmCancel{background:var(--input-bg);color:var(--text)}
+#deleteConfirmOk{background:var(--danger);color:#fff}
+#stopConfirmOk{background:var(--stop);color:#fff}
 #installOk{background:var(--primary);color:#fff}
 
-#emergencyContent{background:var(--panel);width:100%;max-height:85vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
-#emergencyHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-#emergencyHeader h3{font-size:18px;display:flex;align-items:center;gap:8px}
-#emergencyHeader h3 svg{width:22px;height:22px;fill:var(--emergency)}
-#emergencyClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-#emergencyClose svg{width:18px;height:18px;fill:var(--text)}
-.em-section{margin-bottom:20px}
-.em-section-title{font-size:13px;font-weight:700;color:var(--text-sub);margin-bottom:10px;padding-right:4px;display:flex;align-items:center;gap:6px}
-.em-section-title svg{width:16px;height:16px;fill:var(--text-sub)}
-.em-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.em-btn{background:var(--input-bg);border:none;cursor:pointer;padding:14px 10px;border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:inherit;color:var(--text);transition:transform .1s;text-decoration:none}
-.em-btn:active{transform:scale(.96)}
-.em-btn .em-icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.em-btn .em-icon svg{width:22px;height:22px;fill:#fff}
-.em-btn .em-label{font-size:12px;font-weight:600;text-align:center;line-height:1.3}
-.em-btn .em-number{font-size:11px;color:var(--text-sub);font-variant-numeric:tabular-nums}
-.em-btn.police .em-icon{background:#1565c0}
-.em-btn.ambulance .em-icon{background:#c62828}
-.em-btn.fire .em-icon{background:#e65100}
-.em-btn.emergency .em-icon{background:var(--emergency)}
+#emergencyContent,#downloadContent{background:var(--panel-solid);width:100%;max-height:84vh;border-radius:24px 24px 0 0;padding:18px 18px calc(22px + var(--safe-bottom));animation:slideUp .28s ease-out;overflow-y:auto;box-shadow:var(--shadow-lg)}
+#emergencyHeader,#downloadHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+#emergencyHeader h3,#downloadHeader h3{font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px}
+#emergencyHeader h3 svg{width:21px;height:21px;fill:var(--emergency)}
+#downloadHeader h3 svg{width:21px;height:21px;fill:var(--primary)}
+#emergencyClose,#downloadClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+#emergencyClose svg,#downloadClose svg{width:18px;height:18px;fill:var(--text)}
 
-#downloadContent{background:var(--panel);width:100%;max-height:80vh;border-radius:20px 20px 0 0;padding:18px;animation:slideUp .3s ease-out;overflow-y:auto}
-#downloadHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-#downloadHeader h3{font-size:18px;display:flex;align-items:center;gap:8px}
-#downloadHeader h3 svg{width:22px;height:22px;fill:var(--primary)}
-#downloadClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-#downloadClose svg{width:18px;height:18px;fill:var(--text)}
-.download-info{background:var(--input-bg);border-radius:12px;padding:14px;margin-bottom:14px;font-size:13px;line-height:1.6;color:var(--text-sub)}
+.layer-switcher{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.layer-card{background:var(--input-bg);border:1.5px solid transparent;border-radius:14px;padding:11px;cursor:pointer;font-family:inherit;color:var(--text);text-align:right;transition:all .15s}
+.layer-card.active{border-color:var(--primary);background:var(--primary-soft)}
+.layer-card .l-title{font-size:13px;font-weight:800}
+.layer-card .l-sub{font-size:11px;color:var(--text-sub);margin-top:2px}
+
+.em-section{margin-bottom:18px}
+.em-section-title{font-size:12.5px;font-weight:800;color:var(--text-sub);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.em-section-title svg{width:16px;height:16px;fill:var(--text-sub)}
+.em-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.em-btn{background:var(--input-bg);border:1px solid var(--border);cursor:pointer;padding:14px 10px;border-radius:16px;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:inherit;color:var(--text);transition:transform .12s;text-decoration:none}
+.em-btn:active{transform:scale(.96)}
+.em-btn .em-icon{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center}
+.em-btn .em-icon svg{width:22px;height:22px;fill:#fff}
+.em-btn .em-label{font-size:12.5px;font-weight:700;text-align:center}
+.em-btn .em-number{font-size:12px;color:var(--text-sub);font-weight:700;font-variant-numeric:tabular-nums}
+.em-btn.police .em-icon{background:#1d4ed8}
+.em-btn.ambulance .em-icon{background:#dc2626}
+.em-btn.fire .em-icon{background:#ea580c}
+.em-btn.emergency .em-icon{background:#991b1b}
+
+.download-info{background:var(--input-bg);border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:14px;font-size:12.5px;line-height:1.65;color:var(--text-sub)}
 .download-info strong{color:var(--text)}
-.download-btn{background:var(--primary);color:#fff;border:none;padding:14px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;transition:background .2s}
+.download-btn{background:var(--primary);color:#fff;border:none;padding:13px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;transition:background .2s,transform .12s}
 .download-btn:hover{background:var(--primary-dark)}
 .download-btn:active{transform:scale(.98)}
-.download-btn:disabled{background:var(--input-bg);color:var(--text-sub);cursor:not-allowed}
-.download-btn svg{width:20px;height:20px;fill:currentColor}
-.download-progress{margin-top:14px;display:none}
+.download-btn svg{width:19px;height:19px;fill:currentColor}
+.download-progress{margin-top:12px;display:none}
 .download-progress.show{display:block}
-.download-progress .bar{width:100%;height:8px;background:var(--input-bg);border-radius:4px;overflow:hidden;margin-bottom:8px}
-.download-progress .fill{height:100%;background:var(--primary);width:0%;transition:width .3s;border-radius:4px}
-.download-progress .text{font-size:12px;color:var(--text-sub);text-align:center}
-.download-stats{display:flex;gap:10px;margin-top:14px}
-.download-stats .stat{flex:1;background:var(--input-bg);border-radius:12px;padding:12px;text-align:center}
-.download-stats .stat .val{font-size:20px;font-weight:800;color:var(--primary);font-variant-numeric:tabular-nums}
-.download-stats .stat .lbl{font-size:11px;color:var(--text-sub);margin-top:4px}
+.download-progress .bar{width:100%;height:8px;background:var(--input-bg);border-radius:999px;overflow:hidden;margin-bottom:8px}
+.download-progress .fill{height:100%;background:var(--primary);width:0%;transition:width .25s;border-radius:999px}
+.download-progress .text{font-size:12px;font-weight:600;color:var(--text-sub);text-align:center}
+.download-stats{display:flex;gap:10px;margin-top:12px}
+.download-stats .stat{flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center}
+.download-stats .stat .val{font-size:19px;font-weight:900;color:var(--primary);font-variant-numeric:tabular-nums}
+.download-stats .stat .lbl{font-size:11px;color:var(--text-sub);margin-top:4px;font-weight:600}
 
-.poi-marker{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2.5px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35)}
-.poi-marker svg{width:18px;height:18px;fill:#fff;transform:rotate(45deg)}
+.poi-marker{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2.5px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.poi-marker svg{width:17px;height:17px;fill:#fff;transform:rotate(45deg)}
 .poi-marker.fuel{background:var(--fuel)}
 .poi-marker.pharmacy{background:var(--pharmacy)}
 .poi-marker.hospital{background:var(--hospital)}
 .poi-marker.grocery{background:var(--grocery)}
-.poi-marker.restaurant{background:#ff6d00}
-.poi-marker.atm{background:#00897b}
-.poi-marker.parking{background:#3949ab}
-.poi-marker.mosque{background:#5d4037}
-.poi-marker.cafe{background:#6d4c41}
-.poi-marker.hotel{background:#00838f}
-.waypoint-marker{width:32px;height:32px;background:var(--stop);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px}
+.poi-marker.restaurant{background:#ea580c}
+.poi-marker.atm{background:#0d9488}
+.poi-marker.parking{background:#4f46e5}
+.poi-marker.mosque{background:#78350f}
+.poi-marker.cafe{background:#92400e}
+.poi-marker.hotel{background:#0284c7}
+.waypoint-marker{width:32px;height:32px;background:var(--stop);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px}
 .waypoint-marker span{transform:rotate(45deg)}
 ::-webkit-scrollbar{width:0;height:0}
 </style>
@@ -335,12 +358,12 @@ body.dark #installBox .icon{background:#1a3a5c}
 
 <div id="offlineBadge">
 <svg viewBox="0 0 24 24"><path d="M23.64 7c-.45-.34-4.93-4-11.64-4-1.5 0-2.89.19-4.15.48L18.18 13.8 23.64 7zm-6.6 8.22L3.27 1.44 2 2.72l2.05 2.06C1.91 5.76.59 6.82.36 7l10.08 12.56c.8 1 2.32 1 3.12 0l2.20-2.75 2.5 2.5 1.27-1.27-2.49-2.82z"/></svg>
-<span>لا يوجد اتصال — وضع محدود</span>
+<span>وضع بدون إنترنت</span>
 </div>
 
 <button id="installPrompt">
 <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-<span>ثبّت التطبيق على جهازك</span>
+<span>تثبيت كزدورة على الجهاز</span>
 </button>
 
 <header id="appHeader">
@@ -348,33 +371,33 @@ body.dark #installBox .icon{background:#1a3a5c}
 <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
 </div>
 <div class="title-block">
-<div class="title">كزدورة</div>
-<div class="subtitle">ملاحة وخرائط في سوريا</div>
+<div class="title">كزدورة <span class="pill-badge">PWA</span></div>
+<div class="subtitle">ملاحة وخرائط ذكية في سوريا</div>
 </div>
 <div class="actions">
 <button class="header-btn" id="installHeaderBtn" title="تثبيت التطبيق" style="display:none;">
 <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
 </button>
-<button class="header-btn" id="downloadHeaderBtn" title="تنزيل الخريطة">
+<button class="header-btn" id="downloadHeaderBtn" title="الخرائط والطبقات">
 <svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
 </button>
-<button class="header-btn" id="emergencyHeaderBtn" title="الطوارئ" style="background:rgba(211,47,47,0.5);">
+<button class="header-btn" id="emergencyHeaderBtn" title="الطوارئ" style="background:rgba(220,38,38,.55);">
 <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
 </button>
 <button class="header-btn" id="savedHeaderBtn" title="الأماكن المحفوظة">
 <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
 </button>
-<button class="header-btn" id="themeHeaderBtn" title="الوضع الليلي">
+<button class="header-btn" id="themeHeaderBtn" title="تبديل المظهر">
 <svg id="themeIconHeader" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
 </button>
 </div>
 </header>
 
 <div id="searchBar">
-<button id="locBtn" class="icon-btn" title="موقعي">
+<button id="locBtn" class="icon-btn" title="تحديد موقعي">
 <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
 </button>
-<input id="searchInput" type="text" placeholder="ابحث عن مكان في سوريا..." />
+<input id="searchInput" type="text" placeholder="ابحث عن شارع، حي، أو معلم في سوريا..." />
 <button id="searchBtn" class="icon-btn" title="بحث">
 <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
 </button>
@@ -387,7 +410,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 <button class="cat-btn" data-cat="grocery"><svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg><span>بقالية</span></button>
 <button class="cat-btn" data-cat="restaurant"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg><span>مطعم</span></button>
 <button class="cat-btn" data-cat="atm"><svg viewBox="0 0 24 24"><path d="M11.5 1L2 6v2h19V6l-9.5-5zM2 19h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h1v-2H2v2zm18-8H2v5h18v-5zm-2 2h-3v-1h3v1z"/></svg><span>صراف آلي</span></button>
-<button class="cat-btn" data-cat="parking"><svg viewBox="0 0 24 24"><path d="M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z"/></svg><span>موقف سيارات</span></button>
+<button class="cat-btn" data-cat="parking"><svg viewBox="0 0 24 24"><path d="M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z"/></svg><span>موقف</span></button>
 <button class="cat-btn" data-cat="mosque"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 1.74.65 3.34 1.72 4.61C4.61 14.89 3 17.34 3 20h18c0-2.66-1.61-5.11-3.72-6.39C18.35 12.34 19 10.74 19 9c0-3.87-3.13-7-7-7zm0 15c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg><span>مسجد</span></button>
 <button class="cat-btn" data-cat="cafe"><svg viewBox="0 0 24 24"><path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"/></svg><span>مقهى</span></button>
 <button class="cat-btn" data-cat="hotel"><svg viewBox="0 0 24 24"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg><span>فندق</span></button>
@@ -416,7 +439,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 
 <div id="speedometer">
 <span id="speedValue">0</span>
-<span id="speedUnit">كم/س<br>سرعة</span>
+<span id="speedUnit">كم/س<br>السرعة</span>
 </div>
 
 <div id="gpsStatus"><span class="dot"></span><span id="gpsText">جاري الاتصال...</span></div>
@@ -444,19 +467,8 @@ body.dark #installBox .icon{background:#1a3a5c}
 
 <button id="startBtn">
 <svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
-ابدأ التوجيه
+<span>ابدأ التوجيه</span>
 </button>
-
-<div id="navPanel">
-<div id="navHeader">
-<span id="navDistance">
-<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-<span id="navDistanceText">—</span>
-</span>
-<button id="stopBtn">إنهاء</button>
-</div>
-<ul id="steps"></ul>
-</div>
 
 <div id="navTopBar">
 <div class="turn-icon" id="currentTurnIcon">
@@ -487,7 +499,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 </div>
 </div>
 
-<button id="navStopFloat">
+<button id="navStopFloat" title="إنهاء التوجيه">
 <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
 </button>
 
@@ -513,7 +525,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 <div id="savedPanel">
 <div id="savedContent">
 <div id="savedHeader">
-<h3>⭐ الأماكن المحفوظة</h3>
+<h3>الأماكن المحفوظة</h3>
 <button id="savedClose">
 <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
 </button>
@@ -527,7 +539,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 <div id="emergencyHeader">
 <h3>
 <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-أرقام الطوارئ والخدمات
+أرقام الطوارئ الرسمية
 </h3>
 <button id="emergencyClose">
 <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
@@ -542,29 +554,38 @@ body.dark #installBox .icon{background:#1a3a5c}
 <div id="downloadHeader">
 <h3>
 <svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
-تنزيل خريطة للعمل بدون إنترنت
+الطبقات والتنزيل دون إنترنت
 </h3>
 <button id="downloadClose">
 <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
 </button>
 </div>
+
+<div class="layer-switcher">
+<button class="layer-card active" data-layer="osm">
+<div class="l-title">خريطة الشوارع (OSM)</div>
+<div class="l-sub">أحياء، طرق، وتفاصيل مدنية</div>
+</button>
+<button class="layer-card" data-layer="satellite">
+<div class="l-title">صور جوية (Esri)</div>
+<div class="l-sub">معالم أرضية وتضاريس</div>
+</button>
+</div>
+
 <div class="download-info">
-📴 <strong>العمل بدون إنترنت:</strong> نزّل خريطة منطقتك (5 كم × 5 كم) واستخدم التطبيق كاملاً بدون اتصال.
-<br><br>
-💾 الحجم المتوقع: <strong>~3-8 ميجابايت</strong><br>
-⏱️ الوقت المتوقع: <strong>30-90 ثانية</strong>
+<strong>العمل دون إنترنت:</strong> حفظ بلاطات الخريطة محلياً ضمن نطاق نصف قطر 2.5 كم لتصفح أسرع عند ضعف الشبكة.
 </div>
 <button class="download-btn" id="downloadAreaBtn">
 <svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
-نزّل منطقة موقعي الحالي
+<span>تنزيل منطقة موقعي الحالي</span>
 </button>
 <button class="download-btn" id="downloadCenterBtn" style="background:var(--input-bg);color:var(--text);">
 <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-نزّل منطقة مركز الخريطة
+<span>تنزيل منطقة مركز الخريطة</span>
 </button>
-<button class="download-btn" id="clearTilesBtn" style="background:#fce8e6;color:#c5221f;">
+<button class="download-btn" id="clearTilesBtn" style="background:rgba(220,38,38,.12);color:var(--danger);">
 <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-مسح البلاطات المحفوظة
+<span>مسح البلاطات المحفوظة</span>
 </button>
 <div class="download-progress" id="downloadProgress">
 <div class="bar"><div class="fill" id="downloadFill"></div></div>
@@ -585,25 +606,11 @@ body.dark #installBox .icon{background:#1a3a5c}
 
 <div id="nameDialog">
 <div id="nameDialogBox">
-<h3>احفظ هذا المكان</h3>
-<input id="nameInput" type="text" placeholder="اسم المكان" />
+<h3>حفظ المكان</h3>
+<input id="nameInput" type="text" placeholder="أدخل اسماً مميزاً للمكان" />
 <div class="actions">
 <button id="nameCancel">إلغاء</button>
 <button id="nameSave">حفظ</button>
-</div>
-</div>
-</div>
-
-<div id="exitDialog">
-<div id="exitBox">
-<div class="icon">
-<svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
-</div>
-<h3>تأكيد الخروج</h3>
-<p>هل تريد فعلاً إغلاق تطبيق كزدورة؟</p>
-<div class="actions">
-<button id="exitCancel">البقاء</button>
-<button id="exitConfirm">خروج</button>
 </div>
 </div>
 </div>
@@ -614,7 +621,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
 </div>
 <h3>إنهاء التوجيه</h3>
-<p>هل تريد إنهاء التوجيه والعودة إلى موقعك؟</p>
+<p>هل تريد إيقاف التوجيه الحالي والعودة إلى عرض الخريطة؟</p>
 <div class="actions">
 <button id="stopConfirmCancel">متابعة</button>
 <button id="stopConfirmOk">إنهاء</button>
@@ -628,7 +635,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
 </div>
 <h3>تثبيت كزدورة</h3>
-<p id="installInstructions">لإضافة التطبيق إلى الشاشة الرئيسية: افتح قائمة المتصفح واختر "إضافة إلى الشاشة الرئيسية".</p>
+<p id="installInstructions">لإضافة التطبيق إلى الشاشة الرئيسية: افتح قائمة المتصفح واختر "إضافة إلى الشاشة الرئيسية" أو "تثبيت التطبيق".</p>
 <div class="actions">
 <button id="installCancel">حسناً</button>
 <button id="installOk" style="display:none;">تثبيت الآن</button>
@@ -642,7 +649,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
 </div>
 <h3 id="deleteConfirmTitle">تأكيد الحذف</h3>
-<p id="deleteConfirmMsg">هل تريد الحذف؟</p>
+<p id="deleteConfirmMsg">هل تريد تنفيذ الحذف؟</p>
 <div class="actions">
 <button id="deleteConfirmCancel">إلغاء</button>
 <button id="deleteConfirmOk">حذف</button>
@@ -650,7 +657,7 @@ body.dark #installBox .icon{background:#1a3a5c}
 </div>
 </div>
 
-<button id="recenterBtn" title="توسيط">
+<button id="recenterBtn" title="توسيط الموقع">
 <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
 </button>
 
@@ -661,12 +668,12 @@ body.dark #installBox .icon{background:#1a3a5c}
 <script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// قاعدة البيانات المحلية الاحتياطية للأماكن (Offline Database)
+// قاعدة البيانات المحلية الاحتياطية (Offline Database)
 // ═══════════════════════════════════════════════════════════════
 const OFFLINE_DB = [];
 
 // ═══════════════════════════════════════════════════════════════
-// منع إطفاء الشاشة + حالة الاتصال + تثبيت PWA
+// منع إطفاء الشاشة + الاتصال + تثبيت PWA
 // ═══════════════════════════════════════════════════════════════
 let noSleep = null, wakeLock = null, deferredInstallPrompt = null;
 async function keepScreenOn() {
@@ -687,8 +694,8 @@ const offlineBadge = document.getElementById('offlineBadge');
 function syncOnlineState() {
   offlineBadge.classList.toggle('show', !navigator.onLine);
 }
-window.addEventListener('online', syncOnlineState);
-window.addEventListener('offline', syncOnlineState);
+window.addEventListener('online', () => { syncOnlineState(); showHint('تم استعادة الاتصال بالإنترنت'); });
+window.addEventListener('offline', () => { syncOnlineState(); showHint('تم فقدان الاتصال — تفعيل الوضع المحلي'); });
 
 const installPromptBtn = document.getElementById('installPrompt');
 const installHeaderBtn = document.getElementById('installHeaderBtn');
@@ -702,9 +709,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   installHeaderBtn.style.display = 'flex';
   installOkBtn.style.display = 'block';
 });
-function openInstallDialog() {
-  installDialog.classList.add('show');
-}
+function openInstallDialog() { installDialog.classList.add('show'); }
 installPromptBtn.onclick = openInstallDialog;
 installHeaderBtn.onclick = openInstallDialog;
 document.getElementById('installCancel').onclick = () => installDialog.classList.remove('show');
@@ -781,11 +786,11 @@ async function updateOfflineStats() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// تنزيل منطقة للعمل بدون إنترنت
+// تنزيل منطقة للعمل دون إنترنت
 // ═══════════════════════════════════════════════════════════════
 let downloadCancelFlag = false;
 async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
-  if (!navigator.onLine) { showHint('⚠️ التنزيل يحتاج اتصال'); return; }
+  if (!navigator.onLine) { showHint('التنزيل يتطلب اتصالاً بالإنترنت'); return; }
   const latDelta = radiusKm / 111;
   const lngDelta = radiusKm / (111 * Math.max(0.001, Math.cos(centerLat * Math.PI / 180)));
   const bounds = { north: centerLat+latDelta, south: centerLat-latDelta, east: centerLng+lngDelta, west: centerLng-lngDelta };
@@ -807,7 +812,7 @@ async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
   }
 
   const total = tileList.length;
-  if (total === 0) { showHint('⚠️ المنطقة صغيرة'); return; }
+  if (total === 0) { showHint('نطاق التنزيل صغير جداً'); return; }
   document.getElementById('downloadProgress').classList.add('show');
   document.getElementById('downloadFill').style.width = '0%';
   document.getElementById('downloadText').textContent = `جاري التنزيل: 0 / ${total}`;
@@ -824,11 +829,11 @@ async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
     if (downloadCancelFlag) break;
     const batch = tileList.slice(i, i+batchSize);
     await Promise.all(batch.map(async (t) => {
-      const key = `${t.z}/${t.x}/${t.y}`;
+      const key = `${activeMapLayer}:${t.z}/${t.x}/${t.y}`;
       const existing = await getTileFromDB(key).catch(() => null);
       if (existing) { done++; updateProgress(); return; }
       try {
-        const r = await fetch(tileUrl(t.z,t.x,t.y));
+        const r = await fetch(getLayerTileUrl(activeMapLayer, t.z, t.x, t.y));
         if (r.ok) {
           const blob = await r.blob();
           await saveTileToDB(key, blob, blob.size);
@@ -837,13 +842,13 @@ async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
       } catch(e) {}
       done++; updateProgress();
     }));
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 180));
   }
 
   document.getElementById('downloadFill').style.width = '100%';
-  document.getElementById('downloadText').textContent = `✅ تم تنزيل ${saved} بلاطة جديدة`;
+  document.getElementById('downloadText').textContent = `تم حفظ ${saved} بلاطة جديدة`;
   setTimeout(() => document.getElementById('downloadProgress').classList.remove('show'), 3000);
-  speak('تم تنزيل منطقة العمل بدون إنترنت');
+  speak('تم تنزيل خريطة المنطقة بنجاح');
   updateOfflineStats();
 }
 
@@ -877,8 +882,8 @@ const POI_ICONS_MAP = {
   cafe: '<svg viewBox="0 0 24 24"><path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"/></svg>',
   hotel: '<svg viewBox="0 0 24 24"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>'
 };
-const CAR_ICON_TOPVIEW = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="cb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4a90e2"/><stop offset="50%" stop-color="#1a73e8"/><stop offset="100%" stop-color="#0d47a1"/></linearGradient></defs><path d="M32 1 L 27 8 L 30 7 L 30 10 L 34 10 L 34 7 L 37 8 Z" fill="#34a853" stroke="#fff" stroke-width="1"/><path d="M32 5 C 25 5 21 9 21 15 L 19 22 L 17 26 L 17 48 C 17 54 21 57 25 57 L 39 57 C 43 57 47 54 47 48 L 47 26 L 45 22 L 43 15 C 43 9 39 5 32 5 Z" fill="url(#cb)" stroke="#fff" stroke-width="2"/><rect x="23" y="27" width="18" height="20" rx="3" fill="#0d47a1" opacity="0.85"/><ellipse cx="24" cy="9" rx="2" ry="1.5" fill="#ffe082"/><ellipse cx="40" cy="9" rx="2" ry="1.5" fill="#ffe082"/></svg>`;
-const WALK_ICON = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M32 2 L 28 10 L 30.5 9 L 30.5 12 L 33.5 12 L 33.5 9 L 36 10 Z" fill="#34a853" stroke="#fff" stroke-width="1"/><circle cx="32" cy="34" r="24" fill="#1a73e8" stroke="#fff" stroke-width="3"/><g transform="translate(32,34)"><circle cx="0" cy="-10" r="4" fill="#fff"/><path d="M -3 -6 L 3 -6 L 5 4 L 2 4 L 0 0 L -2 4 L -5 4 Z" fill="#fff"/></g></svg>`;
+const CAR_ICON_TOPVIEW = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="cb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#60a5fa"/><stop offset="50%" stop-color="#0f62fe"/><stop offset="100%" stop-color="#002d9c"/></linearGradient></defs><path d="M32 1 L 27 8 L 30 7 L 30 10 L 34 10 L 34 7 L 37 8 Z" fill="#16a34a" stroke="#fff" stroke-width="1"/><path d="M32 5 C 25 5 21 9 21 15 L 19 22 L 17 26 L 17 48 C 17 54 21 57 25 57 L 39 57 C 43 57 47 54 47 48 L 47 26 L 45 22 L 43 15 C 43 9 39 5 32 5 Z" fill="url(#cb)" stroke="#fff" stroke-width="2"/><rect x="23" y="27" width="18" height="20" rx="3" fill="#002d9c" opacity="0.85"/><ellipse cx="24" cy="9" rx="2" ry="1.5" fill="#fde047"/><ellipse cx="40" cy="9" rx="2" ry="1.5" fill="#fde047"/></svg>`;
+const WALK_ICON = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M32 2 L 28 10 L 30.5 9 L 30.5 12 L 33.5 12 L 33.5 9 L 36 10 Z" fill="#16a34a" stroke="#fff" stroke-width="1"/><circle cx="32" cy="34" r="24" fill="#0f62fe" stroke="#fff" stroke-width="3"/><g transform="translate(32,34)"><circle cx="0" cy="-10" r="4" fill="#fff"/><path d="M -3 -6 L 3 -6 L 5 4 L 2 4 L 0 0 L -2 4 L -5 4 Z" fill="#fff"/></g></svg>`;
 const EM_ICONS = {
   police: '<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>',
   ambulance: '<svg viewBox="0 0 24 24"><path d="M18 18.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm-9 0c.83 0 1.5-.67 1.5-1.5S9.83 15.5 9 15.5s-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm10-9.5h-3V6h-2v3h-3v2h3v3h2v-3h3zM3 5v13h2c0 2.21 1.79 4 4 4s4-1.79 4-4h2c0 2.21 1.79 4 4 4s4-1.79 4-4h2V9c0-1.1-.9-2-2-2h-3V4c0-.55-.45-1-1-1H6c-.55 0-1 .45-1 1v1H3z"/></svg>',
@@ -902,7 +907,7 @@ function speak(text, priority = false) {
   if (!text || !synth || typeof SpeechSynthesisUtterance === 'undefined') return;
   if (priority) synth.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'ar-SA'; u.rate = 0.95; u.pitch = 1;
+  u.lang = 'ar-SA'; u.rate = 0.96; u.pitch = 1;
   if (arabicVoice) u.voice = arabicVoice;
   synth.speak(u);
 }
@@ -912,7 +917,7 @@ function playBeep(f = 880, d = 150) {
     const o = ctx.createOscillator();
     const g = ctx.createGain();
     o.type = 'sine'; o.frequency.value = f;
-    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    g.gain.setValueAtTime(0.14, ctx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + d / 1000);
     o.connect(g); g.connect(ctx.destination);
     o.start(); o.stop(ctx.currentTime + d / 1000);
@@ -939,6 +944,8 @@ function hideLoading() {
 function showHint(t) {
   const h = document.getElementById('mapHint');
   h.textContent = t;
+  h.classList.remove('show');
+  void h.offsetWidth;
   h.classList.add('show');
   clearTimeout(showHint._t);
   showHint._t = setTimeout(() => h.classList.remove('show'), 3000);
@@ -973,7 +980,7 @@ function coordsBounds(coords) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// حوار الحذف والطوارئ
+// الحوارات والطوارئ
 // ═══════════════════════════════════════════════════════════════
 const deleteConfirmDialog = document.getElementById('deleteConfirmDialog');
 let deleteConfirmCallback = null;
@@ -1006,7 +1013,7 @@ function buildEmergencyPanel() {
   body.innerHTML = '';
   const sec1 = document.createElement('div');
   sec1.className = 'em-section';
-  sec1.innerHTML = `<div class="em-section-title"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>الأرقام الرسمية</div>`;
+  sec1.innerHTML = `<div class="em-section-title"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>أرقام الطوارئ الرسمية</div>`;
   const g1 = document.createElement('div');
   g1.className = 'em-grid';
   EMERGENCY_DATA.numbers.forEach(n => {
@@ -1045,6 +1052,7 @@ let currentDestination = null;
 let currentTravelMode = 'driving';
 let recenterMode = 'follow';
 let activeCategory = null;
+let activeMapLayer = 'osm';
 let poiMarkers = [];
 let isDarkMode = false;
 const SPEED_LIMIT = 120;
@@ -1053,40 +1061,77 @@ const OFF_ROUTE_THRESHOLD_M = 80, OFF_ROUTE_COUNT = 3, ROUTE_RECALC_COOLDOWN = 1
 let savedPlaces = JSON.parse(localStorage.getItem('kzdora_saved') || '[]');
 
 // ═══════════════════════════════════════════════════════════════
-// الخريطة
+// الخريطة والطبقات
 // ═══════════════════════════════════════════════════════════════
-const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-const tileUrl = (z,x,y) => TILE_URL.replace('{z}',z).replace('{x}',x).replace('{y}',y);
+function getLayerTileUrl(layer, z, x, y) {
+  if (layer === 'satellite') {
+    return `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
+  }
+  return `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
+}
+
 maplibregl.addProtocol('osmdb', async (params) => {
-  const [z,x,y] = params.url.replace('osmdb://','').split('/').map(Number);
-  const key = `${z}/${x}/${y}`;
+  const clean = params.url.replace('osmdb://','');
+  const [layerPrefix, rest] = clean.includes(':') ? clean.split(':') : ['osm', clean];
+  const [z,x,y] = rest.split('/').map(Number);
+  const key = `${layerPrefix}:${z}/${x}/${y}`;
   const hit = await getTileFromDB(key).catch(() => null);
   if (hit && hit.blob) return { data: await hit.blob.arrayBuffer() };
-  const r = await fetch(tileUrl(z,x,y));
+  const r = await fetch(getLayerTileUrl(layerPrefix, z, x, y));
   if (!r.ok) throw new Error('tile ' + r.status);
   const blob = await r.blob();
   saveTileToDB(key, blob, blob.size).catch(() => {});
   return { data: await blob.arrayBuffer() };
 });
-const MAP_STYLE = {
-  version: 8, name:'OSM',
-  sources: {
-    'osm': {
-      type:'raster',
-      tiles: ['osmdb://{z}/{x}/{y}'],
-      tileSize: 256, maxzoom: 19
-    }
-  },
-  layers: [
-    { id:'bg', type:'background', paint:{ 'background-color':'#f2efe9' } },
-    { id:'osm-layer', type:'raster', source:'osm' }
-  ]
-};
+
+function buildMapStyle(layer) {
+  return {
+    version: 8,
+    name: layer,
+    sources: {
+      'base-tiles': {
+        type: 'raster',
+        tiles: [`osmdb://${layer}:{z}/{x}/{y}`],
+        tileSize: 256,
+        maxzoom: 19
+      }
+    },
+    layers: [
+      { id: 'bg', type: 'background', paint: { 'background-color': layer === 'satellite' ? '#111827' : '#f2efe9' } },
+      { id: 'base-layer', type: 'raster', source: 'base-tiles' }
+    ]
+  };
+}
+
 const ALEPPO_CENTER = [37.1612, 36.2021];
-const map = new maplibregl.Map({ container:'map', style:MAP_STYLE, center:ALEPPO_CENTER, zoom:13, pitch:0, bearing:0, attributionControl:false, antialias:true });
+const map = new maplibregl.Map({
+  container: 'map',
+  style: buildMapStyle('osm'),
+  center: ALEPPO_CENTER,
+  zoom: 13,
+  pitch: 0,
+  bearing: 0,
+  attributionControl: false,
+  antialias: true
+});
+
+function switchMapLayer(layer) {
+  if (layer === activeMapLayer) return;
+  activeMapLayer = layer;
+  document.querySelectorAll('.layer-card').forEach(c => c.classList.toggle('active', c.dataset.layer === layer));
+  map.setStyle(buildMapStyle(layer));
+  map.once('styledata', () => {
+    if (currentRouteData) drawRoute(currentRouteData);
+  });
+  showHint(layer === 'satellite' ? 'تم التبديل إلى الصور الجوية' : 'تم التبديل إلى خريطة الشوارع');
+}
+
+document.querySelectorAll('.layer-card').forEach(card => {
+  card.onclick = () => switchMapLayer(card.dataset.layer);
+});
 
 // ═══════════════════════════════════════════════════════════════
-// إدارة نقاط التوقف (Waypoints)
+// نقاط التوقف (Waypoints)
 // ═══════════════════════════════════════════════════════════════
 function updateWaypointsUI() {
   const bar = document.getElementById('waypointsBar');
@@ -1125,15 +1170,15 @@ function redrawWaypointMarkers() {
 
 document.getElementById('addWaypointBtn').onclick = () => {
   pendingWaypointPick = true;
-  showHint('📍 اضغط على الخريطة لاختيار نقطة توقف');
+  showHint('اضغط على الخريطة لاختيار نقطة توقف');
 };
 
 function addWaypoint(loc, name) {
   currentWaypoints.push({ loc, name: name || `نقطة ${currentWaypoints.length+1}` });
   updateWaypointsUI();
   redrawWaypointMarkers();
-  showHint(`✅ تم إضافة نقطة التوقف ${currentWaypoints.length}`);
-  speak(`تم إضافة نقطة التوقف ${currentWaypoints.length}`);
+  showHint(`تمت إضافة نقطة التوقف ${currentWaypoints.length}`);
+  speak(`تمت إضافة نقطة التوقف ${currentWaypoints.length}`);
   if (currentDestination) setDestination(currentDestination, null, true);
 }
 
@@ -1150,7 +1195,6 @@ async function searchNearby(cat) {
 
   if (!navigator.onLine) {
     hideLoading();
-    showHint('📴 لا يوجد إنترنت — جاري استخدام البحث المحلي الاحتياطي');
     loadLocalPOIs(cat, lat, lng);
     return;
   }
@@ -1186,7 +1230,6 @@ async function searchNearby(cat) {
   }
 
   hideLoading();
-  showHint('⚠️ تعذر جلب النتائج أونلاين — تم استخدام البيانات الاحتياطية');
   loadLocalPOIs(cat, lat, lng);
 }
 
@@ -1197,7 +1240,7 @@ function loadLocalPOIs(cat, lat, lng) {
   })).sort((a, b) => a.dist - b.dist);
 
   if (localResults.length > 0) displayPoiResults(localResults, cat);
-  else showHint('⚠️ لم يتم العثور على أماكن في هذه الفئة محلياً');
+  else showHint('لا توجد نتائج متاحة لهذه الفئة حالياً');
 }
 
 function buildAddress(t) {
@@ -1205,7 +1248,7 @@ function buildAddress(t) {
   const p = [];
   if (t['addr:street']) p.push(t['addr:street']);
   if (t['addr:city']) p.push(t['addr:city']);
-  return p.join(', ');
+  return p.join('، ');
 }
 function displayPoiResults(results, cat) {
   clearPoiMarkers();
@@ -1235,9 +1278,10 @@ function renderResultsList(results, cat) {
     const d = document.createElement('div');
     d.className = 'result-item';
     const dt = p.dist < 1 ? `${Math.round(p.dist*1000)} م` : `${p.dist.toFixed(1)} كم`;
-    d.innerHTML = `<div class="pin">${icon}</div><div class="text"><div class="title">${esc(p.name)}</div><div class="sub">${esc(p.address||CAT_LABELS[cat])}</div></div><div class="dist-badge">${dt}</div><button class="save-btn"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
-    d.querySelector('.text').onclick = () => { box.classList.remove('show'); if (pendingWaypointPick) { addWaypoint([p.lat,p.lng], p.name); pendingWaypointPick = false; } else setDestination([p.lat,p.lng], p.name); };
-    d.querySelector('.dist-badge').onclick = (e) => { e.stopPropagation(); box.classList.remove('show'); if (pendingWaypointPick) { addWaypoint([p.lat,p.lng], p.name); pendingWaypointPick = false; } else setDestination([p.lat,p.lng], p.name); };
+    d.innerHTML = `<div class="pin">${icon}</div><div class="text"><div class="title">${esc(p.name)}</div><div class="sub">${esc(p.address||CAT_LABELS[cat])}</div></div><div class="dist-badge">${dt}</div><button class="save-btn" title="حفظ"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
+    const go = () => { box.classList.remove('show'); if (pendingWaypointPick) { addWaypoint([p.lat,p.lng], p.name); pendingWaypointPick = false; } else setDestination([p.lat,p.lng], p.name); };
+    d.querySelector('.text').onclick = go;
+    d.querySelector('.dist-badge').onclick = (e) => { e.stopPropagation(); go(); };
     d.querySelector('.save-btn').onclick = (e) => { e.stopPropagation(); openNameDialog([p.lat,p.lng], p.name); };
     list.appendChild(d);
   });
@@ -1255,7 +1299,7 @@ function showMapPopup(ll, x, y) {
   const header = document.getElementById('appHeader');
   const minTop = (header ? header.getBoundingClientRect().bottom : 0) + 60;
   const popupHeight = 310;
-  const left = Math.min(Math.max(10, x - 100), window.innerWidth - 220);
+  const left = Math.min(Math.max(10, x - 110), window.innerWidth - 230);
   const top = Math.min(Math.max(minTop, y), window.innerHeight - popupHeight - 20);
   mapPopup.style.left = left + 'px';
   mapPopup.style.top = top + 'px';
@@ -1263,10 +1307,20 @@ function showMapPopup(ll, x, y) {
 }
 function hideMapPopup() { mapPopup.classList.remove('show'); }
 (() => {
-  const b = document.createElement('button'); b.className = 'popup-item'; b.textContent = '📤 مشاركة الموقع عبر واتساب';
-  b.onclick = () => { if (popupLatLng) { const a = popupLatLng.lat.toFixed(6), o = popupLatLng.lng.toFixed(6); window.open('https://wa.me/?text=' + encodeURIComponent('موقعي: https://www.openstreetmap.org/?mlat=' + a + '&mlon=' + o + '#map=18/' + a + '/' + o)); } hideMapPopup(); };
+  const b = document.createElement('button');
+  b.className = 'popup-item';
+  b.textContent = 'مشاركة الموقع عبر واتساب';
+  b.onclick = () => {
+    if (popupLatLng) {
+      const a = popupLatLng.lat.toFixed(6), o = popupLatLng.lng.toFixed(6);
+      window.open('https://wa.me/?text=' + encodeURIComponent('موقعي: https://www.openstreetmap.org/?mlat=' + a + '&mlon=' + o + '#map=18/' + a + '/' + o), '_blank', 'noopener');
+    }
+    hideMapPopup();
+  };
   mapPopup.appendChild(b);
-  const c = document.createElement('div'); c.id = 'osmCredit'; c.innerHTML = '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© مساهمو OpenStreetMap</a>';
+  const c = document.createElement('div');
+  c.id = 'osmCredit';
+  c.innerHTML = '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>';
   document.body.appendChild(c);
 })();
 
@@ -1277,7 +1331,7 @@ function handlePressStart(e) {
   clearTimeout(pressTimer);
   pressTimer = setTimeout(() => {
     showMapPopup({ lat:e.lngLat.lat, lng:e.lngLat.lng }, e.point.x, e.point.y);
-    if (navigator.vibrate) navigator.vibrate(40);
+    if (navigator.vibrate) navigator.vibrate(35);
   }, 500);
 }
 function handlePressMove(e) {
@@ -1298,7 +1352,7 @@ map.on('click', (e) => {
 map.on('contextmenu', e => { e.preventDefault(); showMapPopup({ lat:e.lngLat.lat, lng:e.lngLat.lng }, e.point.x, e.point.y); });
 
 // ═══════════════════════════════════════════════════════════════
-// الوضع الليلي
+// الوضع الليلي والنهاري
 // ═══════════════════════════════════════════════════════════════
 const themeHeaderBtn = document.getElementById('themeHeaderBtn');
 const themeIconHeader = document.getElementById('themeIconHeader');
@@ -1307,7 +1361,7 @@ function setDarkMode(d) {
   document.body.classList.toggle('dark', d);
   themeIconHeader.innerHTML = d ? ICONS.sun : ICONS.moon;
 }
-themeHeaderBtn.onclick = () => { setDarkMode(!isDarkMode); };
+themeHeaderBtn.onclick = () => setDarkMode(!isDarkMode);
 
 // ═══════════════════════════════════════════════════════════════
 // GPS وتتبع التوجيه
@@ -1428,7 +1482,7 @@ function setDestination(loc, name, isRecalc=false) {
   el.innerHTML = ICONS.arrive;
   destMarker = new maplibregl.Marker({ element:el, anchor:'bottom' }).setLngLat([loc[1],loc[0]]).addTo(map);
   const start = (navigationActive && userLocation) ? userLocation : (manualStart || userLocation);
-  if (!start) { speak('يرجى تحديد موقع الانطلاق'); showHint('📍 اضغط زر الموقع أو اضغط مطولاً على الخريطة'); return; }
+  if (!start) { speak('يرجى تحديد موقع الانطلاق'); showHint('حدد موقعك أو اضغط مطولاً لتحديد الانطلاق'); return; }
   if (!isRecalc) showLoading('جاري حساب المسار...');
   if (!isRecalc) { document.getElementById('routeOptions').classList.remove('show'); document.getElementById('startBtn').classList.remove('show'); }
   const pts = [start, ...currentWaypoints.map(w=>w.loc), loc];
@@ -1462,12 +1516,12 @@ async function fetchValhallaRoutes(points, costing, isRecalc) {
       const r = await fetch(`https://router.project-osrm.org/route/v1/${profile}/${coordsStr}?overview=full&geometries=geojson&steps=true`);
       const data = await r.json();
       hideLoading();
-      if (!data.routes?.length) { showHint('⚠️ تعذر حساب المسار'); return; }
+      if (!data.routes?.length) { showHint('تعذر حساب المسار'); return; }
       const norm = normalizeOSRMRoute(data.routes[0]);
       applyCalculatedRoutes(norm, null, isRecalc);
     } catch(e2) {
       hideLoading();
-      showHint('⚠️ تعذر الاتصال بخادم المسارات');
+      showHint('تعذر الاتصال بخادم المسارات');
     }
   }
 }
@@ -1540,8 +1594,8 @@ function drawRoute(r) {
   ['route-line'].forEach(id => { if (map.getSource(id)) map.removeSource(id); });
   try {
     map.addSource('route-line', { type:'geojson', data:{ type:'Feature', geometry:r.geometry, properties:{} } });
-    map.addLayer({ id:'route-line-outline', type:'line', source:'route-line', layout:{ 'line-join':'round','line-cap':'round' }, paint:{ 'line-color':'#0d47a1','line-width':14,'line-opacity':0.35 } });
-    map.addLayer({ id:'route-line', type:'line', source:'route-line', layout:{ 'line-join':'round','line-cap':'round' }, paint:{ 'line-color':'#1a73e8','line-width':9,'line-opacity':0.95 } });
+    map.addLayer({ id:'route-line-outline', type:'line', source:'route-line', layout:{ 'line-join':'round','line-cap':'round' }, paint:{ 'line-color':'#002d9c','line-width':14,'line-opacity':0.35 } });
+    map.addLayer({ id:'route-line', type:'line', source:'route-line', layout:{ 'line-join':'round','line-cap':'round' }, paint:{ 'line-color':'#0f62fe','line-width':9,'line-opacity':0.96 } });
   } catch(e) {}
 }
 function mapManeuver(t, m) {
@@ -1571,7 +1625,7 @@ document.getElementById('startBtn').onclick = async () => {
   if (!currentSteps.length) return;
   if (!userLocation && !manualStart) {
     speak('يرجى تحديد موقعك أولاً');
-    showHint('📍 اضغط زر الموقع أو اضغط مطولاً على الخريطة لتحديد الانطلاق');
+    showHint('اضغط زر الموقع أو اضغط مطولاً على الخريطة');
     return;
   }
   await keepScreenOn();
@@ -1585,7 +1639,6 @@ document.getElementById('startBtn').onclick = async () => {
   document.getElementById('startBtn').classList.remove('show');
   document.getElementById('routeOptions').classList.remove('show');
   document.getElementById('waypointsBar').classList.remove('show');
-  document.getElementById('navPanel').classList.remove('show');
   document.getElementById('navTopBar').classList.add('show');
   document.getElementById('navBottomBar').classList.add('show');
   document.getElementById('navStopFloat').classList.add('show');
@@ -1638,7 +1691,6 @@ function stopNavigation() {
   speak('تم إنهاء التوجيه');
 }
 
-document.getElementById('stopBtn').onclick = stopNavigation;
 document.getElementById('navStopFloat').onclick = () => stopConfirmDialog.classList.add('show');
 document.getElementById('recenterBtn').onclick = () => {
   recenterMode = 'follow';
@@ -1718,7 +1770,7 @@ function checkOffRoute(loc) {
     offRouteCounter++;
     if (offRouteCounter >= OFF_ROUTE_COUNT) {
       lastRouteRecalcTime = Date.now(); offRouteCounter = 0;
-      showHint('🔄 إعادة حساب المسار...');
+      showHint('جاري إعادة حساب المسار...');
       playBeep(700,200);
       if (currentDestination) { userLocation = loc; setDestination(currentDestination, null, true); }
     }
@@ -1778,7 +1830,7 @@ document.getElementById('resultsClose').onclick = () => {
 };
 
 document.getElementById('locBtn').onclick = () => {
-  if (!navigator.geolocation) { showHint('⚠️ GPS غير مدعوم على هذا الجهاز'); return; }
+  if (!navigator.geolocation) { showHint('GPS غير مدعوم على هذا الجهاز'); return; }
   showLoading('جاري تحديد موقعك...');
   navigator.geolocation.getCurrentPosition(pos => {
     hideLoading();
@@ -1786,7 +1838,7 @@ document.getElementById('locBtn').onclick = () => {
     map.flyTo({ center:[loc[1],loc[0]], zoom:16, duration:800 });
     updateUserLocation(loc, pos.coords.accuracy, pos.coords.heading);
     if (watchId === null) startGpsTracking();
-  }, err => { hideLoading(); showHint('⚠️ تعذر تحديد الموقع — تحقق من الصلاحيات'); }, { enableHighAccuracy:true, timeout:20000 });
+  }, err => { hideLoading(); showHint('تعذر تحديد الموقع — تحقق من الصلاحيات'); }, { enableHighAccuracy:true, timeout:20000 });
 };
 
 document.getElementById('popupStart').onclick = () => { if (popupLatLng) setManualStart([popupLatLng.lat, popupLatLng.lng]); hideMapPopup(); };
@@ -1807,7 +1859,7 @@ function setManualStart(loc) {
   el.style.cssText = 'width:36px;height:36px;';
   el.innerHTML = ICONS.depart;
   startMarker = new maplibregl.Marker({ element:el, anchor:'bottom' }).setLngLat([loc[1],loc[0]]).addTo(map);
-  showHint('✅ تم تحديد نقطة الانطلاق');
+  showHint('تم تحديد نقطة الانطلاق');
   speak('تم تحديد نقطة الانطلاق');
   if (currentDestination) setDestination(currentDestination);
 }
@@ -1819,32 +1871,36 @@ const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
 
 async function searchPlaces(q) {
-  if (!q.trim()) return;
-  if (!navigator.onLine) { showHint('⚠️ البحث يحتاج اتصال'); return; }
+  const clean = q.trim();
+  if (!clean) return;
+  if (!navigator.onLine) {
+    const localHits = OFFLINE_DB.filter(x => x.name && x.name.includes(clean));
+    if (!localHits.length) { showHint('البحث النصي يتطلب اتصالاً بالإنترنت'); return; }
+  }
 
   const box = document.getElementById('results');
   const list = document.getElementById('resultsList');
   const cnt = document.getElementById('resultsCount');
   box.classList.add('show');
-  list.innerHTML = '<div class="result-item"><div class="text">⏳ جاري البحث...</div></div>';
+  list.innerHTML = '<div class="result-item"><div class="text">جاري البحث...</div></div>';
   try {
-    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=sy&limit=10&accept-language=ar&addressdetails=1`, { headers:{ 'User-Agent':'Kzdora/1.0 (navigation-app)' } });
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(clean)}&countrycodes=sy&limit=10&accept-language=ar&addressdetails=1`, { headers:{ 'User-Agent':'Kzdora/2.0 (navigation-app)' } });
     const data = await r.json();
     cnt.textContent = `(${data.length})`;
-    if (!data.length) { list.innerHTML = '<div class="result-item"><div class="text">لا توجد نتائج</div></div>'; return; }
+    if (!data.length) { list.innerHTML = '<div class="result-item"><div class="text">لا توجد نتائج مطابقة</div></div>'; return; }
     list.innerHTML = '';
     data.forEach(p => {
       const parts = p.display_name.split(',');
-      const title = parts[0].trim(), sub = parts.slice(1,3).join(', ').trim();
+      const title = parts[0].trim(), sub = parts.slice(1,3).join('، ').trim();
       const loc = [parseFloat(p.lat), parseFloat(p.lon)];
       const d = document.createElement('div');
       d.className = 'result-item';
-      d.innerHTML = `<div class="pin">${ICONS.arrive}</div><div class="text"><div class="title">${esc(title)}</div><div class="sub">${esc(sub)}</div></div><button class="save-btn"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
+      d.innerHTML = `<div class="pin">${ICONS.arrive}</div><div class="text"><div class="title">${esc(title)}</div><div class="sub">${esc(sub)}</div></div><button class="save-btn" title="حفظ"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
       d.querySelector('.text').onclick = () => { box.classList.remove('show'); searchInput.value = title; setDestination(loc, title); };
       d.querySelector('.save-btn').onclick = (ev) => { ev.stopPropagation(); openNameDialog(loc, title); };
       list.appendChild(d);
     });
-  } catch(e) { list.innerHTML = '<div class="result-item"><div class="text">خطأ في الاتصال</div></div>'; }
+  } catch(e) { list.innerHTML = '<div class="result-item"><div class="text">تعذر إتمام البحث حالياً</div></div>'; }
 }
 searchBtn.onclick = () => searchPlaces(searchInput.value);
 searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchPlaces(searchInput.value); });
@@ -1867,7 +1923,7 @@ document.getElementById('nameSave').onclick = () => {
   if (pendingSaveLocation) {
     savedPlaces.push({ name:n, loc:pendingSaveLocation, ts:Date.now() });
     localStorage.setItem('kzdora_saved', JSON.stringify(savedPlaces));
-    showHint('⭐ تم الحفظ');
+    showHint('تم حفظ المكان');
     speak('تم حفظ ' + n);
     if (pendingSaveCallback) pendingSaveCallback();
   }
@@ -1887,7 +1943,7 @@ function renderSavedList() {
   if (!savedPlaces.length) { savedList.innerHTML = '<div class="empty">لا توجد أماكن محفوظة بعد.</div>'; return; }
   savedPlaces.forEach((p,i) => {
     const li = document.createElement('li');
-    li.innerHTML = `<div class="star">${ICONS.waypoint}</div><div class="info"><div class="name">${esc(p.name)}</div><div class="coords">${p.loc[0].toFixed(4)}, ${p.loc[1].toFixed(4)}</div></div><button class="del-btn"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>`;
+    li.innerHTML = `<div class="star">${ICONS.waypoint}</div><div class="info"><div class="name">${esc(p.name)}</div><div class="coords">${p.loc[0].toFixed(4)}, ${p.loc[1].toFixed(4)}</div></div><button class="del-btn" title="حذف"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>`;
     li.querySelector('.info').onclick = () => { savedPanel.classList.remove('show'); setDestination(p.loc, p.name); };
     li.querySelector('.del-btn').onclick = ev => {
       ev.stopPropagation();
@@ -1911,7 +1967,7 @@ document.getElementById('downloadHeaderBtn').onclick = () => { updateOfflineStat
 document.getElementById('downloadClose').onclick = () => downloadPanel.classList.remove('show');
 downloadPanel.onclick = e => { if (e.target === downloadPanel) downloadPanel.classList.remove('show'); };
 document.getElementById('downloadAreaBtn').onclick = () => {
-  if (!userLocation) { showHint('📍 في انتظار تحديد موقعك...'); return; }
+  if (!userLocation) { showHint('بانتظار تحديد موقعك الحالي...'); return; }
   downloadAreaForOffline(userLocation[0], userLocation[1], 2.5);
 };
 document.getElementById('downloadCenterBtn').onclick = () => {
@@ -1919,7 +1975,7 @@ document.getElementById('downloadCenterBtn').onclick = () => {
   downloadAreaForOffline(c.lat, c.lng, 2.5);
 };
 document.getElementById('clearTilesBtn').onclick = () => {
-  showDeleteConfirm('مسح البلاطات', 'هل تريد مسح جميع البلاطات المحفوظة؟', async () => {
+  showDeleteConfirm('مسح البلاطات', 'هل تريد مسح جميع البلاطات المحفوظة في الذاكرة؟', async () => {
     await clearAllTiles().catch(() => {});
     updateOfflineStats();
     showHint('تم مسح الكاش');
@@ -1929,7 +1985,7 @@ document.getElementById('clearTilesBtn').onclick = () => {
 // ═══════════════════════════════════════════════════════════════
 // بدء التشغيل
 // ═══════════════════════════════════════════════════════════════
-window.addEventListener('load', async () => {
+window.addEventListener('load', () => {
   syncOnlineState();
   document.getElementById('travelModeBar').classList.add('show');
   document.getElementById('recenterBtn').classList.add('show');
