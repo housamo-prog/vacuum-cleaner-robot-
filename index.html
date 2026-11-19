@@ -3,343 +3,365 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#090d16">
+<meta name="theme-color" content="#0b1120">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="كزدورة">
-<title>كزدورة 3.0 — نظام ملاحة ذكي</title>
+<title>كزدورة — ملاحة ذكية متطورة</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
 :root{
-  --bg-glass:rgba(255,255,255,.88);
-  --bg-solid:#ffffff;
-  --bg-elevated:#f3f4f6;
-  --text:#0f172a;
-  --text-muted:#64748b;
-  --accent:#2563eb;
-  --accent-glow:rgba(37,99,235,.28);
-  --accent-soft:rgba(37,99,235,.1);
-  --emerald:#10b981;
-  --amber:#f59e0b;
-  --rose:#ef4444;
-  --border:rgba(15,23,42,.08);
-  --shadow-float:0 12px 32px -4px rgba(15,23,42,.16),0 4px 12px -2px rgba(15,23,42,.08);
-  --shadow-sheet:0 -10px 40px rgba(15,23,42,.18);
-  --safe-top:env(safe-area-inset-top,12px);
-  --safe-bottom:env(safe-area-inset-bottom,12px);
+  --glass:rgba(255,255,255,.84);
+  --glass-strong:rgba(255,255,255,.94);
+  --surface:#ffffff;
+  --surface-2:#f1f5f9;
+  --ink:#0f172a;
+  --muted:#64748b;
+  --brand:#1d4ed8;
+  --brand-2:#0ea5e9;
+  --brand-soft:rgba(29,78,216,.12);
+  --ok:#10b981;
+  --warn:#f59e0b;
+  --err:#ef4444;
+  --line:rgba(15,23,42,.08);
+  --shadow:0 14px 34px rgba(15,23,42,.14),0 2px 8px rgba(15,23,42,.06);
+  --safe-t:env(safe-area-inset-top,10px);
+  --safe-b:env(safe-area-inset-bottom,12px);
 }
 body.dark{
-  --bg-glass:rgba(15,23,42,.86);
-  --bg-solid:#0f172a;
-  --bg-elevated:#1e293b;
-  --text:#f8fafc;
-  --text-muted:#94a3b8;
-  --accent:#3b82f6;
-  --accent-glow:rgba(59,130,246,.35);
-  --accent-soft:rgba(59,130,246,.16);
-  --border:rgba(255,255,255,.09);
-  --shadow-float:0 16px 36px -4px rgba(0,0,0,.55);
-  --shadow-sheet:0 -12px 44px rgba(0,0,0,.65);
+  --glass:rgba(15,23,42,.82);
+  --glass-strong:rgba(15,23,42,.95);
+  --surface:#0f172a;
+  --surface-2:#1e293b;
+  --ink:#f8fafc;
+  --muted:#94a3b8;
+  --brand:#3b82f6;
+  --brand-2:#38bdf8;
+  --brand-soft:rgba(59,130,246,.18);
+  --line:rgba(255,255,255,.1);
+  --shadow:0 16px 40px rgba(0,0,0,.55);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Tahoma,sans-serif;overflow:hidden;background:#0f172a;color:var(--text);user-select:none;position:fixed}
+html,body{height:100%;width:100%;overflow:hidden;position:fixed;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Tahoma,Arial,sans-serif;background:#0b1120;color:var(--ink);user-select:none}
 #map{position:fixed;inset:0;width:100%;height:100%;z-index:1}
-body.dark #map.osm-active .maplibregl-canvas{filter:invert(.92) hue-rotate(180deg) brightness(.88) contrast(1.05)}
+body.dark #map.osm-mode .maplibregl-canvas{filter:invert(.93) hue-rotate(180deg) brightness(.88) contrast(1.06)}
 .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none!important}
 
-/* Top Floating Island (Search + Brand Pill) */
-#topDock{position:fixed;top:calc(var(--safe-top) + 8px);left:12px;right:12px;z-index:1000;display:flex;flex-direction:column;gap:8px;transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .3s}
-body.navigating #topDock{transform:translateY(-160%);opacity:0;pointer-events:none}
+/* Splash Screen */
+#splash{position:fixed;inset:0;z-index:5000;background:radial-gradient(circle at 20% 20%,#1e3a8a 0%,#0b1120 65%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:14px;transition:opacity .45s ease,transform .45s ease}
+#splash.hide{opacity:0;transform:scale(1.04);pointer-events:none}
+.splash-logo{width:76px;height:76px;border-radius:24px;background:linear-gradient(135deg,#3b82f6,#06b6d4);display:flex;align-items:center;justify-content:center;box-shadow:0 18px 40px rgba(59,130,246,.45)}
+.splash-logo svg{width:42px;height:42px;fill:#fff}
+.splash-title{font-size:28px;font-weight:900;letter-spacing:-.5px}
+.splash-sub{font-size:13px;color:#cbd5e1;font-weight:600}
 
-.search-island{display:flex;align-items:center;gap:8px;background:var(--bg-glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:22px;padding:6px 8px;box-shadow:var(--shadow-float)}
-.brand-pill{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;padding:8px 12px;border-radius:16px;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px var(--accent-glow)}
-.brand-pill svg{width:16px;height:16px;fill:#fff}
-#searchInput{flex:1;border:none;background:transparent;outline:none;font-size:14.5px;font-weight:600;color:var(--text);font-family:inherit;min-width:0;padding:6px 4px}
-#searchInput::placeholder{color:var(--text-muted);font-weight:500}
-.island-btn{width:38px;height:38px;border-radius:14px;border:none;background:var(--bg-elevated);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .12s,background .2s}
-.island-btn:active{transform:scale(.92)}
-.island-btn svg{width:19px;height:19px;fill:currentColor}
-.island-btn.primary{background:var(--accent);color:#fff}
+/* Top HUD */
+#topBar{position:fixed;top:calc(var(--safe-t) + 6px);left:12px;right:12px;z-index:1000;display:flex;flex-direction:column;gap:8px;transition:transform .35s ease,opacity .3s}
+body.navigating #topBar{transform:translateY(-170%);opacity:0;pointer-events:none}
 
-/* Category Chips */
-.chips-row{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px}
-.chips-row::-webkit-scrollbar{display:none}
-.chip{flex-shrink:0;display:flex;align-items:center;gap:6px;background:var(--bg-glass);backdrop-filter:blur(16px);border:1px solid var(--border);padding:8px 13px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.06);transition:all .15s}
-.chip:active{transform:scale(.95)}
-.chip.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 6px 16px var(--accent-glow)}
-.chip svg{width:15px;height:15px;fill:currentColor}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--glass);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid var(--line);border-radius:22px;padding:6px 8px;box-shadow:var(--shadow)}
+.brand-badge{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;padding:8px 12px;border-radius:16px;font-weight:900;font-size:13px;flex-shrink:0}
+.brand-badge svg{width:16px;height:16px;fill:#fff}
+#qInput{flex:1;border:none;background:transparent;outline:none;color:var(--ink);font-family:inherit;font-size:14.5px;font-weight:600;min-width:0;padding:6px 4px}
+#qInput::placeholder{color:var(--muted);font-weight:500}
+.icon-act{width:38px;height:38px;border-radius:14px;border:none;background:var(--surface-2);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .12s}
+.icon-act:active{transform:scale(.92)}
+.icon-act.go{background:var(--brand);color:#fff}
+.icon-act svg{width:19px;height:19px;fill:currentColor}
 
-/* Floating Right Action Rail (Map Controls) */
-#mapRail{position:fixed;right:12px;top:calc(var(--safe-top) + 124px);z-index:990;display:flex;flex-direction:column;gap:8px;transition:transform .3s}
-body.navigating #mapRail{top:calc(var(--safe-top) + 118px)}
-.rail-btn{width:44px;height:44px;border-radius:16px;background:var(--bg-glass);backdrop-filter:blur(18px);border:1px solid var(--border);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow-float);font-size:12px;font-weight:900;transition:transform .12s,background .2s}
-.rail-btn:active{transform:scale(.92)}
-.rail-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.rail-btn.danger{color:var(--rose)}
-.rail-btn svg{width:20px;height:20px;fill:currentColor}
+.cat-scroll{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.cat-scroll::-webkit-scrollbar{display:none}
+.cat-chip{flex-shrink:0;display:flex;align-items:center;gap:6px;background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:999px;padding:8px 13px;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--ink);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.06);transition:all .15s}
+.cat-chip:active{transform:scale(.95)}
+.cat-chip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.cat-chip svg{width:15px;height:15px;fill:currentColor}
 
-/* Speed & GPS Pill (Left Side) */
-#telemetryPill{position:fixed;left:12px;top:calc(var(--safe-top) + 124px);z-index:990;display:flex;flex-direction:column;gap:8px}
-body.navigating #telemetryPill{display:none}
-.speed-orb{width:62px;height:62px;border-radius:20px;background:var(--bg-glass);backdrop-filter:blur(18px);border:1px solid var(--border);box-shadow:var(--shadow-float);display:flex;flex-direction:column;align-items:center;justify-content:center}
-.speed-orb.over{background:rgba(239,68,68,.92);color:#fff;border-color:var(--rose)}
-.speed-orb .num{font-size:22px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
-.speed-orb .unit{font-size:9.5px;font-weight:700;opacity:.75;margin-top:2px}
-.gps-pill{background:var(--bg-glass);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:999px;padding:5px 10px;font-size:10.5px;font-weight:700;display:flex;align-items:center;gap:5px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-.gps-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--amber)}
-.gps-pill.ready .dot{background:var(--emerald)}
+/* Side Controls */
+#sideLeft{position:fixed;left:12px;top:calc(var(--safe-t) + 122px);z-index:990;display:flex;flex-direction:column;gap:8px}
+body.navigating #sideLeft{display:none}
+.meter-box{width:64px;height:64px;border-radius:20px;background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--line);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.meter-box.over{background:var(--err);color:#fff;border-color:var(--err)}
+.meter-val{font-size:22px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.meter-unit{font-size:9.5px;font-weight:700;opacity:.75;margin-top:2px}
+.gps-tag{background:var(--glass);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:10.5px;font-weight:800;display:flex;align-items:center;gap:5px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.gps-tag .dot{width:7px;height:7px;border-radius:50%;background:var(--warn)}
+.gps-tag.ok .dot{background:var(--ok)}
 
-/* Search Results Drawer */
-#resultsDrawer{position:fixed;top:calc(var(--safe-top) + 118px);left:12px;right:12px;z-index:1100;background:var(--bg-solid);border:1px solid var(--border);border-radius:24px;max-height:56vh;overflow-y:auto;display:none;box-shadow:var(--shadow-float)}
-#resultsDrawer.show{display:block;animation:fadeScale .2s ease-out}
-@keyframes fadeScale{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-.drawer-head{position:sticky;top:0;background:var(--bg-solid);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;z-index:2}
-.drawer-head span{font-size:13px;font-weight:800}
-.res-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer}
-.res-row:last-child{border-bottom:none}
-.res-row:active{background:var(--bg-elevated)}
-.res-icon{width:38px;height:38px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.res-icon svg{width:19px;height:19px;fill:currentColor}
-.res-meta{flex:1;min-width:0}
-.res-title{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.res-sub{font-size:11.5px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.res-dist{font-size:11px;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:4px 9px;border-radius:999px}
+#sideRight{position:fixed;right:12px;top:calc(var(--safe-t) + 122px);z-index:990;display:flex;flex-direction:column;gap:8px}
+body.navigating #sideRight{top:calc(var(--safe-t) + 116px)}
+.tool-btn{width:44px;height:44px;border-radius:16px;background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);font-size:12px;font-weight:900;transition:transform .12s,background .2s}
+.tool-btn:active{transform:scale(.92)}
+.tool-btn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.tool-btn.sos{color:var(--err)}
+.tool-btn svg{width:20px;height:20px;fill:currentColor}
 
-/* Bottom Smart Sheet */
-#bottomSheet{position:fixed;bottom:0;left:0;right:0;z-index:1050;background:var(--bg-glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);border-radius:28px 28px 0 0;padding:10px 16px calc(var(--safe-bottom) + 12px);box-shadow:var(--shadow-sheet);transition:transform .35s cubic-bezier(.22,1,.36,1)}
-body.navigating #bottomSheet{transform:translateY(110%);pointer-events:none}
-.sheet-handle{width:38px;height:4px;border-radius:999px;background:var(--text-muted);opacity:.35;margin:0 auto 12px}
+/* Search / POI Results */
+#resultsPanel{position:fixed;top:calc(var(--safe-t) + 116px);left:12px;right:12px;z-index:1150;background:var(--glass-strong);backdrop-filter:blur(24px);border:1px solid var(--line);border-radius:24px;max-height:55vh;overflow-y:auto;display:none;box-shadow:var(--shadow)}
+#resultsPanel.show{display:block;animation:popIn .2s ease-out}
+@keyframes popIn{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.panel-top{position:sticky;top:0;z-index:2;background:var(--glass-strong);padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.panel-top h4{font-size:13.5px;font-weight:800}
+.x-btn{width:32px;height:32px;border-radius:50%;border:none;background:var(--surface-2);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.x-btn svg{width:16px;height:16px;fill:currentColor}
+.res-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+.res-item:last-child{border-bottom:none}
+.res-item:active{background:var(--surface-2)}
+.res-ico{width:38px;height:38px;border-radius:12px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.res-ico svg{width:19px;height:19px;fill:currentColor}
+.res-info{flex:1;min-width:0}
+.res-name{font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res-addr{font-size:11.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res-badge{font-size:11px;font-weight:800;color:var(--brand);background:var(--brand-soft);padding:4px 9px;border-radius:999px;flex-shrink:0}
 
-/* Quick Places (Home / Work / Saved) */
-.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.quick-card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;padding:11px 10px;display:flex;align-items:center;gap:9px;cursor:pointer;text-align:right;transition:transform .12s}
-.quick-card:active{transform:scale(.96)}
-.quick-card .q-ico{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.quick-card .q-ico svg{width:17px;height:17px;fill:#fff}
-.quick-card .q-title{font-size:12.5px;font-weight:800;color:var(--text)}
-.quick-card .q-sub{font-size:10px;color:var(--text-muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72px}
+/* Bottom Sheet */
+#bottomCard{position:fixed;bottom:0;left:0;right:0;z-index:1050;background:var(--glass);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);border-top:1px solid var(--line);border-radius:28px 28px 0 0;padding:10px 16px calc(var(--safe-b) + 12px);box-shadow:0 -12px 42px rgba(15,23,42,.2);transition:transform .35s cubic-bezier(.22,1,.36,1)}
+body.navigating #bottomCard{transform:translateY(115%);pointer-events:none}
+.grip{width:38px;height:4px;border-radius:999px;background:var(--muted);opacity:.35;margin:0 auto 12px}
 
-/* Route Preview State inside Sheet */
-#routePreviewBox{display:none;flex-direction:column;gap:12px}
-#routePreviewBox.show{display:flex}
+.shortcuts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sc-btn{background:var(--surface-2);border:1px solid var(--line);border-radius:18px;padding:10px;display:flex;align-items:center;gap:8px;cursor:pointer;text-align:right;color:var(--ink);font-family:inherit;transition:transform .12s}
+.sc-btn:active{transform:scale(.96)}
+.sc-ico{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sc-ico svg{width:17px;height:17px;fill:#fff}
+.sc-title{font-size:12.5px;font-weight:800}
+.sc-sub{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:74px;margin-top:1px}
+
+#routeBox{display:none;flex-direction:column;gap:11px}
+#routeBox.show{display:flex}
 #exploreBox.hide{display:none}
 
-.dest-banner{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.dest-banner .d-name{font-size:16px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dest-banner .d-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
-.close-circle{width:32px;height:32px;border-radius:50%;border:none;background:var(--bg-elevated);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
-.close-circle svg{width:16px;height:16px;fill:currentColor}
+.dest-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dest-title{font-size:16px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dest-sub{font-size:12px;color:var(--muted);margin-top:2px;font-weight:600}
 
-.route-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.r-card{background:var(--bg-elevated);border:2px solid transparent;border-radius:18px;padding:11px 13px;cursor:pointer;text-align:right;transition:all .15s}
-.r-card.active{border-color:var(--accent);background:var(--accent-soft)}
-.r-card .r-tag{font-size:11px;font-weight:800;color:var(--accent);display:flex;align-items:center;justify-content:space-between}
-.r-card .r-time{font-size:18px;font-weight:900;margin-top:3px;font-variant-numeric:tabular-nums}
-.r-card .r-dist{font-size:11.5px;color:var(--text-muted);font-weight:600}
+.wp-strip{display:none;flex-wrap:wrap;gap:6px;align-items:center}
+.wp-strip.show{display:flex}
+.wp-chip{background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:11.5px;font-weight:700;display:flex;align-items:center;gap:6px}
+.wp-chip button{border:none;background:none;color:var(--err);font-weight:900;cursor:pointer;font-size:12px}
+.add-wp-btn{border:1px dashed var(--brand);background:var(--brand-soft);color:var(--brand);border-radius:999px;padding:5px 11px;font-family:inherit;font-size:11.5px;font-weight:800;cursor:pointer}
 
-.mode-pills{display:flex;gap:6px;background:var(--bg-elevated);padding:4px;border-radius:14px}
-.m-pill{flex:1;border:none;background:transparent;padding:8px;border-radius:11px;font-family:inherit;font-size:12.5px;font-weight:800;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
-.m-pill.active{background:var(--bg-solid);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.m-pill svg{width:16px;height:16px;fill:currentColor}
+.mode-switch{display:flex;gap:6px;background:var(--surface-2);padding:4px;border-radius:14px}
+.mode-opt{flex:1;border:none;background:transparent;padding:8px;border-radius:11px;font-family:inherit;font-size:12.5px;font-weight:800;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.mode-opt.active{background:var(--surface);color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.mode-opt svg{width:16px;height:16px;fill:currentColor}
 
-.cta-row{display:flex;gap:8px}
-.btn-go{flex:2;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:18px;padding:14px;font-family:inherit;font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 8px 22px var(--accent-glow)}
-.btn-go:active{transform:scale(.97)}
-.btn-go svg{width:19px;height:19px;fill:#fff}
-.btn-sim{flex:1;background:var(--bg-elevated);color:var(--text);border:1px solid var(--border);border-radius:18px;padding:14px 10px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
-.btn-sim svg{width:17px;height:17px;fill:var(--accent)}
+.route-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.rt-card{background:var(--surface-2);border:2px solid transparent;border-radius:18px;padding:10px 12px;cursor:pointer;text-align:right;transition:all .15s}
+.rt-card.active{border-color:var(--brand);background:var(--brand-soft)}
+.rt-head{font-size:11px;font-weight:800;color:var(--brand);display:flex;justify-content:space-between}
+.rt-dur{font-size:18px;font-weight:900;margin-top:2px;font-variant-numeric:tabular-nums}
+.rt-km{font-size:11.5px;color:var(--muted);font-weight:700}
 
-/* Active Navigation HUD */
-#navHudTop{position:fixed;top:calc(var(--safe-top) + 8px);left:12px;right:12px;z-index:1200;background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;border-radius:24px;padding:14px 16px;display:none;align-items:center;gap:14px;box-shadow:0 16px 38px rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.12)}
-#navHudTop.show{display:flex;animation:slideDown .3s ease-out}
-@keyframes slideDown{from{transform:translateY(-120%)}to{transform:translateY(0)}}
-.hud-arrow{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 18px rgba(37,99,235,.45)}
-.hud-arrow svg{width:38px;height:38px;fill:#fff}
-.hud-text{flex:1;min-width:0}
-.hud-dist{font-size:30px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
-.hud-street{font-size:14px;font-weight:700;color:#cbd5e1;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hud-sim-tag{font-size:10px;background:#f59e0b;color:#000;padding:2px 7px;border-radius:999px;font-weight:900;margin-right:6px;display:none}
-.hud-sim-tag.show{display:inline-block}
+.action-row{display:flex;gap:8px}
+.primary-cta{flex:2;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;border:none;border-radius:18px;padding:13px;font-family:inherit;font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 8px 22px rgba(29,78,216,.35)}
+.primary-cta:active{transform:scale(.97)}
+.primary-cta svg{width:19px;height:19px;fill:#fff}
+.sec-cta{flex:1;background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:13px 10px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.sec-cta svg{width:17px;height:17px;fill:var(--brand)}
 
-#navHudBottom{position:fixed;bottom:calc(var(--safe-bottom) + 8px);left:12px;right:12px;z-index:1200;background:rgba(15,23,42,.94);backdrop-filter:blur(20px);color:#fff;border-radius:24px;padding:12px 16px;display:none;align-items:center;justify-content:space-between;box-shadow:0 16px 40px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)}
-#navHudBottom.show{display:flex}
-.hud-speed{background:#fff;color:#0f172a;border-radius:16px;padding:6px 14px;text-align:center;min-width:68px}
-.hud-speed.over{background:#ef4444;color:#fff}
-.hud-speed .v{font-size:22px;font-weight:900;line-height:1}
-.hud-speed .u{font-size:9px;font-weight:800;opacity:.7}
-.hud-stat{text-align:center}
-.hud-stat .v{font-size:18px;font-weight:900;font-variant-numeric:tabular-nums}
-.hud-stat .l{font-size:10.5px;color:#94a3b8;font-weight:600;margin-top:2px}
-.btn-end{width:46px;height:46px;border-radius:16px;background:#ef4444;border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.btn-end svg{width:22px;height:22px;fill:#fff}
+/* Navigation HUD */
+#navTop{position:fixed;top:calc(var(--safe-t) + 6px);left:12px;right:12px;z-index:1200;background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;border-radius:24px;padding:14px 16px;display:none;align-items:center;gap:14px;box-shadow:0 16px 38px rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.12)}
+#navTop.show{display:flex;animation:dropIn .28s ease-out}
+@keyframes dropIn{from{transform:translateY(-120%)}to{transform:translateY(0)}}
+.nav-turn{width:62px;height:62px;border-radius:18px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-turn svg{width:36px;height:36px;fill:#fff}
+.nav-meta{flex:1;min-width:0}
+.nav-dist{font-size:30px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.nav-instr{font-size:14px;font-weight:700;color:#cbd5e1;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sim-pill{font-size:10px;background:var(--warn);color:#000;padding:2px 7px;border-radius:999px;font-weight:900;margin-right:8px;display:none}
+.sim-pill.show{display:inline-block}
 
-/* Context Popup & Modals */
-#ctxMenu{position:fixed;z-index:2000;background:var(--bg-solid);border:1px solid var(--border);border-radius:20px;padding:6px;min-width:215px;box-shadow:var(--shadow-float);display:none}
-#ctxMenu.show{display:block;animation:fadeScale .15s ease-out}
-.ctx-btn{width:100%;border:none;background:transparent;padding:11px 12px;border-radius:13px;display:flex;align-items:center;gap:10px;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--text);cursor:pointer;text-align:right}
-.ctx-btn:active{background:var(--bg-elevated)}
-.ctx-btn svg{width:18px;height:18px;fill:var(--accent)}
+#navBottom{position:fixed;bottom:calc(var(--safe-b) + 8px);left:12px;right:12px;z-index:1200;background:rgba(15,23,42,.95);backdrop-filter:blur(20px);color:#fff;border-radius:24px;padding:12px 16px;display:none;align-items:center;justify-content:space-between;box-shadow:0 16px 40px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)}
+#navBottom.show{display:flex}
+.spd-box{background:#fff;color:#0f172a;border-radius:16px;padding:6px 13px;text-align:center;min-width:66px}
+.spd-box.over{background:var(--err);color:#fff}
+.spd-box .v{font-size:21px;font-weight:900;line-height:1}
+.spd-box .u{font-size:9px;font-weight:800;opacity:.75}
+.nav-stat{text-align:center}
+.nav-stat .v{font-size:17px;font-weight:900;font-variant-numeric:tabular-nums}
+.nav-stat .l{font-size:10px;color:#94a3b8;font-weight:700;margin-top:2px}
+.stop-btn{width:46px;height:46px;border-radius:16px;background:var(--err);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.stop-btn svg{width:22px;height:22px;fill:#fff}
 
-.modal-backdrop{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center}
-.modal-backdrop.show{display:flex}
-.modal-sheet{background:var(--bg-solid);width:100%;max-width:520px;border-radius:28px 28px 0 0;padding:18px 18px calc(var(--safe-bottom) + 18px);max-height:82vh;overflow-y:auto;box-shadow:var(--shadow-sheet)}
-.modal-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:14px}
-.modal-head h3{font-size:16px;font-weight:900}
+/* Context Menu & Sheets */
+#ctxPop{position:fixed;z-index:2200;background:var(--glass-strong);backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:20px;padding:6px;min-width:215px;box-shadow:var(--shadow);display:none}
+#ctxPop.show{display:block;animation:popIn .15s ease-out}
+.ctx-item{width:100%;border:none;background:transparent;padding:10px 12px;border-radius:13px;display:flex;align-items:center;gap:10px;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;text-align:right}
+.ctx-item:active{background:var(--surface-2)}
+.ctx-item svg{width:18px;height:18px;fill:var(--brand)}
 
-.layer-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
-.layer-opt{background:var(--bg-elevated);border:2px solid transparent;border-radius:16px;padding:12px;text-align:right;cursor:pointer;font-family:inherit;color:var(--text)}
-.layer-opt.active{border-color:var(--accent);background:var(--accent-soft)}
-.layer-opt .t{font-size:13.5px;font-weight:800}
-.layer-opt .s{font-size:11px;color:var(--text-muted);margin-top:2px}
+.sheet-backdrop{position:fixed;inset:0;z-index:3200;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center}
+.sheet-backdrop.show{display:flex}
+.sheet-body{background:var(--surface);width:100%;max-width:520px;border-radius:28px 28px 0 0;padding:18px 18px calc(var(--safe-b) + 18px);max-height:82vh;overflow-y:auto;box-shadow:0 -14px 44px rgba(0,0,0,.35)}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.sheet-head h3{font-size:16px;font-weight:900}
 
-.em-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.em-card{background:var(--bg-elevated);border-radius:18px;padding:14px;text-align:center;text-decoration:none;color:var(--text);border:1px solid var(--border)}
-.em-card .num{font-size:20px;font-weight:900;color:var(--rose);margin-top:4px}
-.em-card .lbl{font-size:13px;font-weight:800}
+.layer-opts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.layer-card{background:var(--surface-2);border:2px solid transparent;border-radius:16px;padding:12px;text-align:right;cursor:pointer;font-family:inherit;color:var(--ink)}
+.layer-card.active{border-color:var(--brand);background:var(--brand-soft)}
+.layer-card .lt{font-size:13.5px;font-weight:800}
+.layer-card .ls{font-size:11px;color:var(--muted);margin-top:2px}
+
+.sos-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.sos-card{background:var(--surface-2);border:1px solid var(--line);border-radius:18px;padding:14px;text-align:center;text-decoration:none;color:var(--ink)}
+.sos-card .sn{font-size:20px;font-weight:900;color:var(--err);margin-top:4px}
+.sos-card .sl{font-size:13px;font-weight:800}
 
 /* Markers & Toast */
-.user-dot{width:22px;height:22px;position:relative}
-.user-dot::before{content:'';position:absolute;inset:-6px;border-radius:50%;background:rgba(37,99,235,.28);animation:ping 2s infinite}
-.user-dot::after{content:'';position:absolute;inset:3px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-@keyframes ping{0%{transform:scale(.8);opacity:.9}100%{transform:scale(2.4);opacity:0}}
+.loc-dot{width:22px;height:22px;position:relative}
+.loc-dot::before{content:'';position:absolute;inset:-6px;border-radius:50%;background:rgba(29,78,216,.28);animation:pulse2 2s infinite}
+.loc-dot::after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--brand);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+@keyframes pulse2{0%{transform:scale(.8);opacity:.9}100%{transform:scale(2.4);opacity:0}}
 
-.car-puck{width:54px;height:54px;display:flex;align-items:center;justify-content:center;transition:transform .2s linear}
-.car-puck svg{width:54px;height:54px;filter:drop-shadow(0 6px 12px rgba(0,0,0,.45))}
+.nav-puck{width:56px;height:56px;display:flex;align-items:center;justify-content:center}
+.nav-puck svg{width:56px;height:56px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.45))}
 
-.poi-pin{width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--accent);border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.3)}
-.poi-pin svg{width:16px;height:16px;fill:#fff;transform:rotate(45deg)}
+.pin-mark{width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--brand);border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.pin-mark svg{width:16px;height:16px;fill:#fff;transform:rotate(45deg)}
 
-#toast{position:fixed;top:calc(var(--safe-top) + 70px);left:50%;transform:translateX(-50%) translateY(-14px);z-index:4000;background:rgba(15,23,42,.94);color:#fff;padding:9px 18px;border-radius:999px;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:all .25s;box-shadow:0 10px 25px rgba(0,0,0,.3);white-space:nowrap}
+.wp-pin{width:28px;height:28px;border-radius:50%;background:var(--warn);color:#000;font-weight:900;font-size:12px;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(0,0,0,.35)}
+
+#toast{position:fixed;top:calc(var(--safe-t) + 68px);left:50%;transform:translateX(-50%) translateY(-12px);z-index:4500;background:rgba(15,23,42,.95);color:#fff;padding:9px 18px;border-radius:999px;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:all .25s;white-space:nowrap;box-shadow:0 10px 25px rgba(0,0,0,.35)}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
-<body class="osm-active">
+<body class="osm-mode">
+
+<!-- Splash -->
+<div id="splash">
+  <div class="splash-logo">
+    <svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+  </div>
+  <div class="splash-title">كزدورة</div>
+  <div class="splash-sub">ملاحة ذكية • مسارات متعددة • محاكاة حية</div>
+</div>
 
 <div id="map"></div>
 
-<!-- Top Floating Search Island -->
-<div id="topDock">
-  <div class="search-island">
-    <div class="brand-pill">
+<!-- Top Bar -->
+<div id="topBar">
+  <div class="search-box">
+    <div class="brand-badge">
       <svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
       <span>كزدورة</span>
     </div>
-    <input id="searchInput" type="text" placeholder="إلى أين تريد الذهاب؟" autocomplete="off">
-    <button class="island-btn primary" id="searchBtn" title="بحث">
+    <input id="qInput" type="text" placeholder="ابحث عن حي، شارع، أو وجهة في سوريا..." autocomplete="off">
+    <button class="icon-act go" id="qBtn" title="بحث">
       <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
     </button>
   </div>
-  <div class="chips-row" id="categoryChips">
-    <button class="chip" data-cat="fuel"><svg viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v16h10v-7.5h1.5v5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77z"/></svg>وقود</button>
-    <button class="chip" data-cat="pharmacy"><svg viewBox="0 0 24 24"><path d="M21 5h-2.64l1.14-3.14L17.15 1l-1.46 4H3v2l2 6-2 6v2h18v-2l-2-6 2-6V5zm-5 9h-3v3h-2v-3H8v-2h3V9h2v3h3v2z"/></svg>صيدلية</button>
-    <button class="chip" data-cat="hospital"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg>مشفى</button>
-    <button class="chip" data-cat="restaurant"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>مطعم</button>
-    <button class="chip" data-cat="atm"><svg viewBox="0 0 24 24"><path d="M11.5 1L2 6v2h19V6l-9.5-5zM2 19h20v2H2v-2zm18-8H2v5h18v-5z"/></svg>صراف</button>
-    <button class="chip" data-cat="mosque"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 1.74.65 3.34 1.72 4.61C4.61 14.89 3 17.34 3 20h18c0-2.66-1.61-5.11-3.72-6.39C18.35 12.34 19 10.74 19 9c0-3.87-3.13-7-7-7z"/></svg>مسجد</button>
+
+  <div class="cat-scroll" id="catBar">
+    <button class="cat-chip" data-cat="fuel"><svg viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v16h10v-7.5h1.5v5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77z"/></svg>وقود</button>
+    <button class="cat-chip" data-cat="pharmacy"><svg viewBox="0 0 24 24"><path d="M21 5h-2.64l1.14-3.14L17.15 1l-1.46 4H3v2l2 6-2 6v2h18v-2l-2-6 2-6V5zm-5 9h-3v3h-2v-3H8v-2h3V9h2v3h3v2z"/></svg>صيدلية</button>
+    <button class="cat-chip" data-cat="hospital"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg>مشفى</button>
+    <button class="cat-chip" data-cat="restaurant"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>مطعم</button>
+    <button class="cat-chip" data-cat="atm"><svg viewBox="0 0 24 24"><path d="M11.5 1L2 6v2h19V6l-9.5-5zM2 19h20v2H2v-2zm18-8H2v5h18v-5z"/></svg>صراف</button>
+    <button class="cat-chip" data-cat="mosque"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 1.74.65 3.34 1.72 4.61C4.61 14.89 3 17.34 3 20h18c0-2.66-1.61-5.11-3.72-6.39C18.35 12.34 19 10.74 19 9c0-3.87-3.13-7-7-7z"/></svg>مسجد</button>
   </div>
 </div>
 
-<!-- Telemetry Pill (Left) -->
-<div id="telemetryPill">
-  <div class="speed-orb" id="speedOrb">
-    <div class="num" id="speedNum">0</div>
-    <div class="unit">كم/س</div>
+<!-- Left Telemetry -->
+<div id="sideLeft">
+  <div class="meter-box" id="speedBox">
+    <div class="meter-val" id="speedNum">0</div>
+    <div class="meter-unit">كم/س</div>
   </div>
-  <div class="gps-pill" id="gpsPill"><span class="dot"></span><span id="gpsLabel">GPS</span></div>
+  <div class="gps-tag" id="gpsTag"><span class="dot"></span><span id="gpsTxt">GPS</span></div>
 </div>
 
-<!-- Map Controls Rail (Right) -->
-<div id="mapRail">
-  <button class="rail-btn" id="locateBtn" title="موقعي الحالي">
+<!-- Right Tools -->
+<div id="sideRight">
+  <button class="tool-btn" id="myLocBtn" title="موقعي">
     <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
   </button>
-  <button class="rail-btn" id="tiltBtn" title="منظور ثلاثي الأبعاد">3D</button>
-  <button class="rail-btn" id="compassBtn" title="إعادة توجيه الشمال">
-    <svg id="compassIcon" viewBox="0 0 24 24"><path d="M12 2L8 12l4 10 4-10L12 2zm0 4.8L13.8 11h-3.6L12 6.8z"/></svg>
+  <button class="tool-btn" id="pitchBtn" title="منظور 3D">3D</button>
+  <button class="tool-btn" id="northBtn" title="اتجاه الشمال">
+    <svg id="northSvg" viewBox="0 0 24 24"><path d="M12 2L8 12l4 10 4-10L12 2zm0 4.8L13.8 11h-3.6L12 6.8z"/></svg>
   </button>
-  <button class="rail-btn" id="layersBtn" title="الطبقات والخرائط">
+  <button class="tool-btn" id="layerBtn" title="الطبقات والذاكرة">
     <svg viewBox="0 0 24 24"><path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/></svg>
   </button>
-  <button class="rail-btn" id="themeBtn" title="الوضع الليلي">
+  <button class="tool-btn" id="darkBtn" title="الوضع الليلي">
     <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.39 5.39 0 0 1-4.4 2.26 5.4 5.4 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
   </button>
-  <button class="rail-btn danger" id="sosBtn" title="أرقام الطوارئ">SOS</button>
+  <button class="tool-btn sos" id="sosBtn" title="طوارئ">SOS</button>
 </div>
 
-<!-- Results Drawer -->
-<div id="resultsDrawer">
-  <div class="drawer-head">
-    <span id="resultsTitle">نتائج البحث</span>
-    <button class="close-circle" id="closeResultsBtn"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+<!-- Results Panel -->
+<div id="resultsPanel">
+  <div class="panel-top">
+    <h4 id="resultsHead">النتائج</h4>
+    <button class="x-btn" id="closeResults"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
   </div>
-  <div id="resultsList"></div>
+  <div id="resultsBody"></div>
 </div>
 
-<!-- Smart Bottom Sheet -->
-<div id="bottomSheet">
-  <div class="sheet-handle"></div>
+<!-- Bottom Card -->
+<div id="bottomCard">
+  <div class="grip"></div>
 
-  <!-- Explore Mode -->
   <div id="exploreBox">
-    <div class="quick-grid">
-      <button class="quick-card" id="homeQuickBtn">
-        <div class="q-ico" style="background:#2563eb"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
-        <div><div class="q-title">المنزل</div><div class="q-sub" id="homeSub">اضغط للتعيين</div></div>
+    <div class="shortcuts">
+      <button class="sc-btn" id="homeBtn">
+        <div class="sc-ico" style="background:#2563eb"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
+        <div><div class="sc-title">المنزل</div><div class="sc-sub" id="homeTxt">غير محدد</div></div>
       </button>
-      <button class="quick-card" id="workQuickBtn">
-        <div class="q-ico" style="background:#10b981"><svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg></div>
-        <div><div class="q-title">العمل</div><div class="q-sub" id="workSub">اضغط للتعيين</div></div>
+      <button class="sc-btn" id="workBtn">
+        <div class="sc-ico" style="background:#10b981"><svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg></div>
+        <div><div class="sc-title">العمل</div><div class="sc-sub" id="workTxt">غير محدد</div></div>
       </button>
-      <button class="quick-card" id="savedQuickBtn">
-        <div class="q-ico" style="background:#f59e0b"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
-        <div><div class="q-title">المفضلة</div><div class="q-sub" id="savedCountSub">0 أماكن</div></div>
+      <button class="sc-btn" id="favBtn">
+        <div class="sc-ico" style="background:#f59e0b"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
+        <div><div class="sc-title">المحفوظات</div><div class="sc-sub" id="favTxt">0 أماكن</div></div>
       </button>
     </div>
   </div>
 
-  <!-- Route Preview Mode -->
-  <div id="routePreviewBox">
-    <div class="dest-banner">
+  <div id="routeBox">
+    <div class="dest-row">
       <div style="min-width:0;flex:1">
-        <div class="d-name" id="destNameLabel">الوجهة المحددة</div>
-        <div class="d-sub" id="destSummaryLabel">جاري حساب المسار...</div>
+        <div class="dest-title" id="rtDestName">الوجهة</div>
+        <div class="dest-sub" id="rtDestMeta">جاري الحساب...</div>
       </div>
-      <button class="close-circle" id="clearRouteBtn" title="إلغاء المسار">
-        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-      </button>
+      <button class="x-btn" id="cancelRoute" title="إلغاء"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
     </div>
 
-    <div class="mode-pills">
-      <button class="m-pill active" data-mode="auto">
+    <div class="wp-strip" id="wpStrip">
+      <div id="wpChips"></div>
+      <button class="add-wp-btn" id="addWpBtn">+ نقطة توقف</button>
+    </div>
+
+    <div class="mode-switch">
+      <button class="mode-opt active" data-mode="auto">
         <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
-        <span>سيارة</span>
+        <span>قيادة</span>
       </button>
-      <button class="m-pill" data-mode="pedestrian">
+      <button class="mode-opt" data-mode="pedestrian">
         <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
         <span>مشي</span>
       </button>
     </div>
 
-    <div class="route-cards">
-      <div class="r-card active" data-idx="0" id="routeCard0">
-        <div class="r-tag"><span>المسار الأسرع</span><span>⚡</span></div>
-        <div class="r-time" id="r0Time">—</div>
-        <div class="r-dist" id="r0Dist">—</div>
+    <div class="route-grid">
+      <div class="rt-card active" data-i="0" id="rtCard0">
+        <div class="rt-head"><span>المسار الأسرع</span><span>⚡</span></div>
+        <div class="rt-dur" id="rt0Dur">—</div>
+        <div class="rt-km" id="rt0Km">—</div>
       </div>
-      <div class="r-card" data-idx="1" id="routeCard1">
-        <div class="r-tag"><span>مسار بديل</span><span>⇄</span></div>
-        <div class="r-time" id="r1Time">—</div>
-        <div class="r-dist" id="r1Dist">—</div>
+      <div class="rt-card" data-i="1" id="rtCard1">
+        <div class="rt-head"><span>مسار بديل</span><span>⇄</span></div>
+        <div class="rt-dur" id="rt1Dur">—</div>
+        <div class="rt-km" id="rt1Km">—</div>
       </div>
     </div>
 
-    <div class="cta-row">
-      <button class="btn-go" id="startNavBtn">
+    <div class="action-row">
+      <button class="primary-cta" id="goBtn">
         <svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
-        <span>انطلق الآن</span>
+        <span>بدء التوجيه</span>
       </button>
-      <button class="btn-sim" id="simulateBtn" title="محاكاة المسار">
+      <button class="sec-cta" id="simBtn">
         <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
         <span>محاكاة</span>
       </button>
@@ -347,87 +369,88 @@ body.navigating #bottomSheet{transform:translateY(110%);pointer-events:none}
   </div>
 </div>
 
-<!-- Active Navigation HUD -->
-<div id="navHudTop">
-  <div class="hud-arrow" id="hudArrow">
+<!-- Navigation HUD -->
+<div id="navTop">
+  <div class="nav-turn">
     <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.59 5.58L20 12l-8-8-8 8z"/></svg>
   </div>
-  <div class="hud-text">
-    <div class="hud-dist"><span id="hudDistVal">—</span><span class="hud-sim-tag" id="simBadge">محاكاة</span></div>
-    <div class="hud-street" id="hudInstrText">تابع السير للأمام</div>
+  <div class="nav-meta">
+    <div class="nav-dist"><span id="hudDist">—</span><span class="sim-pill" id="simPill">محاكاة</span></div>
+    <div class="nav-instr" id="hudInstr">تابع المسار</div>
   </div>
 </div>
 
-<div id="navHudBottom">
-  <div class="hud-speed" id="hudSpeedBox">
-    <div class="v" id="hudSpeedVal">0</div>
+<div id="navBottom">
+  <div class="spd-box" id="hudSpdBox">
+    <div class="v" id="hudSpd">0</div>
     <div class="u">كم/س</div>
   </div>
-  <div class="hud-stat">
-    <div class="v" id="hudRemDist">—</div>
+  <div class="nav-stat">
+    <div class="v" id="hudLeftDist">—</div>
     <div class="l">المتبقي</div>
   </div>
-  <div class="hud-stat">
-    <div class="v" id="hudRemTime" style="color:#60a5fa">—</div>
+  <div class="nav-stat">
+    <div class="v" id="hudLeftDur" style="color:#38bdf8">—</div>
     <div class="l">المدة</div>
   </div>
-  <div class="hud-stat">
-    <div class="v" id="hudEtaVal">—</div>
+  <div class="nav-stat">
+    <div class="v" id="hudEta">—</div>
     <div class="l">الوصول</div>
   </div>
-  <button class="btn-end" id="endNavBtn" title="إنهاء التوجيه">
+  <button class="stop-btn" id="stopNavBtn" title="إنهاء">
     <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
   </button>
 </div>
 
-<!-- Long Press Context Menu -->
-<div id="ctxMenu">
-  <button class="ctx-btn" id="ctxGo"><svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>الذهاب إلى هنا</button>
-  <button class="ctx-btn" id="ctxStart"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg>تعيين كنقطة انطلاق</button>
-  <button class="ctx-btn" id="ctxHome"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>حفظ كموقع المنزل</button>
-  <button class="ctx-btn" id="ctxWork"><svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/></svg>حفظ كمقر العمل</button>
-  <button class="ctx-btn" id="ctxSave"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>إضافة للمفضلة</button>
+<!-- Context Menu -->
+<div id="ctxPop">
+  <button class="ctx-item" id="cGo"><svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>التوجه إلى هنا</button>
+  <button class="ctx-item" id="cWp"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>إضافة كنقطة توقف</button>
+  <button class="ctx-item" id="cStart"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg>تعيين كنقطة انطلاق</button>
+  <button class="ctx-item" id="cHome"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>حفظ كـ المنزل</button>
+  <button class="ctx-item" id="cWork"><svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/></svg>حفظ كـ العمل</button>
+  <button class="ctx-item" id="cSave"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>حفظ في المفضلة</button>
 </div>
 
-<!-- Layers & Offline Modal -->
-<div class="modal-backdrop" id="layersModal">
-  <div class="modal-sheet">
-    <div class="modal-head">
-      <h3>نمط الخريطة والعمل دون إنترنت</h3>
-      <button class="close-circle" data-close="layersModal"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+<!-- Layers Modal -->
+<div class="sheet-backdrop" id="layerModal">
+  <div class="sheet-body">
+    <div class="sheet-head">
+      <h3>الطبقات والعمل دون إنترنت</h3>
+      <button class="x-btn" data-close="layerModal"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
     </div>
-    <div class="layer-grid">
-      <button class="layer-opt active" data-layer="osm"><div class="t">خريطة الشوارع</div><div class="s">تفاصيل الأحياء والطرق</div></button>
-      <button class="layer-opt" data-layer="satellite"><div class="t">صور جوية (Esri)</div><div class="s">رؤية فضائية حقيقية</div></button>
+    <div class="layer-opts">
+      <button class="layer-card active" data-lyr="osm"><div class="lt">خريطة الشوارع</div><div class="ls">تفاصيل المدن والطرق</div></button>
+      <button class="layer-card" data-lyr="satellite"><div class="lt">صور جوية</div><div class="ls">معالم وتضاريس</div></button>
     </div>
-    <button class="btn-go" id="cacheAreaBtn" style="width:100%;margin-bottom:8px">تنزيل المنطقة الحالية (2.5 كم) للعمل دون إنترنت</button>
-    <div id="cacheStatus" style="text-align:center;font-size:12px;color:var(--text-muted);font-weight:700">البلاطات المحفوظة: 0</div>
+    <button class="primary-cta" id="cacheBtn" style="width:100%;margin-bottom:8px">تنزيل المنطقة الحالية (2.5 كم)</button>
+    <div id="cacheInfo" style="text-align:center;font-size:12px;color:var(--muted);font-weight:700">البلاطات المخزنة: 0</div>
   </div>
 </div>
 
-<!-- Saved Places Modal -->
-<div class="modal-backdrop" id="savedModal">
-  <div class="modal-sheet">
-    <div class="modal-head">
-      <h3>الأماكن المفضلة</h3>
-      <button class="close-circle" data-close="savedModal"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+<!-- Saved Modal -->
+<div class="sheet-backdrop" id="favModal">
+  <div class="sheet-body">
+    <div class="sheet-head">
+      <h3>الأماكن المحفوظة</h3>
+      <button class="x-btn" data-close="favModal"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
     </div>
-    <div id="savedListContainer"></div>
+    <div id="favList"></div>
   </div>
 </div>
 
 <!-- SOS Modal -->
-<div class="modal-backdrop" id="sosModal">
-  <div class="modal-sheet">
-    <div class="modal-head">
+<div class="sheet-backdrop" id="sosModal">
+  <div class="sheet-body">
+    <div class="sheet-head">
       <h3>أرقام الطوارئ</h3>
-      <button class="close-circle" data-close="sosModal"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+      <button class="x-btn" data-close="sosModal"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
     </div>
-    <div class="em-grid">
-      <a class="em-card" href="tel:112"><div class="lbl">الشرطة</div><div class="num">112</div></a>
-      <a class="em-card" href="tel:110"><div class="lbl">الإسعاف</div><div class="num">110</div></a>
-      <a class="em-card" href="tel:113"><div class="lbl">الإطفاء</div><div class="num">113</div></a>
-      <a class="em-card" href="tel:112"><div class="lbl">طوارئ عامة</div><div class="num">112</div></a>
+    <div class="sos-grid">
+      <a class="sos-card" href="tel:112"><div class="sl">الشرطة</div><div class="sn">112</div></a>
+      <a class="sos-card" href="tel:110"><div class="sl">الإسعاف</div><div class="sn">110</div></a>
+      <a class="sos-card" href="tel:113"><div class="sl">الإطفاء</div><div class="sn">113</div></a>
+      <a class="sos-card" href="tel:112"><div class="sl">طوارئ عامة</div><div class="sn">112</div></a>
     </div>
   </div>
 </div>
@@ -437,137 +460,148 @@ body.navigating #bottomSheet{transform:translateY(110%);pointer-events:none}
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// التهيئة والمتغيرات الأساسية
+// الحالة العامة للتطبيق
 // ═══════════════════════════════════════════════════════════════
 const ALEPPO = [37.1612, 36.2021];
-let currentLayer = 'osm';
-let is3D = false;
-let userLoc = null;      // [lat, lng]
-let manualStart = null;  // [lat, lng]
-let destLoc = null;      // [lat, lng]
-let destName = '';
-let travelMode = 'auto';
-let routesList = [];
-let activeRouteIdx = 0;
-let navActive = false;
-let simTimer = null;
-let watchId = null;
-let lastHeading = 0;
-let currentSpeed = 0;
-let userMarker = null, destMarker = null, startMarker = null, carMarker = null;
-let poiMarkers = [];
-let ctxCoords = null;
+let layerMode = 'osm';
+let tilt3D = false;
+let userPos = null;
+let startPos = null;
+let destPos = null;
+let destTitle = '';
+let waypoints = [];
+let pickWpMode = false;
+let modeCosting = 'auto';
+let routes = [];
+let activeIdx = 0;
+let navigating = false;
+let simInterval = null;
+let headingDeg = 0;
+let speedKmh = 0;
+let locMarker = null, destMarker = null, startMarker = null, puckMarker = null;
+let wpMarkers = [], poiMarkers = [];
+let ctxPt = null;
 
-let savedPlaces = JSON.parse(localStorage.getItem('kzdora_v3_saved') || '[]');
-let homePlace = JSON.parse(localStorage.getItem('kzdora_v3_home') || 'null');
-let workPlace = JSON.parse(localStorage.getItem('kzdora_v3_work') || 'null');
+let homeData = JSON.parse(localStorage.getItem('kzd4_home') || 'null');
+let workData = JSON.parse(localStorage.getItem('kzd4_work') || 'null');
+let favData  = JSON.parse(localStorage.getItem('kzd4_fav')  || '[]');
 
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => el.classList.remove('show'), 2800);
+function notify(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(notify._t);
+  notify._t = setTimeout(() => t.classList.remove('show'), 2600);
 }
 
-function speak(text) {
-  if (!('speechSynthesis' in window) || !text) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'ar-SA';
-  u.rate = 0.98;
-  window.speechSynthesis.speak(u);
+function voice(txt) {
+  try {
+    if (!('speechSynthesis' in window) || !txt) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = 'ar-SA';
+    u.rate = 0.98;
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
 }
 
-function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+function distKm(a, b, c, d) {
+  const R = 6371, p1 = a*Math.PI/180, p2 = c*Math.PI/180;
+  const dp = (c-a)*Math.PI/180, dl = (d-b)*Math.PI/180;
+  const x = Math.sin(dp/2)**2 + Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
 }
 
-function bearing(lat1, lon1, lat2, lon2) {
-  const toR = d => d*Math.PI/180, toD = r => r*180/Math.PI;
-  const dL = toR(lon2-lon1);
-  const y = Math.sin(dL)*Math.cos(toR(lat2));
-  const x = Math.cos(toR(lat1))*Math.sin(toR(lat2)) - Math.sin(toR(lat1))*Math.cos(toR(lat2))*Math.cos(dL);
-  return (toD(Math.atan2(y,x)) + 360) % 360;
+function bearingDeg(a, b, c, d) {
+  const r = x => x*Math.PI/180, deg = x => x*180/Math.PI;
+  const y = Math.sin(r(d-b))*Math.cos(r(c));
+  const x = Math.cos(r(a))*Math.sin(r(c)) - Math.sin(r(a))*Math.cos(r(c))*Math.cos(r(d-b));
+  return (deg(Math.atan2(y,x)) + 360) % 360;
+}
+
+function etaText(sec) {
+  const d = new Date(Date.now() + sec*1000);
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// IndexedDB للتخزين المحلي للبلاطات
+// IndexedDB للبلاطات المحلية
 // ═══════════════════════════════════════════════════════════════
-let db = null;
-function openTileDB() {
+let idb = null;
+function openIDB() {
   return new Promise(res => {
-    const req = indexedDB.open('kzdora_v3_tiles', 1);
-    req.onupgradeneeded = e => e.target.result.createObjectStore('tiles', { keyPath: 'k' });
-    req.onsuccess = e => { db = e.target.result; res(db); };
-    req.onerror = () => res(null);
+    try {
+      const req = indexedDB.open('kzdora_v4_db', 1);
+      req.onupgradeneeded = e => e.target.result.createObjectStore('tiles', { keyPath: 'k' });
+      req.onsuccess = e => { idb = e.target.result; res(idb); };
+      req.onerror = () => res(null);
+    } catch (e) { res(null); }
   });
 }
-async function getTile(k) {
-  if (!db) await openTileDB();
-  if (!db) return null;
+async function readTile(k) {
+  if (!idb) await openIDB();
+  if (!idb) return null;
   return new Promise(res => {
-    const r = db.transaction('tiles','readonly').objectStore('tiles').get(k);
+    const r = idb.transaction('tiles','readonly').objectStore('tiles').get(k);
     r.onsuccess = () => res(r.result?.b || null);
     r.onerror = () => res(null);
   });
 }
-async function putTile(k, b) {
-  if (!db) await openTileDB();
-  if (!db) return;
-  const tx = db.transaction('tiles','readwrite');
-  tx.objectStore('tiles').put({ k, b });
+async function writeTile(k, b) {
+  if (!idb) await openIDB();
+  if (!idb) return;
+  try {
+    const tx = idb.transaction('tiles','readwrite');
+    tx.objectStore('tiles').put({ k, b });
+  } catch (e) {}
 }
-async function countTiles() {
-  if (!db) await openTileDB();
-  if (!db) return 0;
+async function totalTiles() {
+  if (!idb) await openIDB();
+  if (!idb) return 0;
   return new Promise(res => {
-    const r = db.transaction('tiles','readonly').objectStore('tiles').count();
+    const r = idb.transaction('tiles','readonly').objectStore('tiles').count();
     r.onsuccess = () => res(r.result || 0);
     r.onerror = () => res(0);
   });
 }
-
-function tileUrl(layer, z, x, y) {
-  return layer === 'satellite'
+function tileEndpoint(lyr, z, x, y) {
+  return lyr === 'satellite'
     ? `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`
     : `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
 }
 
-maplibregl.addProtocol('kzdora', async (params) => {
-  const [layer, rest] = params.url.replace('kzdora://','').split(':');
-  const key = `${layer}:${rest}`;
-  const cached = await getTile(key);
-  if (cached) return { data: await cached.arrayBuffer() };
+maplibregl.addProtocol('kzd4', async (params) => {
+  const [lyr, rest] = params.url.replace('kzd4://','').split(':');
+  const key = `${lyr}:${rest}`;
+  const hit = await readTile(key);
+  if (hit) return { data: await hit.arrayBuffer() };
   const [z,x,y] = rest.split('/');
-  const r = await fetch(tileUrl(layer, z, x, y));
-  if (!r.ok) throw new Error('tile error');
-  const blob = await r.blob();
-  putTile(key, blob);
+  const resp = await fetch(tileEndpoint(lyr, z, x, y));
+  if (!resp.ok) throw new Error('tile fetch failed');
+  const blob = await resp.blob();
+  writeTile(key, blob);
   return { data: await blob.arrayBuffer() };
 });
 
-function createStyle(layer) {
+function buildStyle(lyr) {
   return {
     version: 8,
     sources: {
-      base: { type: 'raster', tiles: [`kzdora://${layer}:{z}/{x}/{y}`], tileSize: 256, maxzoom: 19 }
+      base: { type: 'raster', tiles: [`kzd4://${lyr}:{z}/{x}/{y}`], tileSize: 256, maxzoom: 19 }
     },
     layers: [
-      { id: 'bg', type: 'background', paint: { 'background-color': layer === 'satellite' ? '#090d16' : '#e5e7eb' } },
+      { id: 'bg', type: 'background', paint: { 'background-color': lyr === 'satellite' ? '#0b1120' : '#e2e8f0' } },
       { id: 'base', type: 'raster', source: 'base' }
     ]
   };
 }
 
 // ═══════════════════════════════════════════════════════════════
-// إنشاء الخريطة
+// الخريطة والبوصلة
 // ═══════════════════════════════════════════════════════════════
 const map = new maplibregl.Map({
   container: 'map',
-  style: createStyle('osm'),
+  style: buildStyle('osm'),
   center: ALEPPO,
   zoom: 13.5,
   pitch: 0,
@@ -575,76 +609,164 @@ const map = new maplibregl.Map({
   attributionControl: false
 });
 
-map.on('rotate', () => {
-  document.getElementById('compassIcon').style.transform = `rotate(${-map.getBearing()}deg)`;
+map.on('load', () => {
+  openIDB();
+  setTimeout(() => document.getElementById('splash').classList.add('hide'), 650);
 });
 
-// ═══════════════════════════════════════════════════════════════
-// تحديث الاختصارات السريعة (المنزل / العمل / المفضلة)
-// ═══════════════════════════════════════════════════════════════
-function refreshQuickCards() {
-  document.getElementById('homeSub').textContent = homePlace ? homePlace.name : 'اضغط للتعيين';
-  document.getElementById('workSub').textContent = workPlace ? workPlace.name : 'اضغط للتعيين';
-  document.getElementById('savedCountSub').textContent = `${savedPlaces.length} أماكن`;
-}
-refreshQuickCards();
+map.on('rotate', () => {
+  document.getElementById('northSvg').style.transform = `rotate(${-map.getBearing()}deg)`;
+});
 
-document.getElementById('homeQuickBtn').onclick = () => {
-  if (homePlace) prepareRoute(homePlace.loc, homePlace.name);
-  else toast('اضغط مطولاً على الخريطة لحفظ موقع المنزل');
+// بوصلة الجهاز
+window.addEventListener('deviceorientationabsolute', e => {
+  if (e.alpha != null && !navigating) {
+    headingDeg = (360 - e.alpha) % 360;
+  }
+}, true);
+window.addEventListener('deviceorientation', e => {
+  if (e.webkitCompassHeading != null && !navigating) {
+    headingDeg = e.webkitCompassHeading;
+  }
+}, true);
+
+// ═══════════════════════════════════════════════════════════════
+// الاختصارات والمفضلة
+// ═══════════════════════════════════════════════════════════════
+function syncShortcuts() {
+  document.getElementById('homeTxt').textContent = homeData ? homeData.name : 'غير محدد';
+  document.getElementById('workTxt').textContent = workData ? workData.name : 'غير محدد';
+  document.getElementById('favTxt').textContent = `${favData.length} أماكن`;
+}
+syncShortcuts();
+
+document.getElementById('homeBtn').onclick = () => {
+  if (homeData) buildRoute(homeData.loc, homeData.name);
+  else notify('اضغط مطولاً على الخريطة لحفظ المنزل');
 };
-document.getElementById('workQuickBtn').onclick = () => {
-  if (workPlace) prepareRoute(workPlace.loc, workPlace.name);
-  else toast('اضغط مطولاً على الخريطة لحفظ مقر العمل');
+document.getElementById('workBtn').onclick = () => {
+  if (workData) buildRoute(workData.loc, workData.name);
+  else notify('اضغط مطولاً على الخريطة لحفظ العمل');
 };
-document.getElementById('savedQuickBtn').onclick = () => {
-  renderSavedModal();
-  document.getElementById('savedModal').classList.add('show');
+document.getElementById('favBtn').onclick = () => {
+  drawFavList();
+  document.getElementById('favModal').classList.add('show');
 };
+
+function drawFavList() {
+  const wrap = document.getElementById('favList');
+  if (!favData.length) {
+    wrap.innerHTML = '<p style="text-align:center;color:var(--muted);padding:24px">لا توجد أماكن محفوظة بعد</p>';
+    return;
+  }
+  wrap.innerHTML = '';
+  favData.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = 'res-item';
+    row.innerHTML = `<div class="res-ico"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div><div class="res-info"><div class="res-name">${item.name}</div><div class="res-addr">${item.loc[0].toFixed(4)}, ${item.loc[1].toFixed(4)}</div></div><button class="x-btn" title="حذف">✕</button>`;
+    row.querySelector('.res-info').onclick = () => {
+      document.getElementById('favModal').classList.remove('show');
+      buildRoute(item.loc, item.name);
+    };
+    row.querySelector('button').onclick = e => {
+      e.stopPropagation();
+      favData.splice(idx, 1);
+      localStorage.setItem('kzd4_fav', JSON.stringify(favData));
+      syncShortcuts();
+      drawFavList();
+    };
+    wrap.appendChild(row);
+  });
+}
 
 // ═══════════════════════════════════════════════════════════════
 // GPS وتتبع الموقع
 // ═══════════════════════════════════════════════════════════════
-function initGPS() {
+function watchGPS() {
   if (!navigator.geolocation) return;
-  watchId = navigator.geolocation.watchPosition(pos => {
+  navigator.geolocation.watchPosition(pos => {
     const loc = [pos.coords.latitude, pos.coords.longitude];
-    userLoc = loc;
-    document.getElementById('gpsPill').classList.add('ready');
-    document.getElementById('gpsLabel').textContent = `${Math.round(pos.coords.accuracy)}م`;
+    userPos = loc;
+    document.getElementById('gpsTag').classList.add('ok');
+    document.getElementById('gpsTxt').textContent = `${Math.round(pos.coords.accuracy)}م`;
 
     if (pos.coords.speed != null && pos.coords.speed >= 0) {
-      currentSpeed = Math.round(pos.coords.speed * 3.6);
-      document.getElementById('speedNum').textContent = currentSpeed;
-      document.getElementById('hudSpeedVal').textContent = currentSpeed;
-      document.getElementById('speedOrb').classList.toggle('over', currentSpeed > 120);
-      document.getElementById('hudSpeedBox').classList.toggle('over', currentSpeed > 120);
+      speedKmh = Math.round(pos.coords.speed * 3.6);
+      document.getElementById('speedNum').textContent = speedKmh;
+      document.getElementById('hudSpd').textContent = speedKmh;
+      const over = speedKmh > 120;
+      document.getElementById('speedBox').classList.toggle('over', over);
+      document.getElementById('hudSpdBox').classList.toggle('over', over);
     }
 
-    if (!navActive) {
-      if (!userMarker) {
+    if (!navigating) {
+      if (!locMarker) {
         const el = document.createElement('div');
-        el.className = 'user-dot';
-        userMarker = new maplibregl.Marker({ element: el }).setLngLat([loc[1], loc[0]]).addTo(map);
+        el.className = 'loc-dot';
+        locMarker = new maplibregl.Marker({ element: el }).setLngLat([loc[1], loc[0]]).addTo(map);
         map.flyTo({ center: [loc[1], loc[0]], zoom: 15.5 });
       } else {
-        userMarker.setLngLat([loc[1], loc[0]]);
+        locMarker.setLngLat([loc[1], loc[0]]);
       }
-    } else if (!simTimer) {
-      if (pos.coords.heading != null && !isNaN(pos.coords.heading)) lastHeading = pos.coords.heading;
-      updateNavigationFrame(loc, lastHeading);
+    } else if (!simInterval) {
+      if (pos.coords.heading != null && !isNaN(pos.coords.heading)) headingDeg = pos.coords.heading;
+      renderNavStep(loc, headingDeg);
     }
   }, () => {
-    document.getElementById('gpsLabel').textContent = 'بدون GPS';
+    document.getElementById('gpsTxt').textContent = 'بدون GPS';
   }, { enableHighAccuracy: true, maximumAge: 1000 });
 }
-initGPS();
+watchGPS();
 
 // ═══════════════════════════════════════════════════════════════
-// حساب المسارات (Valhalla + OSRM Fallback)
+// نقاط التوقف وحساب المسارات
 // ═══════════════════════════════════════════════════════════════
-function decodePoly(str, prec = 6) {
-  const f = Math.pow(10, prec), coords = [];
+function syncWaypoints() {
+  const strip = document.getElementById('wpStrip');
+  const box = document.getElementById('wpChips');
+  if (!destPos) { strip.classList.remove('show'); return; }
+  strip.classList.add('show');
+  box.innerHTML = '';
+  waypoints.forEach((wp, i) => {
+    const ch = document.createElement('div');
+    ch.className = 'wp-chip';
+    ch.innerHTML = `<span>${i+1}. ${wp.name}</span><button title="إزالة">×</button>`;
+    ch.querySelector('button').onclick = () => {
+      waypoints.splice(i, 1);
+      drawWpMarkers();
+      syncWaypoints();
+      buildRoute(destPos, destTitle);
+    };
+    box.appendChild(ch);
+  });
+}
+
+function drawWpMarkers() {
+  wpMarkers.forEach(m => m.remove());
+  wpMarkers = [];
+  waypoints.forEach((wp, i) => {
+    const el = document.createElement('div');
+    el.className = 'wp-pin';
+    el.textContent = String(i + 1);
+    wpMarkers.push(new maplibregl.Marker({ element: el }).setLngLat([wp.loc[1], wp.loc[0]]).addTo(map));
+  });
+}
+
+function addWp(loc, name = null) {
+  waypoints.push({ loc, name: name || `توقف ${waypoints.length + 1}` });
+  drawWpMarkers();
+  syncWaypoints();
+  notify(`تمت إضافة نقطة توقف (${waypoints.length})`);
+  if (destPos) buildRoute(destPos, destTitle);
+}
+
+document.getElementById('addWpBtn').onclick = () => {
+  pickWpMode = true;
+  notify('اضغط على الخريطة لتحديد نقطة التوقف');
+};
+
+function decodeLine(str, prec = 6) {
+  const f = Math.pow(10, prec), pts = [];
   let lat = 0, lng = 0, i = 0;
   while (i < str.length) {
     let b, sh = 0, res = 0;
@@ -653,257 +775,244 @@ function decodePoly(str, prec = 6) {
     sh = 0; res = 0;
     do { b = str.charCodeAt(i++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
     lng += (res & 1) ? ~(res >> 1) : (res >> 1);
-    coords.push([lng / f, lat / f]);
+    pts.push([lng / f, lat / f]);
   }
-  return coords;
+  return pts;
 }
 
-async function prepareRoute(targetLoc, name = 'الوجهة المحددة') {
-  destLoc = targetLoc;
-  destName = name;
+async function buildRoute(target, title = 'الوجهة المحددة') {
+  destPos = target;
+  destTitle = title;
 
   if (destMarker) destMarker.remove();
   const pin = document.createElement('div');
-  pin.className = 'poi-pin';
+  pin.className = 'pin-mark';
   pin.style.background = '#ef4444';
   pin.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>';
-  destMarker = new maplibregl.Marker({ element: pin, anchor: 'bottom' }).setLngLat([targetLoc[1], targetLoc[0]]).addTo(map);
+  destMarker = new maplibregl.Marker({ element: pin, anchor: 'bottom' }).setLngLat([target[1], target[0]]).addTo(map);
 
-  const origin = manualStart || userLoc || [map.getCenter().lat, map.getCenter().lng];
+  const origin = startPos || userPos || [map.getCenter().lat, map.getCenter().lng];
+  const allPts = [origin, ...waypoints.map(w => w.loc), target];
+
   document.getElementById('exploreBox').classList.add('hide');
-  document.getElementById('routePreviewBox').classList.add('show');
-  document.getElementById('destNameLabel').textContent = name;
-  document.getElementById('destSummaryLabel').textContent = 'جاري حساب أفضل مسار...';
+  document.getElementById('routeBox').classList.add('show');
+  document.getElementById('rtDestName').textContent = title;
+  document.getElementById('rtDestMeta').textContent = 'جاري حساب المسار...';
+  syncWaypoints();
 
   try {
-    const body = {
-      locations: [{ lat: origin[0], lon: origin[1] }, { lat: targetLoc[0], lon: targetLoc[1] }],
-      costing: travelMode,
-      alternates: 1,
-      directions_options: { units: 'kilometers', language: 'ar-SA' }
-    };
-    const r = await fetch('https://valhalla1.openstreetmap.de/route', {
+    const resp = await fetch('https://valhalla1.openstreetmap.de/route', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify({
+        locations: allPts.map(p => ({ lat: p[0], lon: p[1] })),
+        costing: modeCosting,
+        alternates: waypoints.length ? 0 : 1,
+        directions_options: { units: 'kilometers', language: 'ar-SA' }
+      })
     });
-    const data = await r.json();
-    if (!data.trip) throw new Error('no trip');
+    const json = await resp.json();
+    if (!json.trip) throw new Error('valhalla fail');
 
-    const parseTrip = t => {
+    const parseLegSet = t => {
       const coords = [], steps = [];
       t.legs.forEach(leg => {
-        const offset = coords.length;
-        decodePoly(leg.shape, 6).forEach(c => coords.push(c));
+        const base = coords.length;
+        decodeLine(leg.shape, 6).forEach(c => coords.push(c));
         leg.maneuvers.forEach(m => {
-          const pt = coords[Math.min(offset + (m.begin_shape_index || 0), coords.length - 1)];
-          steps.push({
-            text: m.instruction || 'تابع السير',
-            dist: (m.length || 0) * 1000,
-            time: m.time || 0,
-            type: m.type,
-            loc: pt ? [pt[1], pt[0]] : origin
-          });
+          const pt = coords[Math.min(base + (m.begin_shape_index || 0), coords.length - 1)];
+          steps.push({ text: m.instruction || 'تابع السير', loc: pt ? [pt[1], pt[0]] : origin });
         });
       });
-      return { coords, steps, distance: t.summary.length * 1000, duration: t.summary.time };
+      return { coords, steps, dist: t.summary.length * 1000, dur: t.summary.time };
     };
 
-    routesList = [parseTrip(data.trip)];
-    if (data.alternates?.[0]?.trip) routesList.push(parseTrip(data.alternates[0].trip));
+    routes = [parseLegSet(json.trip)];
+    if (json.alternates?.[0]?.trip) routes.push(parseLegSet(json.alternates[0].trip));
   } catch (e) {
-    // Fallback OSRM
-    const prof = travelMode === 'pedestrian' ? 'foot' : 'driving';
-    const r = await fetch(`https://router.project-osrm.org/route/v1/${prof}/${origin[1]},${origin[0]};${targetLoc[1]},${targetLoc[0]}?overview=full&geometries=geojson&steps=true`);
-    const data = await r.json();
-    if (!data.routes?.length) { toast('تعذر حساب المسار'); return; }
-    const rt = data.routes[0];
-    const steps = rt.legs[0].steps.map(s => ({
+    const prof = modeCosting === 'pedestrian' ? 'foot' : 'driving';
+    const str = allPts.map(p => `${p[1]},${p[0]}`).join(';');
+    const resp = await fetch(`https://router.project-osrm.org/route/v1/${prof}/${str}?overview=full&geometries=geojson&steps=true`);
+    const json = await resp.json();
+    if (!json.routes?.length) { notify('تعذر حساب المسار'); return; }
+    const rt = json.routes[0];
+    const steps = rt.legs.flatMap(l => l.steps.map(s => ({
       text: s.name ? `تابع عبر ${s.name}` : 'تابع السير',
-      dist: s.distance,
-      time: s.duration,
-      type: 1,
       loc: [s.maneuver.location[1], s.maneuver.location[0]]
-    }));
-    routesList = [{ coords: rt.geometry.coordinates, steps, distance: rt.distance, duration: rt.duration }];
+    })));
+    routes = [{ coords: rt.geometry.coordinates, steps, dist: rt.distance, dur: rt.duration }];
   }
 
-  activeRouteIdx = 0;
-  updateRouteCardsUI();
-  renderRouteLine(routesList[0]);
+  activeIdx = 0;
+  paintRouteCards();
+  paintRouteLine(routes[0]);
 }
 
-function updateRouteCardsUI() {
-  const r0 = routesList[0], r1 = routesList[1];
-  document.getElementById('r0Time').textContent = `${Math.max(1, Math.round(r0.duration / 60))} دقيقة`;
-  document.getElementById('r0Dist').textContent = `${(r0.distance / 1000).toFixed(1)} كم`;
-  document.getElementById('destSummaryLabel').textContent = `المسافة ${(r0.distance / 1000).toFixed(1)} كم • الوصول المتوقع ${calcEta(r0.duration)}`;
+function paintRouteCards() {
+  const r0 = routes[0], r1 = routes[1];
+  document.getElementById('rt0Dur').textContent = `${Math.max(1, Math.round(r0.dur / 60))} دقيقة`;
+  document.getElementById('rt0Km').textContent = `${(r0.dist / 1000).toFixed(1)} كم`;
+  document.getElementById('rtDestMeta').textContent = `${(r0.dist / 1000).toFixed(1)} كم • الوصول ${etaText(r0.dur)}`;
 
-  const card1 = document.getElementById('routeCard1');
+  const c1 = document.getElementById('rtCard1');
   if (r1) {
-    card1.style.opacity = '1';
-    document.getElementById('r1Time').textContent = `${Math.max(1, Math.round(r1.duration / 60))} دقيقة`;
-    document.getElementById('r1Dist').textContent = `${(r1.distance / 1000).toFixed(1)} كم`;
+    c1.style.opacity = '1';
+    document.getElementById('rt1Dur').textContent = `${Math.max(1, Math.round(r1.dur / 60))} دقيقة`;
+    document.getElementById('rt1Km').textContent = `${(r1.dist / 1000).toFixed(1)} كم`;
   } else {
-    card1.style.opacity = '.45';
-    document.getElementById('r1Time').textContent = 'غير متاح';
-    document.getElementById('r1Dist').textContent = '—';
+    c1.style.opacity = '.45';
+    document.getElementById('rt1Dur').textContent = 'غير متاح';
+    document.getElementById('rt1Km').textContent = '—';
   }
-  document.querySelectorAll('.r-card').forEach((c, i) => c.classList.toggle('active', i === activeRouteIdx));
+  document.querySelectorAll('.rt-card').forEach((el, i) => el.classList.toggle('active', i === activeIdx));
 }
 
-function renderRouteLine(route) {
-  ['route-glow', 'route-main'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
-  if (map.getSource('route')) map.removeSource('route');
+function paintRouteLine(rt) {
+  ['rt-halo', 'rt-core'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+  if (map.getSource('rt-src')) map.removeSource('rt-src');
 
-  map.addSource('route', {
+  map.addSource('rt-src', {
     type: 'geojson',
-    data: { type: 'Feature', geometry: { type: 'LineString', coordinates: route.coords } }
+    data: { type: 'Feature', geometry: { type: 'LineString', coordinates: rt.coords } }
   });
   map.addLayer({
-    id: 'route-glow', type: 'line', source: 'route',
+    id: 'rt-halo', type: 'line', source: 'rt-src',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: { 'line-color': '#1d4ed8', 'line-width': 14, 'line-opacity': 0.28 }
+    paint: { 'line-color': '#1d4ed8', 'line-width': 14, 'line-opacity': 0.25 }
   });
   map.addLayer({
-    id: 'route-main', type: 'line', source: 'route',
+    id: 'rt-core', type: 'line', source: 'rt-src',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
     paint: { 'line-color': '#3b82f6', 'line-width': 8, 'line-opacity': 0.96 }
   });
 
-  const bounds = new maplibregl.LngLatBounds();
-  route.coords.forEach(c => bounds.extend(c));
-  map.fitBounds(bounds, { padding: { top: 140, bottom: 270, left: 50, right: 50 }, duration: 700 });
-}
-
-function calcEta(sec) {
-  const d = new Date(Date.now() + sec * 1000);
-  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const b = new maplibregl.LngLatBounds();
+  rt.coords.forEach(c => b.extend(c));
+  map.fitBounds(b, { padding: { top: 145, bottom: 290, left: 50, right: 50 }, duration: 650 });
 }
 
 // ═══════════════════════════════════════════════════════════════
-// التوجيه الحي والمحاكاة
+// التوجيه والمحاكاة
 // ═══════════════════════════════════════════════════════════════
-const CAR_SVG = `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="rgba(37,99,235,0.22)"/><path d="M32 6L46 52L32 43L18 52L32 6Z" fill="#2563eb" stroke="#ffffff" stroke-width="3.5" stroke-linejoin="round"/></svg>`;
+const PUCK_SVG = `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="27" fill="rgba(59,130,246,0.22)"/><path d="M32 6L46 52L32 43L18 52L32 6Z" fill="#2563eb" stroke="#ffffff" stroke-width="3.5" stroke-linejoin="round"/></svg>`;
 
-function startNavigation(isSimulation = false) {
-  const route = routesList[activeRouteIdx];
-  if (!route) return;
+function launchNav(sim = false) {
+  const rt = routes[activeIdx];
+  if (!rt || !rt.coords.length) return;
 
-  navActive = true;
+  navigating = true;
   document.body.classList.add('navigating');
-  document.getElementById('navHudTop').classList.add('show');
-  document.getElementById('navHudBottom').classList.add('show');
-  document.getElementById('simBadge').classList.toggle('show', isSimulation);
+  document.getElementById('navTop').classList.add('show');
+  document.getElementById('navBottom').classList.add('show');
+  document.getElementById('simPill').classList.toggle('show', sim);
 
-  if (userMarker) { userMarker.remove(); userMarker = null; }
+  if (locMarker) { locMarker.remove(); locMarker = null; }
   const el = document.createElement('div');
-  el.className = 'car-puck';
-  el.innerHTML = CAR_SVG;
-  const startPt = [route.coords[0][1], route.coords[0][0]];
-  carMarker = new maplibregl.Marker({ element: el }).setLngLat([startPt[1], startPt[0]]).addTo(map);
+  el.className = 'nav-puck';
+  el.innerHTML = PUCK_SVG;
+  const first = [rt.coords[0][1], rt.coords[0][0]];
+  puckMarker = new maplibregl.Marker({ element: el }).setLngLat([first[1], first[0]]).addTo(map);
 
-  speak(`بدء التوجيه إلى ${destName}`);
-  updateNavigationFrame(startPt, 0, route);
+  voice(`بدء التوجيه إلى ${destTitle}`);
+  renderNavStep(first, 0, rt);
 
-  if (isSimulation) {
-    let idx = 0;
-    simTimer = setInterval(() => {
-      if (idx >= route.coords.length - 1) {
-        clearInterval(simTimer);
-        simTimer = null;
-        speak('وصلت إلى وجهتك');
-        toast('انتهت المحاكاة — وصلت إلى الوجهة');
-        setTimeout(stopNavigation, 2000);
+  if (sim) {
+    let i = 0;
+    simInterval = setInterval(() => {
+      if (i >= rt.coords.length - 1) {
+        clearInterval(simInterval);
+        simInterval = null;
+        voice('وصلت إلى وجهتك');
+        notify('وصلت إلى وجهتك بنجاح');
+        setTimeout(exitNav, 1800);
         return;
       }
-      const p1 = [route.coords[idx][1], route.coords[idx][0]];
-      const p2 = [route.coords[idx + 1][1], route.coords[idx + 1][0]];
-      const hd = bearing(p1[0], p1[1], p2[0], p2[1]);
-      document.getElementById('hudSpeedVal').textContent = travelMode === 'pedestrian' ? '5' : '54';
-      updateNavigationFrame(p2, hd, route);
-      idx++;
-    }, 350);
+      const a = [rt.coords[i][1], rt.coords[i][0]];
+      const b = [rt.coords[i+1][1], rt.coords[i+1][0]];
+      const br = bearingDeg(a[0], a[1], b[0], b[1]);
+      document.getElementById('hudSpd').textContent = modeCosting === 'pedestrian' ? '5' : '52';
+      renderNavStep(b, br, rt);
+      i++;
+    }, 320);
   }
 }
 
-function updateNavigationFrame(loc, hd, route = routesList[activeRouteIdx]) {
-  if (!route) return;
-  if (carMarker) carMarker.setLngLat([loc[1], loc[0]]);
+function renderNavStep(loc, br, rt = routes[activeIdx]) {
+  if (!rt) return;
+  if (puckMarker) puckMarker.setLngLat([loc[1], loc[0]]);
 
-  // أقرب خطوة قادمة
-  let closestStep = route.steps[0];
-  let minD = Infinity;
-  for (const s of route.steps) {
-    const d = haversine(loc[0], loc[1], s.loc[0], s.loc[1]) * 1000;
-    if (d < minD) { minD = d; closestStep = s; }
+  let near = rt.steps[0], best = Infinity;
+  for (const st of rt.steps) {
+    const d = distKm(loc[0], loc[1], st.loc[0], st.loc[1]) * 1000;
+    if (d < best) { best = d; near = st; }
   }
 
-  document.getElementById('hudDistVal').textContent = minD >= 1000 ? `${(minD/1000).toFixed(1)} كم` : `${Math.round(minD)} م`;
-  document.getElementById('hudInstrText').textContent = closestStep?.text || 'تابع المسار';
+  document.getElementById('hudDist').textContent = best >= 1000 ? `${(best/1000).toFixed(1)} كم` : `${Math.round(best)} م`;
+  document.getElementById('hudInstr').textContent = near?.text || 'تابع المسار';
 
-  const remKm = haversine(loc[0], loc[1], destLoc[0], destLoc[1]);
-  const estSec = (remKm / (travelMode === 'pedestrian' ? 4.5 : 40)) * 3600;
-  document.getElementById('hudRemDist').textContent = remKm >= 1 ? `${remKm.toFixed(1)} كم` : `${Math.round(remKm*1000)} م`;
-  document.getElementById('hudRemTime').textContent = `${Math.max(1, Math.round(estSec/60))} د`;
-  document.getElementById('hudEtaVal').textContent = calcEta(estSec);
+  const remKm = distKm(loc[0], loc[1], destPos[0], destPos[1]);
+  const remSec = (remKm / (modeCosting === 'pedestrian' ? 4.5 : 42)) * 3600;
+  document.getElementById('hudLeftDist').textContent = remKm >= 1 ? `${remKm.toFixed(1)} كم` : `${Math.round(remKm*1000)} م`;
+  document.getElementById('hudLeftDur').textContent = `${Math.max(1, Math.round(remSec/60))} د`;
+  document.getElementById('hudEta').textContent = etaText(remSec);
 
   map.easeTo({
     center: [loc[1], loc[0]],
     zoom: 17.2,
     pitch: 60,
-    bearing: hd,
-    padding: { top: 120, bottom: 180 },
-    duration: 340
+    bearing: br,
+    padding: { top: 120, bottom: 170 },
+    duration: 310
   });
 }
 
-function stopNavigation() {
-  navActive = false;
-  if (simTimer) { clearInterval(simTimer); simTimer = null; }
+function exitNav() {
+  navigating = false;
+  if (simInterval) { clearInterval(simInterval); simInterval = null; }
   document.body.classList.remove('navigating');
-  document.getElementById('navHudTop').classList.remove('show');
-  document.getElementById('navHudBottom').classList.remove('show');
-  if (carMarker) { carMarker.remove(); carMarker = null; }
-  map.easeTo({ pitch: is3D ? 55 : 0, bearing: 0, padding: { top: 0, bottom: 0 }, duration: 600 });
+  document.getElementById('navTop').classList.remove('show');
+  document.getElementById('navBottom').classList.remove('show');
+  if (puckMarker) { puckMarker.remove(); puckMarker = null; }
+  map.easeTo({ pitch: tilt3D ? 58 : 0, bearing: 0, padding: { top: 0, bottom: 0 }, duration: 550 });
 }
 
 // ═══════════════════════════════════════════════════════════════
 // البحث والفئات
 // ═══════════════════════════════════════════════════════════════
-async function searchText(q) {
-  if (!q.trim()) return;
-  const drawer = document.getElementById('resultsDrawer');
-  const list = document.getElementById('resultsList');
-  drawer.classList.add('show');
-  list.innerHTML = '<div class="res-row"><div class="res-title">جاري البحث...</div></div>';
+async function doSearch(txt) {
+  const q = txt.trim();
+  if (!q) return;
+  const panel = document.getElementById('resultsPanel');
+  const body = document.getElementById('resultsBody');
+  panel.classList.add('show');
+  body.innerHTML = '<div class="res-item"><div class="res-name">جاري البحث...</div></div>';
 
   try {
     const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=sy&limit=8&accept-language=ar`);
-    const data = await r.json();
-    document.getElementById('resultsTitle').textContent = `النتائج (${data.length})`;
-    if (!data.length) { list.innerHTML = '<div class="res-row"><div class="res-title">لا توجد نتائج مطابقة</div></div>'; return; }
-    list.innerHTML = '';
-    data.forEach(item => {
-      const parts = item.display_name.split(',');
-      const title = parts[0].trim();
-      const sub = parts.slice(1, 3).join('، ').trim();
-      const loc = [parseFloat(item.lat), parseFloat(item.lon)];
+    const list = await r.json();
+    document.getElementById('resultsHead').textContent = `نتائج البحث (${list.length})`;
+    if (!list.length) {
+      body.innerHTML = '<div class="res-item"><div class="res-name">لا توجد نتائج مطابقة</div></div>';
+      return;
+    }
+    body.innerHTML = '';
+    list.forEach(p => {
+      const parts = p.display_name.split(',');
+      const name = parts[0].trim();
+      const addr = parts.slice(1, 3).join('، ').trim();
+      const loc = [parseFloat(p.lat), parseFloat(p.lon)];
       const row = document.createElement('div');
-      row.className = 'res-row';
-      row.innerHTML = `<div class="res-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></div><div class="res-meta"><div class="res-title">${title}</div><div class="res-sub">${sub}</div></div>`;
-      row.onclick = () => {
-        drawer.classList.remove('show');
-        prepareRoute(loc, title);
-      };
-      list.appendChild(row);
+      row.className = 'res-item';
+      row.innerHTML = `<div class="res-ico"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></div><div class="res-info"><div class="res-name">${name}</div><div class="res-addr">${addr}</div></div>`;
+      row.onclick = () => { panel.classList.remove('show'); buildRoute(loc, name); };
+      body.appendChild(row);
     });
   } catch (e) {
-    list.innerHTML = '<div class="res-row"><div class="res-title">تعذر الاتصال بخادم البحث</div></div>';
+    body.innerHTML = '<div class="res-item"><div class="res-name">تعذر الاتصال بالبحث</div></div>';
   }
 }
 
-const CAT_QUERY = {
+const CAT_MAP = {
   fuel: '["amenity"="fuel"]',
   pharmacy: '["amenity"="pharmacy"]',
   hospital: '["amenity"~"hospital|clinic"]',
@@ -912,243 +1021,221 @@ const CAT_QUERY = {
   mosque: '["amenity"="place_of_worship"]["religion"="muslim"]'
 };
 
-async function searchCategory(cat) {
+async function doCategory(cat) {
   poiMarkers.forEach(m => m.remove());
   poiMarkers = [];
-  const center = userLoc || [map.getCenter().lat, map.getCenter().lng];
-  toast('جاري البحث عن الأماكن القريبة...');
-  const q = `[out:json][timeout:8];(node${CAT_QUERY[cat]}(around:3000,${center[0]},${center[1]}););out 20;`;
+  const c = userPos || [map.getCenter().lat, map.getCenter().lng];
+  notify('جاري البحث عن الأماكن القريبة...');
+  const q = `[out:json][timeout:8];(node${CAT_MAP[cat]}(around:3000,${c[0]},${c[1]}););out 20;`;
   try {
     const r = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(q) });
     const data = await r.json();
-    const drawer = document.getElementById('resultsDrawer');
-    const list = document.getElementById('resultsList');
-    list.innerHTML = '';
     const items = (data.elements || []).map(el => ({
       name: el.tags?.name || 'نقطة خدمة',
       loc: [el.lat, el.lon],
-      dist: haversine(center[0], center[1], el.lat, el.lon)
-    })).sort((a,b) => a.dist - b.dist);
+      d: distKm(c[0], c[1], el.lat, el.lon)
+    })).sort((a,b) => a.d - b.d);
 
-    document.getElementById('resultsTitle').textContent = `الأقرب إليك (${items.length})`;
+    const panel = document.getElementById('resultsPanel');
+    const body = document.getElementById('resultsBody');
+    document.getElementById('resultsHead').textContent = `الأقرب إليك (${items.length})`;
+    body.innerHTML = '';
+
     items.forEach(it => {
-      const mEl = document.createElement('div');
-      mEl.className = 'poi-pin';
-      mEl.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>';
-      poiMarkers.push(new maplibregl.Marker({ element: mEl, anchor: 'bottom' }).setLngLat([it.loc[1], it.loc[0]]).addTo(map));
+      const mk = document.createElement('div');
+      mk.className = 'pin-mark';
+      mk.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>';
+      poiMarkers.push(new maplibregl.Marker({ element: mk, anchor: 'bottom' }).setLngLat([it.loc[1], it.loc[0]]).addTo(map));
 
       const row = document.createElement('div');
-      row.className = 'res-row';
-      row.innerHTML = `<div class="res-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></div><div class="res-meta"><div class="res-title">${it.name}</div></div><div class="res-dist">${it.dist < 1 ? Math.round(it.dist*1000)+' م' : it.dist.toFixed(1)+' كم'}</div>`;
-      row.onclick = () => { drawer.classList.remove('show'); prepareRoute(it.loc, it.name); };
-      list.appendChild(row);
+      row.className = 'res-item';
+      row.innerHTML = `<div class="res-ico"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></div><div class="res-info"><div class="res-name">${it.name}</div></div><div class="res-badge">${it.d < 1 ? Math.round(it.d*1000)+' م' : it.d.toFixed(1)+' كم'}</div>`;
+      row.onclick = () => { panel.classList.remove('show'); buildRoute(it.loc, it.name); };
+      body.appendChild(row);
     });
-    if (items.length) drawer.classList.add('show');
-    else toast('لم يتم العثور على نتائج قريبة');
-  } catch (e) { toast('تعذر جلب النقاط القريبة'); }
+    if (items.length) panel.classList.add('show');
+    else notify('لا توجد نتائج قريبة');
+  } catch (e) { notify('تعذر جلب النقاط القريبة'); }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// التفاعلات والأزرار
+// الأحداث والضغط المطول
 // ═══════════════════════════════════════════════════════════════
-document.getElementById('searchBtn').onclick = () => searchText(document.getElementById('searchInput').value);
-document.getElementById('searchInput').addEventListener('keypress', e => { if (e.key === 'Enter') searchText(e.target.value); });
-document.getElementById('closeResultsBtn').onclick = () => document.getElementById('resultsDrawer').classList.remove('show');
+document.getElementById('qBtn').onclick = () => doSearch(document.getElementById('qInput').value);
+document.getElementById('qInput').addEventListener('keypress', e => { if (e.key === 'Enter') doSearch(e.target.value); });
+document.getElementById('closeResults').onclick = () => document.getElementById('resultsPanel').classList.remove('show');
 
-document.querySelectorAll('.chip').forEach(ch => {
+document.querySelectorAll('.cat-chip').forEach(ch => {
   ch.onclick = () => {
-    const active = ch.classList.contains('active');
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    if (active) {
-      poiMarkers.forEach(m => m.remove());
-      poiMarkers = [];
-      document.getElementById('resultsDrawer').classList.remove('show');
+    const wasActive = ch.classList.contains('active');
+    document.querySelectorAll('.cat-chip').forEach(x => x.classList.remove('active'));
+    if (wasActive) {
+      poiMarkers.forEach(m => m.remove()); poiMarkers = [];
+      document.getElementById('resultsPanel').classList.remove('show');
     } else {
       ch.classList.add('active');
-      searchCategory(ch.dataset.cat);
+      doCategory(ch.dataset.cat);
     }
   };
 });
 
-document.getElementById('locateBtn').onclick = () => {
-  if (userLoc) map.flyTo({ center: [userLoc[1], userLoc[0]], zoom: 16 });
-  else toast('جاري انتظار إشارة GPS...');
+document.getElementById('myLocBtn').onclick = () => {
+  if (userPos) map.flyTo({ center: [userPos[1], userPos[0]], zoom: 16 });
+  else notify('بانتظار تحديد موقعك عبر GPS');
 };
-
-document.getElementById('tiltBtn').onclick = function() {
-  is3D = !is3D;
-  this.classList.toggle('active', is3D);
-  map.easeTo({ pitch: is3D ? 58 : 0, duration: 500 });
+document.getElementById('pitchBtn').onclick = function() {
+  tilt3D = !tilt3D;
+  this.classList.toggle('active', tilt3D);
+  map.easeTo({ pitch: tilt3D ? 58 : 0, duration: 450 });
 };
-
-document.getElementById('compassBtn').onclick = () => map.easeTo({ bearing: 0, duration: 450 });
-document.getElementById('layersBtn').onclick = async () => {
-  document.getElementById('cacheStatus').textContent = `البلاطات المحفوظة: ${await countTiles()}`;
-  document.getElementById('layersModal').classList.add('show');
+document.getElementById('northBtn').onclick = () => map.easeTo({ bearing: 0, duration: 400 });
+document.getElementById('layerBtn').onclick = async () => {
+  document.getElementById('cacheInfo').textContent = `البلاطات المخزنة: ${await totalTiles()}`;
+  document.getElementById('layerModal').classList.add('show');
 };
-document.getElementById('themeBtn').onclick = function() {
+document.getElementById('darkBtn').onclick = function() {
   document.body.classList.toggle('dark');
   this.classList.toggle('active');
 };
 document.getElementById('sosBtn').onclick = () => document.getElementById('sosModal').classList.add('show');
 
-document.querySelectorAll('[data-close]').forEach(btn => {
-  btn.onclick = () => document.getElementById(btn.dataset.close).classList.remove('show');
+document.querySelectorAll('[data-close]').forEach(b => {
+  b.onclick = () => document.getElementById(b.dataset.close).classList.remove('show');
 });
 
-document.querySelectorAll('.layer-opt').forEach(opt => {
-  opt.onclick = () => {
-    const l = opt.dataset.layer;
-    if (l === currentLayer) return;
-    currentLayer = l;
-    document.body.classList.toggle('osm-active', l === 'osm');
-    document.querySelectorAll('.layer-opt').forEach(o => o.classList.toggle('active', o.dataset.layer === l));
-    map.setStyle(createStyle(l));
-    map.once('styledata', () => { if (routesList[activeRouteIdx]) renderRouteLine(routesList[activeRouteIdx]); });
-  };
-});
-
-document.querySelectorAll('.m-pill').forEach(p => {
-  p.onclick = () => {
-    travelMode = p.dataset.mode;
-    document.querySelectorAll('.m-pill').forEach(x => x.classList.toggle('active', x === p));
-    if (destLoc) prepareRoute(destLoc, destName);
-  };
-});
-
-document.querySelectorAll('.r-card').forEach(card => {
+document.querySelectorAll('.layer-card').forEach(card => {
   card.onclick = () => {
-    const i = Number(card.dataset.idx);
-    if (!routesList[i]) return;
-    activeRouteIdx = i;
-    updateRouteCardsUI();
-    renderRouteLine(routesList[i]);
+    const l = card.dataset.lyr;
+    if (l === layerMode) return;
+    layerMode = l;
+    document.body.classList.toggle('osm-mode', l === 'osm');
+    document.querySelectorAll('.layer-card').forEach(c => c.classList.toggle('active', c.dataset.lyr === l));
+    map.setStyle(buildStyle(l));
+    map.once('styledata', () => { if (routes[activeIdx]) paintRouteLine(routes[activeIdx]); });
   };
 });
 
-document.getElementById('clearRouteBtn').onclick = () => {
-  ['route-glow', 'route-main'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
-  if (map.getSource('route')) map.removeSource('route');
+document.querySelectorAll('.mode-opt').forEach(opt => {
+  opt.onclick = () => {
+    modeCosting = opt.dataset.mode;
+    document.querySelectorAll('.mode-opt').forEach(x => x.classList.toggle('active', x === opt));
+    if (destPos) buildRoute(destPos, destTitle);
+  };
+});
+
+document.querySelectorAll('.rt-card').forEach(card => {
+  card.onclick = () => {
+    const i = Number(card.dataset.i);
+    if (!routes[i]) return;
+    activeIdx = i;
+    paintRouteCards();
+    paintRouteLine(routes[i]);
+  };
+});
+
+document.getElementById('cancelRoute').onclick = () => {
+  ['rt-halo', 'rt-core'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+  if (map.getSource('rt-src')) map.removeSource('rt-src');
   if (destMarker) { destMarker.remove(); destMarker = null; }
-  destLoc = null;
-  routesList = [];
-  document.getElementById('routePreviewBox').classList.remove('show');
+  wpMarkers.forEach(m => m.remove()); wpMarkers = [];
+  waypoints = []; destPos = null; routes = [];
+  document.getElementById('routeBox').classList.remove('show');
   document.getElementById('exploreBox').classList.remove('hide');
 };
 
-document.getElementById('startNavBtn').onclick = () => startNavigation(false);
-document.getElementById('simulateBtn').onclick = () => startNavigation(true);
-document.getElementById('endNavBtn').onclick = stopNavigation;
+document.getElementById('goBtn').onclick = () => launchNav(false);
+document.getElementById('simBtn').onclick = () => launchNav(true);
+document.getElementById('stopNavBtn').onclick = exitNav;
 
-// ═══════════════════════════════════════════════════════════════
-// الضغط المطول على الخريطة (Context Menu)
-// ═══════════════════════════════════════════════════════════════
-const ctxMenu = document.getElementById('ctxMenu');
-let holdTimer = null;
-
-function openCtx(lngLat, pt) {
-  ctxCoords = [lngLat.lat, lngLat.lng];
-  ctxMenu.style.left = Math.min(Math.max(12, pt.x - 100), window.innerWidth - 230) + 'px';
-  ctxMenu.style.top = Math.min(Math.max(80, pt.y - 40), window.innerHeight - 250) + 'px';
-  ctxMenu.classList.add('show');
-  if (navigator.vibrate) navigator.vibrate(30);
+// Context menu
+const ctxPop = document.getElementById('ctxPop');
+let holdId = null;
+function showCtx(ll, pt) {
+  ctxPt = [ll.lat, ll.lng];
+  ctxPop.style.left = Math.min(Math.max(12, pt.x - 105), window.innerWidth - 230) + 'px';
+  ctxPop.style.top = Math.min(Math.max(90, pt.y - 40), window.innerHeight - 280) + 'px';
+  ctxPop.classList.add('show');
+  if (navigator.vibrate) navigator.vibrate(25);
 }
-
 map.on('touchstart', e => {
   if (e.originalEvent.touches.length > 1) return;
-  holdTimer = setTimeout(() => openCtx(e.lngLat, e.point), 480);
+  holdId = setTimeout(() => showCtx(e.lngLat, e.point), 460);
 });
-map.on('touchmove', () => clearTimeout(holdTimer));
-map.on('touchend', () => clearTimeout(holdTimer));
-map.on('contextmenu', e => { e.preventDefault(); openCtx(e.lngLat, e.point); });
-map.on('click', () => ctxMenu.classList.remove('show'));
+map.on('touchmove', () => clearTimeout(holdId));
+map.on('touchend', () => clearTimeout(holdId));
+map.on('contextmenu', e => { e.preventDefault(); showCtx(e.lngLat, e.point); });
+map.on('click', e => {
+  ctxPop.classList.remove('show');
+  if (pickWpMode) {
+    pickWpMode = false;
+    addWp([e.lngLat.lat, e.lngLat.lng]);
+  }
+});
 
-document.getElementById('ctxGo').onclick = () => { ctxMenu.classList.remove('show'); if (ctxCoords) prepareRoute(ctxCoords, 'نقطة على الخريطة'); };
-document.getElementById('ctxStart').onclick = () => {
-  ctxMenu.classList.remove('show');
-  if (!ctxCoords) return;
-  manualStart = ctxCoords;
+document.getElementById('cGo').onclick = () => { ctxPop.classList.remove('show'); if (ctxPt) buildRoute(ctxPt, 'وجهة على الخريطة'); };
+document.getElementById('cWp').onclick = () => { ctxPop.classList.remove('show'); if (ctxPt) addWp(ctxPt); };
+document.getElementById('cStart').onclick = () => {
+  ctxPop.classList.remove('show');
+  if (!ctxPt) return;
+  startPos = ctxPt;
   if (startMarker) startMarker.remove();
   const el = document.createElement('div');
-  el.className = 'poi-pin'; el.style.background = '#10b981';
-  startMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat([ctxCoords[1], ctxCoords[0]]).addTo(map);
-  toast('تم تحديد نقطة الانطلاق');
-  if (destLoc) prepareRoute(destLoc, destName);
+  el.className = 'pin-mark'; el.style.background = '#10b981';
+  startMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat([ctxPt[1], ctxPt[0]]).addTo(map);
+  notify('تم تحديد نقطة الانطلاق');
+  if (destPos) buildRoute(destPos, destTitle);
 };
-document.getElementById('ctxHome').onclick = () => {
-  ctxMenu.classList.remove('show');
-  if (!ctxCoords) return;
-  homePlace = { name: 'المنزل', loc: ctxCoords };
-  localStorage.setItem('kzdora_v3_home', JSON.stringify(homePlace));
-  refreshQuickCards();
-  toast('تم حفظ موقع المنزل');
+document.getElementById('cHome').onclick = () => {
+  ctxPop.classList.remove('show');
+  if (!ctxPt) return;
+  homeData = { name: 'المنزل', loc: ctxPt };
+  localStorage.setItem('kzd4_home', JSON.stringify(homeData));
+  syncShortcuts();
+  notify('تم حفظ موقع المنزل');
 };
-document.getElementById('ctxWork').onclick = () => {
-  ctxMenu.classList.remove('show');
-  if (!ctxCoords) return;
-  workPlace = { name: 'مقر العمل', loc: ctxCoords };
-  localStorage.setItem('kzdora_v3_work', JSON.stringify(workPlace));
-  refreshQuickCards();
-  toast('تم حفظ مقر العمل');
+document.getElementById('cWork').onclick = () => {
+  ctxPop.classList.remove('show');
+  if (!ctxPt) return;
+  workData = { name: 'العمل', loc: ctxPt };
+  localStorage.setItem('kzd4_work', JSON.stringify(workData));
+  syncShortcuts();
+  notify('تم حفظ مقر العمل');
 };
-document.getElementById('ctxSave').onclick = () => {
-  ctxMenu.classList.remove('show');
-  if (!ctxCoords) return;
-  const label = prompt('اسم المكان:', 'مكان مميز');
-  if (!label) return;
-  savedPlaces.push({ name: label, loc: ctxCoords });
-  localStorage.setItem('kzdora_v3_saved', JSON.stringify(savedPlaces));
-  refreshQuickCards();
-  toast('تمت الإضافة للمفضلة');
+document.getElementById('cSave').onclick = () => {
+  ctxPop.classList.remove('show');
+  if (!ctxPt) return;
+  const n = prompt('اسم المكان:', 'مكان محفوظ');
+  if (!n) return;
+  favData.push({ name: n.trim(), loc: ctxPt });
+  localStorage.setItem('kzd4_fav', JSON.stringify(favData));
+  syncShortcuts();
+  notify('تمت الإضافة إلى المحفوظات');
 };
 
-function renderSavedModal() {
-  const box = document.getElementById('savedListContainer');
-  if (!savedPlaces.length) { box.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:24px">لا توجد أماكن محفوظة بعد</p>'; return; }
-  box.innerHTML = '';
-  savedPlaces.forEach((p, idx) => {
-    const row = document.createElement('div');
-    row.className = 'res-row';
-    row.innerHTML = `<div class="res-icon"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div><div class="res-meta"><div class="res-title">${p.name}</div><div class="res-sub">${p.loc[0].toFixed(4)}, ${p.loc[1].toFixed(4)}</div></div><button class="close-circle" title="حذف">✕</button>`;
-    row.querySelector('.res-meta').onclick = () => { document.getElementById('savedModal').classList.remove('show'); prepareRoute(p.loc, p.name); };
-    row.querySelector('button').onclick = e => {
-      e.stopPropagation();
-      savedPlaces.splice(idx, 1);
-      localStorage.setItem('kzdora_v3_saved', JSON.stringify(savedPlaces));
-      refreshQuickCards();
-      renderSavedModal();
-    };
-    box.appendChild(row);
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// تنزيل بلاطات المنطقة للعمل دون إنترنت
-// ═══════════════════════════════════════════════════════════════
-document.getElementById('cacheAreaBtn').onclick = async () => {
-  const c = map.getCenter();
-  const rKm = 2.5;
-  const dLat = rKm / 111, dLng = rKm / (111 * Math.cos(c.lat * Math.PI / 180));
-  const tiles = [];
+// Offline cache
+document.getElementById('cacheBtn').onclick = async () => {
+  const c = map.getCenter(), r = 2.5;
+  const dLat = r / 111, dLng = r / (111 * Math.cos(c.lat * Math.PI / 180));
+  const list = [];
   for (const z of [14, 15, 16]) {
     const n = 2 ** z;
     const x1 = Math.floor((c.lng - dLng + 180) / 360 * n);
     const x2 = Math.floor((c.lng + dLng + 180) / 360 * n);
     const y1 = Math.floor((1 - Math.log(Math.tan((c.lat + dLat)*Math.PI/180) + 1/Math.cos((c.lat + dLat)*Math.PI/180))/Math.PI)/2 * n);
     const y2 = Math.floor((1 - Math.log(Math.tan((c.lat - dLat)*Math.PI/180) + 1/Math.cos((c.lat - dLat)*Math.PI/180))/Math.PI)/2 * n);
-    for (let x = x1; x <= x2; x++) for (let y = y1; y <= y2; y++) tiles.push({ z, x, y });
+    for (let x = x1; x <= x2; x++) for (let y = y1; y <= y2; y++) list.push({ z, x, y });
   }
-  toast(`جاري حفظ ${tiles.length} بلاطة...`);
+  notify(`جاري حفظ ${list.length} بلاطة...`);
   let done = 0;
-  for (const t of tiles) {
+  for (const t of list) {
     try {
-      const res = await fetch(tileUrl(currentLayer, t.z, t.x, t.y));
-      if (res.ok) await putTile(`${currentLayer}:${t.z}/${t.x}/${t.y}`, await res.blob());
+      const res = await fetch(tileEndpoint(layerMode, t.z, t.x, t.y));
+      if (res.ok) await writeTile(`${layerMode}:${t.z}/${t.x}/${t.y}`, await res.blob());
     } catch (e) {}
     done++;
-    document.getElementById('cacheStatus').textContent = `جاري الحفظ: ${done} / ${tiles.length}`;
+    document.getElementById('cacheInfo').textContent = `جاري التخزين: ${done} / ${list.length}`;
   }
-  toast('اكتمل حفظ المنطقة للعمل دون إنترنت');
+  notify('تم حفظ المنطقة للعمل دون إنترنت');
 };
 </script>
 </body>
