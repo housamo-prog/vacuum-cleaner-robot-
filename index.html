@@ -7,11 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>كزدورة 5.0 — نظام ملاحة ذكي متكامل</title>
+<title>كزدورة 6.0 — من تطوير الوسام للبرمجيات</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
 :root{
-  --glass:rgba(255,255,255,.86);
+  --glass:rgba(255,255,255,.87);
   --glass-hi:rgba(255,255,255,.96);
   --bg:var(--glass-hi);
   --bg2:#f1f5f9;
@@ -29,7 +29,7 @@
   --sb:env(safe-area-inset-bottom,12px);
 }
 body.dark{
-  --glass:rgba(15,23,42,.84);
+  --glass:rgba(15,23,42,.85);
   --glass-hi:rgba(15,23,42,.96);
   --bg:#0f172a;
   --bg2:#1e293b;
@@ -48,12 +48,13 @@ body.dark #map.osm .maplibregl-canvas{filter:invert(.93) hue-rotate(180deg) brig
 .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none!important}
 
 /* Splash */
-#splash{position:fixed;inset:0;z-index:5000;background:radial-gradient(circle at 25% 20%,#1e3a8a 0%,#090d16 68%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:12px;transition:opacity .4s,transform .4s}
+#splash{position:fixed;inset:0;z-index:5000;background:radial-gradient(circle at 25% 20%,#1e3a8a 0%,#090d16 68%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:10px;transition:opacity .4s,transform .4s;padding:20px;text-align:center}
 #splash.hide{opacity:0;transform:scale(1.04);pointer-events:none}
 .sp-logo{width:74px;height:74px;border-radius:24px;background:linear-gradient(135deg,#3b82f6,#06b6d4);display:flex;align-items:center;justify-content:center;box-shadow:0 18px 40px rgba(59,130,246,.45)}
 .sp-logo svg{width:40px;height:40px;fill:#fff}
 .sp-name{font-size:28px;font-weight:900}
 .sp-desc{font-size:12.5px;color:#cbd5e1;font-weight:600}
+.sp-dev{font-size:12px;color:#93c5fd;font-weight:800;margin-top:4px;background:rgba(255,255,255,.08);padding:5px 14px;border-radius:999px}
 
 /* Top HUD */
 #topHud{position:fixed;top:calc(var(--st) + 6px);left:12px;right:12px;z-index:1000;display:flex;flex-direction:column;gap:8px;transition:transform .35s,opacity .3s}
@@ -87,13 +88,13 @@ body.nav-on #leftRail{display:none}
 .gps-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--warn)}
 .gps-chip.ok .dot{background:var(--ok)}
 
-#rightRail{position:fixed;right:12px;top:calc(var(--st) + 122px);z-index:990;display:flex;flex-direction:column;gap:8px}
+#rightRail{position:fixed;right:12px;top:calc(var(--st) + 122px);z-index:990;display:flex;flex-direction:column;gap:7px}
 body.nav-on #rightRail{top:calc(var(--st) + 116px)}
-.r-btn{width:44px;height:44px;border-radius:16px;background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);font-size:12px;font-weight:900;transition:transform .12s,background .2s}
+.r-btn{width:42px;height:42px;border-radius:15px;background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);font-size:11.5px;font-weight:900;transition:transform .12s,background .2s}
 .r-btn:active{transform:scale(.92)}
 .r-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .r-btn.sos{color:var(--err)}
-.r-btn svg{width:20px;height:20px;fill:currentColor}
+.r-btn svg{width:19px;height:19px;fill:currentColor}
 
 /* Results Drawer */
 #resDrawer{position:fixed;top:calc(var(--st) + 116px);left:12px;right:12px;z-index:1150;background:var(--glass-hi);backdrop-filter:blur(24px);border:1px solid var(--line);border-radius:24px;max-height:56vh;overflow-y:auto;display:none;box-shadow:var(--shadow)}
@@ -117,9 +118,9 @@ body.nav-on #rightRail{top:calc(var(--st) + 116px)}
 .poi-dir{font-size:10.5px;color:var(--sub);font-weight:700;margin-top:2px}
 
 /* Bottom Sheet */
-#sheet{position:fixed;bottom:0;left:0;right:0;z-index:1050;background:var(--glass);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);border-top:1px solid var(--line);border-radius:28px 28px 0 0;padding:10px 16px calc(var(--sb) + 12px);box-shadow:0 -12px 42px rgba(15,23,42,.2);transition:transform .35s cubic-bezier(.22,1,.36,1)}
+#sheet{position:fixed;bottom:0;left:0;right:0;z-index:1050;background:var(--glass);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);border-top:1px solid var(--line);border-radius:28px 28px 0 0;padding:10px 16px calc(var(--sb) + 10px);box-shadow:0 -12px 42px rgba(15,23,42,.2);transition:transform .35s cubic-bezier(.22,1,.36,1)}
 body.nav-on #sheet{transform:translateY(115%);pointer-events:none}
-.handle{width:38px;height:4px;border-radius:999px;background:var(--sub);opacity:.35;margin:0 auto 12px}
+.handle{width:38px;height:4px;border-radius:999px;background:var(--sub);opacity:.35;margin:0 auto 10px}
 
 .quick-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .q-tile{background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:10px;display:flex;align-items:center;gap:8px;cursor:pointer;text-align:right;color:var(--ink);font-family:inherit}
@@ -128,6 +129,9 @@ body.nav-on #sheet{transform:translateY(115%);pointer-events:none}
 .q-badge svg{width:17px;height:17px;fill:#fff}
 .q-t{font-size:12.5px;font-weight:800}
 .q-s{font-size:10px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:74px;margin-top:1px}
+
+.dev-credit{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;font-size:11.5px;font-weight:800;color:var(--sub)}
+.dev-credit .brand-tag{color:var(--accent);font-weight:900}
 
 #planView{display:none;flex-direction:column;gap:10px}
 #planView.show{display:flex}
@@ -207,6 +211,10 @@ body.nav-on #sheet{transform:translateY(115%);pointer-events:none}
 .lyr-opt .t{font-size:13.5px;font-weight:800}
 .lyr-opt .s{font-size:11px;color:var(--sub);margin-top:2px}
 
+.cfg-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.cfg-row label{font-size:13px;font-weight:800}
+.cfg-inp{width:110px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);border-radius:12px;padding:8px 10px;font-family:inherit;font-size:13.5px;font-weight:800;text-align:center}
+
 .note-form{display:flex;gap:8px;margin-bottom:12px}
 .note-inp{flex:1;border:1px solid var(--line);background:var(--bg2);color:var(--ink);border-radius:14px;padding:10px 12px;font-family:inherit;font-size:13.5px;outline:none}
 .note-add{background:var(--accent);color:#fff;border:none;border-radius:14px;padding:0 16px;font-family:inherit;font-weight:800;cursor:pointer}
@@ -239,7 +247,8 @@ body.nav-on #sheet{transform:translateY(115%);pointer-events:none}
 <div id="splash">
   <div class="sp-logo"><svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg></div>
   <div class="sp-name">كزدورة</div>
-  <div class="sp-desc">رادار قريب • حاسبة رحلة • ملاحظات طريق</div>
+  <div class="sp-desc">ملاحة ذكية • حاسبة وقود • مشاركة فورية</div>
+  <div class="sp-dev">كزدورة من تطوير الوسام للبرمجيات</div>
 </div>
 
 <div id="map"></div>
@@ -279,10 +288,11 @@ body.nav-on #sheet{transform:translateY(115%);pointer-events:none}
 <!-- Right Controls -->
 <div id="rightRail">
   <button class="r-btn" id="locBtn" title="موقعي"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg></button>
+  <button class="r-btn" id="shareBtn" title="مشاركة الموقع"><svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg></button>
   <button class="r-btn" id="tiltBtn" title="منظور ثلاثي الأبعاد">3D</button>
   <button class="r-btn" id="northBtn" title="اتجاه الشمال"><svg id="northArrow" viewBox="0 0 24 24"><path d="M12 2L8 12l4 10 4-10L12 2zm0 4.8L13.8 11h-3.6L12 6.8z"/></svg></button>
   <button class="r-btn" id="notesBtn" title="ملاحظات الطريق"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></button>
-  <button class="r-btn" id="lyrBtn" title="الطبقات والذاكرة"><svg viewBox="0 0 24 24"><path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/></svg></button>
+  <button class="r-btn" id="lyrBtn" title="الطبقات والوقود والأوفلاين"><svg viewBox="0 0 24 24"><path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/></svg></button>
   <button class="r-btn" id="darkBtn" title="الوضع الليلي"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.39 5.39 0 0 1-4.4 2.26 5.4 5.4 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg></button>
   <button class="r-btn sos" id="sosBtn" title="طوارئ">SOS</button>
 </div>
@@ -315,6 +325,11 @@ body.nav-on #sheet{transform:translateY(115%);pointer-events:none}
         <div><div class="q-t">المحفوظات</div><div class="q-s" id="qFavSub">0 أماكن</div></div>
       </button>
     </div>
+
+    <div class="dev-credit">
+      <span class="brand-tag">كزدورة من تطوير الوسام للبرمجيات</span>
+      <span>v6.0</span>
+    </div>
   </div>
 
   <div id="planView">
@@ -327,7 +342,7 @@ body.nav-on #sheet{transform:translateY(115%);pointer-events:none}
     </div>
 
     <div class="trip-estimator" id="tripEst">
-      <span>⛽ الوقود التقديري للرحلة:</span>
+      <span>⛽ الوقود والتكلفة:</span>
       <strong id="fuelEstVal">—</strong>
     </div>
 
@@ -369,6 +384,11 @@ body.nav-on #sheet{transform:translateY(115%);pointer-events:none}
         <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
         <span>محاكاة</span>
       </button>
+    </div>
+
+    <div class="dev-credit">
+      <span class="brand-tag">كزدورة من تطوير الوسام للبرمجيات</span>
+      <span>توجيه ذكي</span>
     </div>
   </div>
 </div>
@@ -418,17 +438,27 @@ body.nav-on #sheet{transform:translateY(115%);pointer-events:none}
   </div>
 </div>
 
-<!-- Layers Modal -->
+<!-- Layers & Fuel Settings Modal -->
 <div class="modal-bg" id="lyrModal">
   <div class="modal-box">
     <div class="m-head">
-      <h3>الطبقات والعمل دون إنترنت</h3>
+      <h3>الطبقات والوقود والأوفلاين</h3>
       <button class="x-ico" data-close="lyrModal"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
     </div>
     <div class="lyr-grid">
       <button class="lyr-opt active" data-l="osm"><div class="t">خريطة الشوارع</div><div class="s">الأحياء والطرق</div></button>
       <button class="lyr-opt" data-l="satellite"><div class="t">صور جوية</div><div class="s">رؤية فضائية</div></button>
     </div>
+
+    <div class="cfg-row">
+      <label for="consInp">استهلاك السيارة (لتر / 100 كم):</label>
+      <input class="cfg-inp" id="consInp" type="number" step="0.5" min="2" max="30" value="8">
+    </div>
+    <div class="cfg-row">
+      <label for="priceInp">سعر الليتر (اختياري):</label>
+      <input class="cfg-inp" id="priceInp" type="number" step="100" min="0" value="0">
+    </div>
+
     <button class="btn-start" id="cacheRegionBtn" style="width:100%;margin-bottom:8px">حفظ المنطقة الحالية (2.5 كم) أوفلاين</button>
     <div id="cacheCountTxt" style="text-align:center;font-size:12px;color:var(--sub);font-weight:700">البلاطات المحفوظة: 0</div>
   </div>
@@ -466,7 +496,7 @@ body.nav-on #sheet{transform:translateY(115%);pointer-events:none}
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// الحالة والبيانات الأساسية
+// الحالة والبيانات الأساسية — كزدورة من تطوير الوسام للبرمجيات
 // ═══════════════════════════════════════════════════════════════
 const ALEPPO = [37.1612, 36.2021];
 let lyrMode = 'osm';
@@ -484,16 +514,20 @@ let onNav = false;
 let demoLoop = null;
 let headDeg = 0;
 let spdVal = 0;
+let lastRerouteAt = 0;
 let uMark = null, dMark = null, sMark = null, puck = null;
 let wMarks = [], pMarks = [];
 let ctxLoc = null;
 
-let homeObj = JSON.parse(localStorage.getItem('kzd5_home') || 'null');
-let workObj = JSON.parse(localStorage.getItem('kzd5_work') || 'null');
-let favArr  = JSON.parse(localStorage.getItem('kzd5_fav')  || '[]');
-let noteArr = JSON.parse(localStorage.getItem('kzd5_notes')|| '[]');
+let homeObj = JSON.parse(localStorage.getItem('kzd6_home') || 'null');
+let workObj = JSON.parse(localStorage.getItem('kzd6_work') || 'null');
+let favArr  = JSON.parse(localStorage.getItem('kzd6_fav')  || '[]');
+let noteArr = JSON.parse(localStorage.getItem('kzd6_notes')|| '[]');
+let fuelCfg = JSON.parse(localStorage.getItem('kzd6_fuel') || '{"cons":8,"price":0}');
 
-// قاعدة نقاط مرجعية احتياطية في حلب لضمان عدم تعطل البحث عند ضعف الشبكة
+document.getElementById('consInp').value = fuelCfg.cons ?? 8;
+document.getElementById('priceInp').value = fuelCfg.price ?? 0;
+
 const LOCAL_POIS = {
   fuel: [
     { name: 'محطة وقود حلب الجديدة', loc: [36.2125, 37.1220] },
@@ -572,6 +606,16 @@ function fmtEta(sec) {
   return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
+function minDistToRouteKm(loc, coords) {
+  if (!coords?.length) return 0;
+  let min = Infinity;
+  for (let i = 0; i < coords.length; i += 2) {
+    const d = haversineKm(loc[0], loc[1], coords[i][1], coords[i][0]);
+    if (d < min) min = d;
+  }
+  return min;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // IndexedDB للبلاطات المحلية
 // ═══════════════════════════════════════════════════════════════
@@ -579,7 +623,7 @@ let dbRef = null;
 function openDB() {
   return new Promise(res => {
     try {
-      const r = indexedDB.open('kzd5_tiles_db', 1);
+      const r = indexedDB.open('kzd6_tiles_db', 1);
       r.onupgradeneeded = e => e.target.result.createObjectStore('tiles', { keyPath: 'k' });
       r.onsuccess = e => { dbRef = e.target.result; res(dbRef); };
       r.onerror = () => res(null);
@@ -618,8 +662,8 @@ function tileSrcUrl(l, z, x, y) {
     : `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
 }
 
-maplibregl.addProtocol('kzd5', async (params) => {
-  const [l, rest] = params.url.replace('kzd5://','').split(':');
+maplibregl.addProtocol('kzd6', async (params) => {
+  const [l, rest] = params.url.replace('kzd6://','').split(':');
   const key = `${l}:${rest}`;
   const hit = await getCachedTile(key);
   if (hit) return { data: await hit.arrayBuffer() };
@@ -635,7 +679,7 @@ function makeMapStyle(l) {
   return {
     version: 8,
     sources: {
-      base: { type: 'raster', tiles: [`kzd5://${l}:{z}/{x}/{y}`], tileSize: 256, maxzoom: 19 }
+      base: { type: 'raster', tiles: [`kzd6://${l}:{z}/{x}/{y}`], tileSize: 256, maxzoom: 19 }
     },
     layers: [
       { id: 'bg', type: 'background', paint: { 'background-color': l === 'satellite' ? '#090d16' : '#e2e8f0' } },
@@ -659,7 +703,7 @@ const map = new maplibregl.Map({
 
 map.on('load', () => {
   openDB();
-  setTimeout(() => document.getElementById('splash').classList.add('hide'), 600);
+  setTimeout(() => document.getElementById('splash').classList.add('hide'), 650);
 });
 
 map.on('rotate', () => {
@@ -667,7 +711,7 @@ map.on('rotate', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// الاختصارات والمفضلة والملاحظات
+// الاختصارات والمفضلة والملاحظات والوقود
 // ═══════════════════════════════════════════════════════════════
 function syncQuickUI() {
   document.getElementById('qHomeSub').textContent = homeObj ? homeObj.name : 'اضغط للحفظ';
@@ -704,7 +748,7 @@ function renderFavs() {
     row.querySelector('button').onclick = e => {
       e.stopPropagation();
       favArr.splice(i, 1);
-      localStorage.setItem('kzd5_fav', JSON.stringify(favArr));
+      localStorage.setItem('kzd6_fav', JSON.stringify(favArr));
       syncQuickUI();
       renderFavs();
     };
@@ -725,7 +769,7 @@ function renderNotes() {
     row.innerHTML = `<div class="poi-txt"><div class="poi-title">${n.txt}</div><div class="poi-sub">${n.time}</div></div><button class="x-ico">✕</button>`;
     row.querySelector('button').onclick = () => {
       noteArr.splice(i, 1);
-      localStorage.setItem('kzd5_notes', JSON.stringify(noteArr));
+      localStorage.setItem('kzd6_notes', JSON.stringify(noteArr));
       renderNotes();
     };
     box.appendChild(row);
@@ -741,14 +785,39 @@ document.getElementById('noteAddBtn').onclick = () => {
   const txt = inp.value.trim();
   if (!txt) return;
   noteArr.unshift({ txt, time: new Date().toLocaleTimeString('ar-SY', { hour: '2-digit', minute: '2-digit' }) });
-  localStorage.setItem('kzd5_notes', JSON.stringify(noteArr));
+  localStorage.setItem('kzd6_notes', JSON.stringify(noteArr));
   inp.value = '';
   renderNotes();
   toast('تم حفظ الملاحظة');
 };
 
+function saveFuelSettings() {
+  fuelCfg.cons = Math.max(1, parseFloat(document.getElementById('consInp').value) || 8);
+  fuelCfg.price = Math.max(0, parseFloat(document.getElementById('priceInp').value) || 0);
+  localStorage.setItem('kzd6_fuel', JSON.stringify(fuelCfg));
+  if (rtList[rtIdx]) paintPlanCards();
+}
+document.getElementById('consInp').onchange = saveFuelSettings;
+document.getElementById('priceInp').onchange = saveFuelSettings;
+
+// مشاركة الموقع أو الوجهة
+document.getElementById('shareBtn').onclick = async () => {
+  const pt = dPos || uPos || [map.getCenter().lat, map.getCenter().lng];
+  const label = dPos ? `الوجهة (${dName})` : 'موقعي الحالي';
+  const text = `كزدورة — ${label}: https://www.openstreetmap.org/?mlat=${pt[0].toFixed(5)}&mlon=${pt[1].toFixed(5)}#map=16/${pt[0].toFixed(5)}/${pt[1].toFixed(5)}`;
+  if (navigator.share) {
+    try { await navigator.share({ title: 'كزدورة', text }); return; } catch (e) {}
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('تم نسخ رابط الموقع');
+  } catch (e) {
+    toast(`${pt[0].toFixed(4)}, ${pt[1].toFixed(4)}`);
+  }
+};
+
 // ═══════════════════════════════════════════════════════════════
-// GPS وتتبع الموقع
+// GPS وتتبع الموقع + إعادة حساب المسار عند الانحراف
 // ═══════════════════════════════════════════════════════════════
 function startGPS() {
   if (!navigator.geolocation) return;
@@ -778,7 +847,14 @@ function startGPS() {
       }
     } else if (!demoLoop) {
       if (pos.coords.heading != null && !isNaN(pos.coords.heading)) headDeg = pos.coords.heading;
-      stepNav(loc, headDeg);
+      const curRt = rtList[rtIdx];
+      if (curRt && dPos && minDistToRouteKm(loc, curRt.coords) > 0.12 && Date.now() - lastRerouteAt > 8000) {
+        lastRerouteAt = Date.now();
+        toast('إعادة حساب المسار...');
+        planTrip(dPos, dName, true);
+      } else {
+        stepNav(loc, headDeg);
+      }
     }
   }, () => {
     document.getElementById('gpsTxt').textContent = 'بدون GPS';
@@ -848,7 +924,7 @@ function decodeShape(str, prec = 6) {
   return pts;
 }
 
-async function planTrip(target, title = 'الوجهة المحددة') {
+async function planTrip(target, title = 'الوجهة المحددة', keepNav = false) {
   dPos = target;
   dName = title;
 
@@ -859,14 +935,16 @@ async function planTrip(target, title = 'الوجهة المحددة') {
   pin.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>';
   dMark = new maplibregl.Marker({ element: pin, anchor: 'bottom' }).setLngLat([target[1], target[0]]).addTo(map);
 
-  const origin = sPos || uPos || [map.getCenter().lat, map.getCenter().lng];
+  const origin = (keepNav && uPos) ? uPos : (sPos || uPos || [map.getCenter().lat, map.getCenter().lng]);
   const pts = [origin, ...wps.map(w => w.loc), target];
 
-  document.getElementById('homeView').classList.add('hide');
-  document.getElementById('planView').classList.add('show');
-  document.getElementById('planDest').textContent = title;
-  document.getElementById('planSummary').textContent = 'جاري حساب المسار...';
-  syncWpBar();
+  if (!keepNav) {
+    document.getElementById('homeView').classList.add('hide');
+    document.getElementById('planView').classList.add('show');
+    document.getElementById('planDest').textContent = title;
+    document.getElementById('planSummary').textContent = 'جاري حساب المسار...';
+    syncWpBar();
+  }
 
   try {
     const resp = await fetch('https://valhalla1.openstreetmap.de/route', {
@@ -913,20 +991,25 @@ async function planTrip(target, title = 'الوجهة المحددة') {
 
   rtIdx = 0;
   paintPlanCards();
-  paintPlanLine(rtList[0]);
+  paintPlanLine(rtList[0], !keepNav);
 }
 
 function paintPlanCards() {
   const r0 = rtList[0], r1 = rtList[1];
-  const km0 = (r0.dist / 1000).toFixed(1);
+  const kmVal = r0.dist / 1000;
+  const km0 = kmVal.toFixed(1);
   const min0 = Math.max(1, Math.round(r0.dur / 60));
   document.getElementById('rt0Dur').textContent = `${min0} دقيقة`;
   document.getElementById('rt0Km').textContent = `${km0} كم`;
   document.getElementById('planSummary').textContent = `${km0} كم • الوصول ${fmtEta(r0.dur)}`;
 
-  // تقدير الوقود (متوسط 8 لتر لكل 100 كم للقيادة)
-  const liters = costMode === 'pedestrian' ? 0 : ((r0.dist / 1000) * 0.08);
-  document.getElementById('fuelEstVal').textContent = costMode === 'pedestrian' ? '0 لتر (مشي)' : `~${liters.toFixed(1)} لتر`;
+  if (costMode === 'pedestrian') {
+    document.getElementById('fuelEstVal').textContent = '0 لتر (مشي)';
+  } else {
+    const liters = kmVal * ((fuelCfg.cons || 8) / 100);
+    const cost = fuelCfg.price > 0 ? ` • ${Math.round(liters * fuelCfg.price).toLocaleString()} ل.س` : '';
+    document.getElementById('fuelEstVal').textContent = `~${liters.toFixed(1)} لتر${cost}`;
+  }
 
   const b1 = document.getElementById('rtBox1');
   if (r1) {
@@ -941,7 +1024,7 @@ function paintPlanCards() {
   document.querySelectorAll('.rt-box').forEach((el, i) => el.classList.toggle('active', i === rtIdx));
 }
 
-function paintPlanLine(rt) {
+function paintPlanLine(rt, fit = true) {
   ['p-halo', 'p-core'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
   if (map.getSource('p-src')) map.removeSource('p-src');
 
@@ -960,9 +1043,11 @@ function paintPlanLine(rt) {
     paint: { 'line-color': '#3b82f6', 'line-width': 8, 'line-opacity': 0.96 }
   });
 
-  const b = new maplibregl.LngLatBounds();
-  rt.coords.forEach(c => b.extend(c));
-  map.fitBounds(b, { padding: { top: 145, bottom: 320, left: 50, right: 50 }, duration: 650 });
+  if (fit) {
+    const b = new maplibregl.LngLatBounds();
+    rt.coords.forEach(c => b.extend(c));
+    map.fitBounds(b, { padding: { top: 145, bottom: 340, left: 50, right: 50 }, duration: 650 });
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1051,7 +1136,7 @@ function endNav() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// محرك البحث والفئات الهجين (Overpass + Nominatim + احتياطي محلي)
+// محرك البحث والفئات الهجين
 // ═══════════════════════════════════════════════════════════════
 async function runTextSearch(txt) {
   const q = txt.trim();
@@ -1128,7 +1213,6 @@ async function runCategorySearch(catKey) {
   const center = uPos || [map.getCenter().lat, map.getCenter().lng];
   toast(`جاري البحث عن أقرب ${spec.label}...`);
 
-  // 1) محاولة Overpass الشاملة (node + way)
   try {
     const q = `[out:json][timeout:10];(node${spec.osm}(around:5000,${center[0]},${center[1]});way${spec.osm}(around:5000,${center[0]},${center[1]}););out center 25;`;
     const r = await fetch('https://overpass-api.de/api/interpreter', {
@@ -1156,7 +1240,6 @@ async function runCategorySearch(catKey) {
     }
   } catch (e) {}
 
-  // 2) بديل Nominatim حول الموقع الحالي
   try {
     const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(spec.kw + ' حلب')}&limit=12&accept-language=ar`);
     if (r.ok) {
@@ -1177,7 +1260,6 @@ async function runCategorySearch(catKey) {
     }
   } catch (e) {}
 
-  // 3) بديل محلي فوري لضمان عمل الميزة دائماً
   const fallback = (LOCAL_POIS[catKey] || []).map(item => ({
     name: item.name,
     loc: item.loc,
@@ -1319,7 +1401,7 @@ document.getElementById('ctxHome').onclick = () => {
   ctxEl.classList.remove('show');
   if (!ctxLoc) return;
   homeObj = { name: 'المنزل', loc: ctxLoc };
-  localStorage.setItem('kzd5_home', JSON.stringify(homeObj));
+  localStorage.setItem('kzd6_home', JSON.stringify(homeObj));
   syncQuickUI();
   toast('تم حفظ المنزل');
 };
@@ -1327,7 +1409,7 @@ document.getElementById('ctxWork').onclick = () => {
   ctxEl.classList.remove('show');
   if (!ctxLoc) return;
   workObj = { name: 'العمل', loc: ctxLoc };
-  localStorage.setItem('kzd5_work', JSON.stringify(workObj));
+  localStorage.setItem('kzd6_work', JSON.stringify(workObj));
   syncQuickUI();
   toast('تم حفظ العمل');
 };
@@ -1337,7 +1419,7 @@ document.getElementById('ctxFav').onclick = () => {
   const n = prompt('اسم المكان:', 'مكان محفوظ');
   if (!n) return;
   favArr.push({ name: n.trim(), loc: ctxLoc });
-  localStorage.setItem('kzd5_fav', JSON.stringify(favArr));
+  localStorage.setItem('kzd6_fav', JSON.stringify(favArr));
   syncQuickUI();
   toast('تمت الإضافة للمفضلة');
 };
