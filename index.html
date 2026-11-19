@@ -2,2012 +2,1154 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f62fe">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#090d16">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="كزدورة">
-<meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon.svg">
-<title>كزدورة — ملاحة وخرائط ذكية</title>
+<title>كزدورة 3.0 — نظام ملاحة ذكي</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
 :root{
-  --panel:rgba(255,255,255,.92);
-  --panel-solid:#ffffff;
-  --text:#111827;
-  --text-sub:#4b5563;
-  --primary:#0f62fe;
-  --primary-dark:#0043ce;
-  --primary-soft:rgba(15,98,254,.12);
-  --danger:#dc2626;
-  --success:#16a34a;
-  --warning:#d97706;
-  --border:rgba(17,24,39,.08);
-  --input-bg:rgba(17,24,39,.06);
-  --gold:#eab308;
-  --fuel:#ea580c;
-  --pharmacy:#16a34a;
-  --hospital:#dc2626;
-  --grocery:#7c3aed;
-  --stop:#f97316;
-  --emergency:#b91c1c;
-  --shadow-sm:0 4px 14px rgba(15,23,42,.08);
-  --shadow-md:0 10px 28px rgba(15,23,42,.14);
-  --shadow-lg:0 18px 42px rgba(15,23,42,.22);
-  --safe-top:env(safe-area-inset-top,0px);
-  --safe-bottom:env(safe-area-inset-bottom,0px)
+  --bg-glass:rgba(255,255,255,.88);
+  --bg-solid:#ffffff;
+  --bg-elevated:#f3f4f6;
+  --text:#0f172a;
+  --text-muted:#64748b;
+  --accent:#2563eb;
+  --accent-glow:rgba(37,99,235,.28);
+  --accent-soft:rgba(37,99,235,.1);
+  --emerald:#10b981;
+  --amber:#f59e0b;
+  --rose:#ef4444;
+  --border:rgba(15,23,42,.08);
+  --shadow-float:0 12px 32px -4px rgba(15,23,42,.16),0 4px 12px -2px rgba(15,23,42,.08);
+  --shadow-sheet:0 -10px 40px rgba(15,23,42,.18);
+  --safe-top:env(safe-area-inset-top,12px);
+  --safe-bottom:env(safe-area-inset-bottom,12px);
 }
 body.dark{
-  --panel:rgba(24,24,27,.9);
-  --panel-solid:#18181b;
-  --text:#f4f4f5;
-  --text-sub:#a1a1aa;
-  --primary:#60a5fa;
-  --primary-dark:#3b82f6;
-  --primary-soft:rgba(96,165,250,.16);
-  --border:rgba(255,255,255,.1);
-  --input-bg:rgba(255,255,255,.08);
-  --shadow-sm:0 4px 16px rgba(0,0,0,.35);
-  --shadow-md:0 12px 32px rgba(0,0,0,.5);
-  --shadow-lg:0 20px 48px rgba(0,0,0,.65)
+  --bg-glass:rgba(15,23,42,.86);
+  --bg-solid:#0f172a;
+  --bg-elevated:#1e293b;
+  --text:#f8fafc;
+  --text-muted:#94a3b8;
+  --accent:#3b82f6;
+  --accent-glow:rgba(59,130,246,.35);
+  --accent-soft:rgba(59,130,246,.16);
+  --border:rgba(255,255,255,.09);
+  --shadow-float:0 16px 36px -4px rgba(0,0,0,.55);
+  --shadow-sheet:0 -12px 44px rgba(0,0,0,.65);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Tahoma,Arial,sans-serif;overflow:hidden;background:#e5e7eb;color:var(--text);overscroll-behavior:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;position:fixed}
-#map{position:fixed;inset:0;width:100%;height:100%;z-index:1;background:#e5e7eb}
-body.dark #map{background:#09090b}
-body.dark #map .maplibregl-canvas{filter:invert(.92) hue-rotate(180deg) brightness(.9) contrast(.95)}
-body.dark .maplibregl-marker,body.dark .poi-marker{filter:invert(.92) hue-rotate(180deg)}
+html,body{height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Tahoma,sans-serif;overflow:hidden;background:#0f172a;color:var(--text);user-select:none;position:fixed}
+#map{position:fixed;inset:0;width:100%;height:100%;z-index:1}
+body.dark #map.osm-active .maplibregl-canvas{filter:invert(.92) hue-rotate(180deg) brightness(.88) contrast(1.05)}
 .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none!important}
 
-#osmCredit{position:fixed;left:8px;bottom:calc(4px + var(--safe-bottom));z-index:2000;font-size:10px;background:var(--panel);backdrop-filter:blur(10px);padding:2px 8px;border-radius:999px;border:1px solid var(--border)}
-#osmCredit a{color:var(--text-sub);text-decoration:none}
-body.navigating #osmCredit{bottom:calc(92px + var(--safe-bottom))}
+/* Top Floating Island (Search + Brand Pill) */
+#topDock{position:fixed;top:calc(var(--safe-top) + 8px);left:12px;right:12px;z-index:1000;display:flex;flex-direction:column;gap:8px;transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .3s}
+body.navigating #topDock{transform:translateY(-160%);opacity:0;pointer-events:none}
 
-#offlineBadge{position:fixed;top:calc(74px + var(--safe-top));left:50%;transform:translateX(-50%);z-index:2000;background:rgba(220,38,38,.95);backdrop-filter:blur(10px);color:#fff;padding:7px 15px;border-radius:999px;font-size:12px;font-weight:600;display:none;align-items:center;gap:6px;box-shadow:var(--shadow-md)}
-#offlineBadge.show{display:flex}
-#offlineBadge svg{width:14px;height:14px;fill:#fff}
+.search-island{display:flex;align-items:center;gap:8px;background:var(--bg-glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:22px;padding:6px 8px;box-shadow:var(--shadow-float)}
+.brand-pill{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;padding:8px 12px;border-radius:16px;font-weight:800;font-size:13px;flex-shrink:0;box-shadow:0 4px 12px var(--accent-glow)}
+.brand-pill svg{width:16px;height:16px;fill:#fff}
+#searchInput{flex:1;border:none;background:transparent;outline:none;font-size:14.5px;font-weight:600;color:var(--text);font-family:inherit;min-width:0;padding:6px 4px}
+#searchInput::placeholder{color:var(--text-muted);font-weight:500}
+.island-btn{width:38px;height:38px;border-radius:14px;border:none;background:var(--bg-elevated);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .12s,background .2s}
+.island-btn:active{transform:scale(.92)}
+.island-btn svg{width:19px;height:19px;fill:currentColor}
+.island-btn.primary{background:var(--accent);color:#fff}
 
-#installPrompt{position:fixed;bottom:calc(92px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(220%);z-index:1400;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:12px 20px;border-radius:999px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 26px rgba(15,98,254,.4);font-family:inherit;font-size:13px;font-weight:700;border:1px solid rgba(255,255,255,.22);cursor:pointer;white-space:nowrap;transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;pointer-events:none}
-#installPrompt.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
-#installPrompt svg{width:18px;height:18px;fill:#fff}
-body.navigating #installPrompt{display:none}
+/* Category Chips */
+.chips-row{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px}
+.chips-row::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;display:flex;align-items:center;gap:6px;background:var(--bg-glass);backdrop-filter:blur(16px);border:1px solid var(--border);padding:8px 13px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.06);transition:all .15s}
+.chip:active{transform:scale(.95)}
+.chip.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 6px 16px var(--accent-glow)}
+.chip svg{width:15px;height:15px;fill:currentColor}
 
-#appHeader{position:fixed;top:0;left:0;right:0;z-index:1050;padding:calc(10px + var(--safe-top)) 14px 12px;background:linear-gradient(135deg,#0f62fe 0%,#002d9c 100%);display:flex;align-items:center;gap:11px;box-shadow:var(--shadow-md);color:#fff;transition:transform .35s,opacity .35s}
-body.navigating #appHeader{transform:translateY(-100%);opacity:0;pointer-events:none}
-#appHeader .logo{width:42px;height:42px;flex-shrink:0;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border-radius:14px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.28)}
-#appHeader .logo svg{width:24px;height:24px;fill:#fff}
-#appHeader .title-block{flex:1;min-width:0}
-#appHeader .title{font-size:18px;font-weight:800;letter-spacing:-.2px;display:flex;align-items:center;gap:6px}
-#appHeader .pill-badge{font-size:10px;font-weight:700;background:rgba(255,255,255,.2);padding:2px 7px;border-radius:999px}
-#appHeader .subtitle{font-size:11px;opacity:.9;margin-top:2px}
-#appHeader .actions{display:flex;gap:6px}
-#appHeader .header-btn{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.18);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,background .2s}
-#appHeader .header-btn:active{transform:scale(.93);background:rgba(255,255,255,.26)}
-#appHeader .header-btn svg{width:19px;height:19px;fill:#fff}
+/* Floating Right Action Rail (Map Controls) */
+#mapRail{position:fixed;right:12px;top:calc(var(--safe-top) + 124px);z-index:990;display:flex;flex-direction:column;gap:8px;transition:transform .3s}
+body.navigating #mapRail{top:calc(var(--safe-top) + 118px)}
+.rail-btn{width:44px;height:44px;border-radius:16px;background:var(--bg-glass);backdrop-filter:blur(18px);border:1px solid var(--border);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow-float);font-size:12px;font-weight:900;transition:transform .12s,background .2s}
+.rail-btn:active{transform:scale(.92)}
+.rail-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.rail-btn.danger{color:var(--rose)}
+.rail-btn svg{width:20px;height:20px;fill:currentColor}
 
-#searchBar{position:fixed;top:calc(68px + var(--safe-top));left:10px;right:10px;z-index:1000;display:flex;gap:6px;align-items:center;background:var(--panel);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:18px;padding:6px;box-shadow:var(--shadow-md);transition:transform .3s,opacity .3s}
-body.navigating #searchBar{transform:translateY(-250%);opacity:0;pointer-events:none}
-#searchInput{flex:1;border:none;outline:none;padding:11px 14px;font-size:14px;font-weight:500;border-radius:13px;background:var(--input-bg);font-family:inherit;color:var(--text)}
-#searchInput::placeholder{color:var(--text-sub)}
-.icon-btn{background:transparent;border:none;cursor:pointer;width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;transition:background .15s,transform .12s}
-.icon-btn:active{transform:scale(.92);background:var(--primary-soft)}
-.icon-btn svg{width:21px;height:21px;fill:var(--primary)}
+/* Speed & GPS Pill (Left Side) */
+#telemetryPill{position:fixed;left:12px;top:calc(var(--safe-top) + 124px);z-index:990;display:flex;flex-direction:column;gap:8px}
+body.navigating #telemetryPill{display:none}
+.speed-orb{width:62px;height:62px;border-radius:20px;background:var(--bg-glass);backdrop-filter:blur(18px);border:1px solid var(--border);box-shadow:var(--shadow-float);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.speed-orb.over{background:rgba(239,68,68,.92);color:#fff;border-color:var(--rose)}
+.speed-orb .num{font-size:22px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.speed-orb .unit{font-size:9.5px;font-weight:700;opacity:.75;margin-top:2px}
+.gps-pill{background:var(--bg-glass);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:999px;padding:5px 10px;font-size:10.5px;font-weight:700;display:flex;align-items:center;gap:5px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.gps-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--amber)}
+.gps-pill.ready .dot{background:var(--emerald)}
 
-#categoryBar{position:fixed;top:calc(128px + var(--safe-top));left:0;right:0;z-index:999;overflow-x:auto;overflow-y:hidden;padding:4px 10px 10px;display:flex;gap:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:transform .3s,opacity .3s}
-#categoryBar::-webkit-scrollbar{display:none}
-body.navigating #categoryBar{transform:translateY(-350%);opacity:0;pointer-events:none}
-.cat-btn{flex-shrink:0;background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--border);cursor:pointer;padding:8px 13px 8px 11px;border-radius:999px;display:flex;align-items:center;gap:6px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--text);box-shadow:var(--shadow-sm);white-space:nowrap;transition:transform .14s,background .2s,color .2s}
-.cat-btn:active{transform:scale(.95)}
-.cat-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 6px 18px rgba(15,98,254,.32)}
-.cat-btn svg{width:17px;height:17px;flex-shrink:0}
-.cat-btn[data-cat="fuel"] svg{fill:var(--fuel)}
-.cat-btn[data-cat="pharmacy"] svg{fill:var(--pharmacy)}
-.cat-btn[data-cat="hospital"] svg{fill:var(--hospital)}
-.cat-btn[data-cat="grocery"] svg{fill:var(--grocery)}
-.cat-btn[data-cat="restaurant"] svg{fill:#ea580c}
-.cat-btn[data-cat="atm"] svg{fill:#0d9488}
-.cat-btn[data-cat="parking"] svg{fill:#4f46e5}
-.cat-btn[data-cat="mosque"] svg{fill:#78350f}
-.cat-btn[data-cat="cafe"] svg{fill:#92400e}
-.cat-btn[data-cat="hotel"] svg{fill:#0284c7}
-.cat-btn.active svg{fill:#fff}
+/* Search Results Drawer */
+#resultsDrawer{position:fixed;top:calc(var(--safe-top) + 118px);left:12px;right:12px;z-index:1100;background:var(--bg-solid);border:1px solid var(--border);border-radius:24px;max-height:56vh;overflow-y:auto;display:none;box-shadow:var(--shadow-float)}
+#resultsDrawer.show{display:block;animation:fadeScale .2s ease-out}
+@keyframes fadeScale{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.drawer-head{position:sticky;top:0;background:var(--bg-solid);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;z-index:2}
+.drawer-head span{font-size:13px;font-weight:800}
+.res-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer}
+.res-row:last-child{border-bottom:none}
+.res-row:active{background:var(--bg-elevated)}
+.res-icon{width:38px;height:38px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.res-icon svg{width:19px;height:19px;fill:currentColor}
+.res-meta{flex:1;min-width:0}
+.res-title{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res-sub{font-size:11.5px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res-dist{font-size:11px;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:4px 9px;border-radius:999px}
 
-#results{position:fixed;top:calc(180px + var(--safe-top));left:10px;right:10px;z-index:1000;background:var(--panel-solid);border:1px solid var(--border);border-radius:18px;max-height:54vh;overflow-y:auto;display:none;box-shadow:var(--shadow-lg)}
-#results.show{display:block}
-.result-item{padding:12px 15px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;display:flex;gap:12px;align-items:center;transition:background .12s}
-.result-item:last-child{border-bottom:none}
-.result-item:active{background:var(--input-bg)}
-.result-item .pin svg{width:22px;height:22px;flex-shrink:0}
-.result-item .text{flex:1;line-height:1.4;min-width:0}
-.result-item .title{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.result-item .sub{font-size:11.5px;color:var(--text-sub);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.result-item .dist-badge{background:var(--primary-soft);color:var(--primary);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;flex-shrink:0}
-.result-item .save-btn{background:var(--input-bg);border:none;cursor:pointer;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.result-item .save-btn svg{width:17px;height:17px;fill:var(--text-sub)}
-#resultsHeader{position:sticky;top:0;z-index:2;background:var(--panel-solid);padding:11px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
-#resultsHeader .title-block{font-size:13px;font-weight:700}
-#resultsHeader .title-block span{color:var(--text-sub);font-weight:500}
-#resultsClose{background:var(--input-bg);border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-#resultsClose svg{width:16px;height:16px;fill:var(--text)}
+/* Bottom Smart Sheet */
+#bottomSheet{position:fixed;bottom:0;left:0;right:0;z-index:1050;background:var(--bg-glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);border-radius:28px 28px 0 0;padding:10px 16px calc(var(--safe-bottom) + 12px);box-shadow:var(--shadow-sheet);transition:transform .35s cubic-bezier(.22,1,.36,1)}
+body.navigating #bottomSheet{transform:translateY(110%);pointer-events:none}
+.sheet-handle{width:38px;height:4px;border-radius:999px;background:var(--text-muted);opacity:.35;margin:0 auto 12px}
 
-#travelModeBar{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:var(--panel);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:999px;padding:5px;box-shadow:var(--shadow-lg);display:none;gap:4px;transition:transform .35s,opacity .35s}
-#travelModeBar.show{display:flex}
-body.navigating #travelModeBar{transform:translate(-50%,250%);opacity:0;pointer-events:none}
-.mode-btn{background:transparent;border:none;cursor:pointer;padding:10px 18px;border-radius:999px;display:flex;align-items:center;gap:7px;font-family:inherit;font-size:13px;font-weight:700;color:var(--text-sub);transition:background .18s,color .18s}
-.mode-btn.active{background:var(--primary);color:#fff;box-shadow:0 4px 14px rgba(15,98,254,.35)}
-.mode-btn svg{width:19px;height:19px;fill:currentColor}
+/* Quick Places (Home / Work / Saved) */
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.quick-card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;padding:11px 10px;display:flex;align-items:center;gap:9px;cursor:pointer;text-align:right;transition:transform .12s}
+.quick-card:active{transform:scale(.96)}
+.quick-card .q-ico{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.quick-card .q-ico svg{width:17px;height:17px;fill:#fff}
+.quick-card .q-title{font-size:12.5px;font-weight:800;color:var(--text)}
+.quick-card .q-sub{font-size:10px;color:var(--text-muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72px}
 
-#speedometer{position:fixed;top:calc(182px + var(--safe-top));left:10px;z-index:999;background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--border);padding:8px 13px;border-radius:16px;box-shadow:var(--shadow-sm);display:none;align-items:center;gap:8px;transition:transform .3s,opacity .3s}
-#speedometer.show{display:flex}
-body.navigating #speedometer{transform:translateY(-250%);opacity:0;pointer-events:none}
-#speedometer.over{background:rgba(220,38,38,.14);border-color:rgba(220,38,38,.35)}
-#speedometer.over #speedValue{color:var(--danger)}
-#speedValue{font-size:24px;font-weight:900;color:var(--primary);min-width:40px;text-align:center;font-variant-numeric:tabular-nums}
-#speedUnit{font-size:10.5px;color:var(--text-sub);line-height:1.25;font-weight:600}
+/* Route Preview State inside Sheet */
+#routePreviewBox{display:none;flex-direction:column;gap:12px}
+#routePreviewBox.show{display:flex}
+#exploreBox.hide{display:none}
 
-#gpsStatus{position:fixed;top:calc(182px + var(--safe-top));right:10px;z-index:999;background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--border);padding:8px 12px;border-radius:999px;font-size:11px;font-weight:600;color:var(--text-sub);display:none;align-items:center;gap:6px;box-shadow:var(--shadow-sm);transition:transform .3s,opacity .3s}
-#gpsStatus.show{display:flex}
-body.navigating #gpsStatus{transform:translateY(-250%);opacity:0;pointer-events:none}
-#gpsStatus .dot{width:8px;height:8px;border-radius:50%;background:var(--danger);animation:pulse 1.5s infinite}
-#gpsStatus.active .dot{background:var(--success)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.dest-banner{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dest-banner .d-name{font-size:16px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dest-banner .d-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+.close-circle{width:32px;height:32px;border-radius:50%;border:none;background:var(--bg-elevated);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.close-circle svg{width:16px;height:16px;fill:currentColor}
 
-#mapPopup{position:fixed;z-index:2000;background:var(--panel-solid);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-lg);padding:6px;display:none;min-width:220px}
-#mapPopup.show{display:block}
-.popup-item{background:transparent;border:none;cursor:pointer;padding:11px 14px;border-radius:12px;display:flex;align-items:center;gap:10px;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--text);width:100%;text-align:right;transition:background .12s}
-.popup-item:active{background:var(--input-bg)}
-.popup-item svg{width:19px;height:19px;flex-shrink:0}
-.popup-item.start svg{fill:var(--success)}
-.popup-item.dest svg{fill:var(--danger)}
-.popup-item.save svg{fill:var(--gold)}
-.popup-item.stop svg{fill:var(--stop)}
+.route-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.r-card{background:var(--bg-elevated);border:2px solid transparent;border-radius:18px;padding:11px 13px;cursor:pointer;text-align:right;transition:all .15s}
+.r-card.active{border-color:var(--accent);background:var(--accent-soft)}
+.r-card .r-tag{font-size:11px;font-weight:800;color:var(--accent);display:flex;align-items:center;justify-content:space-between}
+.r-card .r-time{font-size:18px;font-weight:900;margin-top:3px;font-variant-numeric:tabular-nums}
+.r-card .r-dist{font-size:11.5px;color:var(--text-muted);font-weight:600}
 
-#savedPanel{position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:none;align-items:flex-end}
-#savedPanel.show{display:flex}
-#savedContent{background:var(--panel-solid);width:100%;max-height:70vh;border-radius:24px 24px 0 0;padding:18px;animation:slideUp .28s ease-out;overflow-y:auto;box-shadow:var(--shadow-lg)}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-#savedHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-#savedHeader h3{font-size:17px;font-weight:800}
-#savedClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-#savedClose svg{width:18px;height:18px;fill:var(--text)}
-#savedList{list-style:none}
-#savedList li{padding:13px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;border-radius:12px}
-#savedList li:active{background:var(--input-bg)}
-#savedList li .star svg{width:20px;height:20px;fill:var(--gold)}
-#savedList li .info{flex:1}
-#savedList li .name{font-weight:700;font-size:14px}
-#savedList li .coords{font-size:11px;color:var(--text-sub);margin-top:2px;font-variant-numeric:tabular-nums}
-#savedList li .del-btn{background:rgba(220,38,38,.1);border:none;cursor:pointer;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center}
-#savedList li .del-btn svg{width:17px;height:17px;fill:var(--danger)}
-#savedList .empty{text-align:center;color:var(--text-sub);padding:40px 20px;font-size:14px}
+.mode-pills{display:flex;gap:6px;background:var(--bg-elevated);padding:4px;border-radius:14px}
+.m-pill{flex:1;border:none;background:transparent;padding:8px;border-radius:11px;font-family:inherit;font-size:12.5px;font-weight:800;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.m-pill.active{background:var(--bg-solid);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.m-pill svg{width:16px;height:16px;fill:currentColor}
 
-#waypointsBar{position:fixed;bottom:calc(228px + var(--safe-bottom));left:10px;right:10px;z-index:1000;background:var(--panel);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:18px;padding:10px;box-shadow:var(--shadow-md);display:none;transition:transform .3s,opacity .3s;max-height:24vh;overflow-y:auto}
-#waypointsBar.show{display:block}
-body.navigating #waypointsBar{transform:translateY(250%);opacity:0;pointer-events:none}
-#waypointsBar .wp-title{font-size:12px;font-weight:700;color:var(--text-sub);padding:2px 6px 8px;display:flex;justify-content:space-between;align-items:center}
-#waypointsBar .wp-title button{background:var(--primary-soft);border:none;cursor:pointer;font-size:11.5px;color:var(--primary);font-weight:700;font-family:inherit;padding:4px 10px;border-radius:999px}
-.wp-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;font-size:13px;font-weight:600;background:var(--input-bg);margin-bottom:6px}
-.wp-item:last-child{margin-bottom:0}
-.wp-item .wp-num{width:24px;height:24px;border-radius:50%;background:var(--stop);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
-.wp-item .wp-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.wp-item .wp-del{background:transparent;border:none;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.wp-item .wp-del svg{width:15px;height:15px;fill:var(--danger)}
+.cta-row{display:flex;gap:8px}
+.btn-go{flex:2;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:18px;padding:14px;font-family:inherit;font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 8px 22px var(--accent-glow)}
+.btn-go:active{transform:scale(.97)}
+.btn-go svg{width:19px;height:19px;fill:#fff}
+.btn-sim{flex:1;background:var(--bg-elevated);color:var(--text);border:1px solid var(--border);border-radius:18px;padding:14px 10px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-sim svg{width:17px;height:17px;fill:var(--accent)}
 
-#routeOptions{position:fixed;bottom:calc(90px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:var(--panel);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:20px;padding:6px;box-shadow:var(--shadow-md);display:none;gap:5px;transition:transform .3s,opacity .3s}
-#routeOptions.show{display:flex}
-body.navigating #routeOptions{transform:translate(-50%,250%);opacity:0;pointer-events:none}
-.route-btn{background:transparent;border:none;cursor:pointer;padding:8px 14px;border-radius:14px;font-size:11.5px;font-weight:700;font-family:inherit;color:var(--text-sub);display:flex;flex-direction:column;align-items:center;gap:3px;min-width:84px;transition:background .15s,color .15s}
-.route-btn.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(15,98,254,.3)}
-.route-btn.active svg{fill:#fff}
-.route-btn svg{width:16px;height:16px;fill:var(--text-sub)}
-.route-btn .info{font-size:10px;opacity:.9;font-variant-numeric:tabular-nums}
-.route-btn:disabled{opacity:.4;cursor:not-allowed}
+/* Active Navigation HUD */
+#navHudTop{position:fixed;top:calc(var(--safe-top) + 8px);left:12px;right:12px;z-index:1200;background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;border-radius:24px;padding:14px 16px;display:none;align-items:center;gap:14px;box-shadow:0 16px 38px rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.12)}
+#navHudTop.show{display:flex;animation:slideDown .3s ease-out}
+@keyframes slideDown{from{transform:translateY(-120%)}to{transform:translateY(0)}}
+.hud-arrow{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 18px rgba(37,99,235,.45)}
+.hud-arrow svg{width:38px;height:38px;fill:#fff}
+.hud-text{flex:1;min-width:0}
+.hud-dist{font-size:30px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.hud-street{font-size:14px;font-weight:700;color:#cbd5e1;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud-sim-tag{font-size:10px;background:#f59e0b;color:#000;padding:2px 7px;border-radius:999px;font-weight:900;margin-right:6px;display:none}
+.hud-sim-tag.show{display:inline-block}
 
-#startBtn{position:fixed;bottom:calc(164px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:1001;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;border:1px solid rgba(255,255,255,.2);padding:13px 26px 13px 20px;border-radius:999px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(15,98,254,.42);display:none;font-family:inherit;align-items:center;gap:8px;transition:transform .2s,opacity .3s;white-space:nowrap}
-#startBtn:active{transform:translateX(-50%) scale(.96)}
-#startBtn.show{display:flex}
-body.navigating #startBtn{transform:translate(-50%,250%);opacity:0;pointer-events:none}
-#startBtn svg{width:19px;height:19px;fill:#fff}
+#navHudBottom{position:fixed;bottom:calc(var(--safe-bottom) + 8px);left:12px;right:12px;z-index:1200;background:rgba(15,23,42,.94);backdrop-filter:blur(20px);color:#fff;border-radius:24px;padding:12px 16px;display:none;align-items:center;justify-content:space-between;box-shadow:0 16px 40px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)}
+#navHudBottom.show{display:flex}
+.hud-speed{background:#fff;color:#0f172a;border-radius:16px;padding:6px 14px;text-align:center;min-width:68px}
+.hud-speed.over{background:#ef4444;color:#fff}
+.hud-speed .v{font-size:22px;font-weight:900;line-height:1}
+.hud-speed .u{font-size:9px;font-weight:800;opacity:.7}
+.hud-stat{text-align:center}
+.hud-stat .v{font-size:18px;font-weight:900;font-variant-numeric:tabular-nums}
+.hud-stat .l{font-size:10.5px;color:#94a3b8;font-weight:600;margin-top:2px}
+.btn-end{width:46px;height:46px;border-radius:16px;background:#ef4444;border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.btn-end svg{width:22px;height:22px;fill:#fff}
 
-#navTopBar{position:fixed;top:0;left:0;right:0;z-index:1100;padding:calc(14px + var(--safe-top)) 14px 16px;background:linear-gradient(180deg,rgba(9,13,22,.95) 0%,rgba(9,13,22,.68) 65%,transparent 100%);display:none;align-items:center;gap:14px;color:#fff}
-#navTopBar.show{display:flex}
-#navTopBar .turn-icon{width:78px;height:78px;flex-shrink:0;background:linear-gradient(135deg,#0f62fe,#002d9c);border-radius:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(15,98,254,.5);border:1.5px solid rgba(255,255,255,.22)}
-#navTopBar .turn-icon svg{width:48px;height:48px;fill:#fff}
-#navTopBar .info{flex:1;min-width:0}
-#navTopBar .dist{font-size:36px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 3px 12px rgba(0,0,0,.85)}
-#navTopBar .instr{font-size:14.5px;font-weight:600;margin-top:8px;text-shadow:0 2px 8px rgba(0,0,0,.85);background:rgba(255,255,255,.12);backdrop-filter:blur(8px);padding:6px 11px;border-radius:10px;display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Context Popup & Modals */
+#ctxMenu{position:fixed;z-index:2000;background:var(--bg-solid);border:1px solid var(--border);border-radius:20px;padding:6px;min-width:215px;box-shadow:var(--shadow-float);display:none}
+#ctxMenu.show{display:block;animation:fadeScale .15s ease-out}
+.ctx-btn{width:100%;border:none;background:transparent;padding:11px 12px;border-radius:13px;display:flex;align-items:center;gap:10px;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--text);cursor:pointer;text-align:right}
+.ctx-btn:active{background:var(--bg-elevated)}
+.ctx-btn svg{width:18px;height:18px;fill:var(--accent)}
 
-#navBottomBar{position:fixed;bottom:0;left:0;right:0;z-index:1100;padding:10px 12px calc(14px + var(--safe-bottom));display:none}
-#navBottomBar.show{display:block}
-#navBottomCard{background:rgba(15,23,42,.95);backdrop-filter:blur(16px);border-radius:20px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-lg);border:1px solid rgba(255,255,255,.12);color:#fff}
-#navBottomCard .stat{flex:1;display:flex;flex-direction:column;align-items:center}
-#navBottomCard .stat .val{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
-#navBottomCard .stat .lbl{font-size:10px;opacity:.72;margin-top:3px;font-weight:600}
-#navBottomCard .stat .val.eta{color:#60a5fa}
-#navBottomCard .divider{width:1px;height:36px;background:rgba(255,255,255,.12)}
-#navBottomCard .speed-badge{background:linear-gradient(135deg,#ffffff,#e2e8f0);color:#0f62fe;padding:6px 14px;border-radius:14px;display:flex;flex-direction:column;align-items:center;min-width:72px}
-#navBottomCard .speed-badge.over{background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff}
-#navBottomCard .speed-badge .val{font-size:23px;font-weight:900;font-variant-numeric:tabular-nums}
-#navBottomCard .speed-badge .lbl{font-size:9px;opacity:.85;font-weight:700}
+.modal-backdrop{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center}
+.modal-backdrop.show{display:flex}
+.modal-sheet{background:var(--bg-solid);width:100%;max-width:520px;border-radius:28px 28px 0 0;padding:18px 18px calc(var(--safe-bottom) + 18px);max-height:82vh;overflow-y:auto;box-shadow:var(--shadow-sheet)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.modal-head h3{font-size:16px;font-weight:900}
 
-#navStopFloat{position:fixed;top:calc(16px + var(--safe-top));left:14px;z-index:1200;background:rgba(220,38,38,.95);color:#fff;border:1px solid rgba(255,255,255,.22);cursor:pointer;width:46px;height:46px;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(220,38,38,.45)}
-#navStopFloat.show{display:flex}
-#navStopFloat svg{width:20px;height:20px;fill:#fff}
+.layer-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.layer-opt{background:var(--bg-elevated);border:2px solid transparent;border-radius:16px;padding:12px;text-align:right;cursor:pointer;font-family:inherit;color:var(--text)}
+.layer-opt.active{border-color:var(--accent);background:var(--accent-soft)}
+.layer-opt .t{font-size:13.5px;font-weight:800}
+.layer-opt .s{font-size:11px;color:var(--text-muted);margin-top:2px}
 
-#recenterBtn{position:fixed;right:12px;bottom:calc(20px + var(--safe-bottom));z-index:999;background:var(--panel);backdrop-filter:blur(12px);color:var(--primary);border:1px solid var(--border);cursor:pointer;width:50px;height:50px;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow-md)}
-#recenterBtn.show{display:flex}
-#recenterBtn svg{width:24px;height:24px;fill:var(--primary)}
+.em-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.em-card{background:var(--bg-elevated);border-radius:18px;padding:14px;text-align:center;text-decoration:none;color:var(--text);border:1px solid var(--border)}
+.em-card .num{font-size:20px;font-weight:900;color:var(--rose);margin-top:4px}
+.em-card .lbl{font-size:13px;font-weight:800}
 
-#loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3000;background:rgba(15,23,42,.92);backdrop-filter:blur(10px);color:#fff;padding:15px 22px;border-radius:16px;font-size:13.5px;font-weight:600;display:none;align-items:center;gap:12px;box-shadow:var(--shadow-lg)}
-#loading.show{display:flex}
-.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .75s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* Markers & Toast */
+.user-dot{width:22px;height:22px;position:relative}
+.user-dot::before{content:'';position:absolute;inset:-6px;border-radius:50%;background:rgba(37,99,235,.28);animation:ping 2s infinite}
+.user-dot::after{content:'';position:absolute;inset:3px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+@keyframes ping{0%{transform:scale(.8);opacity:.9}100%{transform:scale(2.4);opacity:0}}
 
-.user-location-icon{position:relative;width:24px;height:24px}
-.user-location-icon .pulse{position:absolute;inset:0;border-radius:50%;background:rgba(15,98,254,.32);animation:pulseRing 2s ease-out infinite}
-@keyframes pulseRing{0%{transform:scale(1);opacity:.75}100%{transform:scale(3);opacity:0}}
-.user-location-icon .core{position:absolute;inset:4px;border-radius:50%;background:var(--primary);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.car-puck{width:54px;height:54px;display:flex;align-items:center;justify-content:center;transition:transform .2s linear}
+.car-puck svg{width:54px;height:54px;filter:drop-shadow(0 6px 12px rgba(0,0,0,.45))}
 
-.vehicle-marker{width:64px;height:64px;display:flex;align-items:center;justify-content:center}
-.vehicle-rotator{width:64px;height:64px;display:flex;align-items:center;justify-content:center;transform-origin:center center;transition:transform .25s ease-out}
-.vehicle-rotator svg{width:100%;height:100%;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5))}
+.poi-pin{width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--accent);border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.poi-pin svg{width:16px;height:16px;fill:#fff;transform:rotate(45deg)}
 
-#mapHint{position:fixed;bottom:calc(232px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(10px);z-index:2500;background:rgba(15,23,42,.94);backdrop-filter:blur(12px);color:#fff;padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:600;display:none;white-space:nowrap;pointer-events:none;box-shadow:var(--shadow-lg);border:1px solid rgba(255,255,255,.12)}
-#mapHint.show{display:block;animation:toastPop 3s ease forwards}
-@keyframes toastPop{0%{opacity:0;transform:translateX(-50%) translateY(12px)}12%,88%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(-8px)}}
-
-#nameDialog,#stopConfirmDialog,#installDialog,#emergencyPanel,#downloadPanel,#deleteConfirmDialog{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
-#stopConfirmDialog{z-index:4500}
-#installDialog{z-index:4600}
-#emergencyPanel,#downloadPanel{z-index:4800;background:rgba(0,0,0,.65);align-items:flex-end;padding:0}
-#deleteConfirmDialog{z-index:5000}
-#nameDialog.show,#stopConfirmDialog.show,#installDialog.show,#deleteConfirmDialog.show,#emergencyPanel.show,#downloadPanel.show{display:flex}
-
-#nameDialogBox,#stopConfirmBox,#installBox,#deleteConfirmBox{background:var(--panel-solid);border:1px solid var(--border);border-radius:22px;padding:22px;width:100%;max-width:340px;box-shadow:var(--shadow-lg)}
-#nameDialogBox h3{font-size:16px;font-weight:800;margin-bottom:12px}
-#nameInput{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:14px;font-weight:600;outline:none;margin-bottom:14px}
-#nameDialogBox .actions{display:flex;gap:8px;justify-content:flex-end}
-#nameDialogBox button{padding:10px 18px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:700}
-#nameCancel{background:var(--input-bg);color:var(--text)}
-#nameSave{background:var(--primary);color:#fff}
-
-#stopConfirmBox,#installBox,#deleteConfirmBox{text-align:center}
-#stopConfirmBox .icon,#installBox .icon,#deleteConfirmBox .icon{width:58px;height:58px;margin:0 auto 14px;border-radius:18px;display:flex;align-items:center;justify-content:center}
-#stopConfirmBox .icon{background:rgba(249,115,22,.14)}
-#installBox .icon{background:var(--primary-soft)}
-#deleteConfirmBox .icon{background:rgba(220,38,38,.14)}
-#deleteConfirmBox .icon svg{width:28px;height:28px;fill:var(--danger)}
-#stopConfirmBox .icon svg{width:28px;height:28px;fill:var(--stop)}
-#installBox .icon svg{width:28px;height:28px;fill:var(--primary)}
-#stopConfirmBox h3,#installBox h3,#deleteConfirmBox h3{font-size:17px;font-weight:800;margin-bottom:8px}
-#stopConfirmBox p,#installBox p,#deleteConfirmBox p{font-size:13px;color:var(--text-sub);margin-bottom:20px;line-height:1.55}
-#stopConfirmBox .actions,#installBox .actions,#deleteConfirmBox .actions{display:flex;gap:10px}
-#stopConfirmBox button,#installBox button,#deleteConfirmBox button{flex:1;padding:12px;border-radius:13px;border:none;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:700}
-#stopConfirmCancel,#installCancel,#deleteConfirmCancel{background:var(--input-bg);color:var(--text)}
-#deleteConfirmOk{background:var(--danger);color:#fff}
-#stopConfirmOk{background:var(--stop);color:#fff}
-#installOk{background:var(--primary);color:#fff}
-
-#emergencyContent,#downloadContent{background:var(--panel-solid);width:100%;max-height:84vh;border-radius:24px 24px 0 0;padding:18px 18px calc(22px + var(--safe-bottom));animation:slideUp .28s ease-out;overflow-y:auto;box-shadow:var(--shadow-lg)}
-#emergencyHeader,#downloadHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-#emergencyHeader h3,#downloadHeader h3{font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px}
-#emergencyHeader h3 svg{width:21px;height:21px;fill:var(--emergency)}
-#downloadHeader h3 svg{width:21px;height:21px;fill:var(--primary)}
-#emergencyClose,#downloadClose{background:var(--input-bg);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-#emergencyClose svg,#downloadClose svg{width:18px;height:18px;fill:var(--text)}
-
-.layer-switcher{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
-.layer-card{background:var(--input-bg);border:1.5px solid transparent;border-radius:14px;padding:11px;cursor:pointer;font-family:inherit;color:var(--text);text-align:right;transition:all .15s}
-.layer-card.active{border-color:var(--primary);background:var(--primary-soft)}
-.layer-card .l-title{font-size:13px;font-weight:800}
-.layer-card .l-sub{font-size:11px;color:var(--text-sub);margin-top:2px}
-
-.em-section{margin-bottom:18px}
-.em-section-title{font-size:12.5px;font-weight:800;color:var(--text-sub);margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.em-section-title svg{width:16px;height:16px;fill:var(--text-sub)}
-.em-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
-.em-btn{background:var(--input-bg);border:1px solid var(--border);cursor:pointer;padding:14px 10px;border-radius:16px;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:inherit;color:var(--text);transition:transform .12s;text-decoration:none}
-.em-btn:active{transform:scale(.96)}
-.em-btn .em-icon{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center}
-.em-btn .em-icon svg{width:22px;height:22px;fill:#fff}
-.em-btn .em-label{font-size:12.5px;font-weight:700;text-align:center}
-.em-btn .em-number{font-size:12px;color:var(--text-sub);font-weight:700;font-variant-numeric:tabular-nums}
-.em-btn.police .em-icon{background:#1d4ed8}
-.em-btn.ambulance .em-icon{background:#dc2626}
-.em-btn.fire .em-icon{background:#ea580c}
-.em-btn.emergency .em-icon{background:#991b1b}
-
-.download-info{background:var(--input-bg);border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:14px;font-size:12.5px;line-height:1.65;color:var(--text-sub)}
-.download-info strong{color:var(--text)}
-.download-btn{background:var(--primary);color:#fff;border:none;padding:13px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;transition:background .2s,transform .12s}
-.download-btn:hover{background:var(--primary-dark)}
-.download-btn:active{transform:scale(.98)}
-.download-btn svg{width:19px;height:19px;fill:currentColor}
-.download-progress{margin-top:12px;display:none}
-.download-progress.show{display:block}
-.download-progress .bar{width:100%;height:8px;background:var(--input-bg);border-radius:999px;overflow:hidden;margin-bottom:8px}
-.download-progress .fill{height:100%;background:var(--primary);width:0%;transition:width .25s;border-radius:999px}
-.download-progress .text{font-size:12px;font-weight:600;color:var(--text-sub);text-align:center}
-.download-stats{display:flex;gap:10px;margin-top:12px}
-.download-stats .stat{flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center}
-.download-stats .stat .val{font-size:19px;font-weight:900;color:var(--primary);font-variant-numeric:tabular-nums}
-.download-stats .stat .lbl{font-size:11px;color:var(--text-sub);margin-top:4px;font-weight:600}
-
-.poi-marker{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2.5px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.35)}
-.poi-marker svg{width:17px;height:17px;fill:#fff;transform:rotate(45deg)}
-.poi-marker.fuel{background:var(--fuel)}
-.poi-marker.pharmacy{background:var(--pharmacy)}
-.poi-marker.hospital{background:var(--hospital)}
-.poi-marker.grocery{background:var(--grocery)}
-.poi-marker.restaurant{background:#ea580c}
-.poi-marker.atm{background:#0d9488}
-.poi-marker.parking{background:#4f46e5}
-.poi-marker.mosque{background:#78350f}
-.poi-marker.cafe{background:#92400e}
-.poi-marker.hotel{background:#0284c7}
-.waypoint-marker{width:32px;height:32px;background:var(--stop);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px}
-.waypoint-marker span{transform:rotate(45deg)}
-::-webkit-scrollbar{width:0;height:0}
+#toast{position:fixed;top:calc(var(--safe-top) + 70px);left:50%;transform:translateX(-50%) translateY(-14px);z-index:4000;background:rgba(15,23,42,.94);color:#fff;padding:9px 18px;border-radius:999px;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:all .25s;box-shadow:0 10px 25px rgba(0,0,0,.3);white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
-</head><body>
+</head>
+<body class="osm-active">
 
 <div id="map"></div>
 
-<div id="offlineBadge">
-<svg viewBox="0 0 24 24"><path d="M23.64 7c-.45-.34-4.93-4-11.64-4-1.5 0-2.89.19-4.15.48L18.18 13.8 23.64 7zm-6.6 8.22L3.27 1.44 2 2.72l2.05 2.06C1.91 5.76.59 6.82.36 7l10.08 12.56c.8 1 2.32 1 3.12 0l2.20-2.75 2.5 2.5 1.27-1.27-2.49-2.82z"/></svg>
-<span>وضع بدون إنترنت</span>
+<!-- Top Floating Search Island -->
+<div id="topDock">
+  <div class="search-island">
+    <div class="brand-pill">
+      <svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+      <span>كزدورة</span>
+    </div>
+    <input id="searchInput" type="text" placeholder="إلى أين تريد الذهاب؟" autocomplete="off">
+    <button class="island-btn primary" id="searchBtn" title="بحث">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    </button>
+  </div>
+  <div class="chips-row" id="categoryChips">
+    <button class="chip" data-cat="fuel"><svg viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v16h10v-7.5h1.5v5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77z"/></svg>وقود</button>
+    <button class="chip" data-cat="pharmacy"><svg viewBox="0 0 24 24"><path d="M21 5h-2.64l1.14-3.14L17.15 1l-1.46 4H3v2l2 6-2 6v2h18v-2l-2-6 2-6V5zm-5 9h-3v3h-2v-3H8v-2h3V9h2v3h3v2z"/></svg>صيدلية</button>
+    <button class="chip" data-cat="hospital"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg>مشفى</button>
+    <button class="chip" data-cat="restaurant"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>مطعم</button>
+    <button class="chip" data-cat="atm"><svg viewBox="0 0 24 24"><path d="M11.5 1L2 6v2h19V6l-9.5-5zM2 19h20v2H2v-2zm18-8H2v5h18v-5z"/></svg>صراف</button>
+    <button class="chip" data-cat="mosque"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 1.74.65 3.34 1.72 4.61C4.61 14.89 3 17.34 3 20h18c0-2.66-1.61-5.11-3.72-6.39C18.35 12.34 19 10.74 19 9c0-3.87-3.13-7-7-7z"/></svg>مسجد</button>
+  </div>
 </div>
 
-<button id="installPrompt">
-<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-<span>تثبيت كزدورة على الجهاز</span>
-</button>
-
-<header id="appHeader">
-<div class="logo">
-<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-</div>
-<div class="title-block">
-<div class="title">كزدورة <span class="pill-badge">PWA</span></div>
-<div class="subtitle">ملاحة وخرائط ذكية في سوريا</div>
-</div>
-<div class="actions">
-<button class="header-btn" id="installHeaderBtn" title="تثبيت التطبيق" style="display:none;">
-<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-</button>
-<button class="header-btn" id="downloadHeaderBtn" title="الخرائط والطبقات">
-<svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
-</button>
-<button class="header-btn" id="emergencyHeaderBtn" title="الطوارئ" style="background:rgba(220,38,38,.55);">
-<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-</button>
-<button class="header-btn" id="savedHeaderBtn" title="الأماكن المحفوظة">
-<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-</button>
-<button class="header-btn" id="themeHeaderBtn" title="تبديل المظهر">
-<svg id="themeIconHeader" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
-</button>
-</div>
-</header>
-
-<div id="searchBar">
-<button id="locBtn" class="icon-btn" title="تحديد موقعي">
-<svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
-</button>
-<input id="searchInput" type="text" placeholder="ابحث عن شارع، حي، أو معلم في سوريا..." />
-<button id="searchBtn" class="icon-btn" title="بحث">
-<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-</button>
+<!-- Telemetry Pill (Left) -->
+<div id="telemetryPill">
+  <div class="speed-orb" id="speedOrb">
+    <div class="num" id="speedNum">0</div>
+    <div class="unit">كم/س</div>
+  </div>
+  <div class="gps-pill" id="gpsPill"><span class="dot"></span><span id="gpsLabel">GPS</span></div>
 </div>
 
-<div id="categoryBar">
-<button class="cat-btn" data-cat="fuel"><svg viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v16h10v-7.5h1.5v5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77zM12 10H6V5h6v5z"/></svg><span>محطة وقود</span></button>
-<button class="cat-btn" data-cat="pharmacy"><svg viewBox="0 0 24 24"><path d="M21 5h-2.64l1.14-3.14L17.15 1l-1.46 4H3v2l2 6-2 6v2h18v-2l-2-6 2-6V5zm-5 9h-3v3h-2v-3H8v-2h3V9h2v3h3v2z"/></svg><span>صيدلية</span></button>
-<button class="cat-btn" data-cat="hospital"><svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10z"/></svg><span>مشفى</span></button>
-<button class="cat-btn" data-cat="grocery"><svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg><span>بقالية</span></button>
-<button class="cat-btn" data-cat="restaurant"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg><span>مطعم</span></button>
-<button class="cat-btn" data-cat="atm"><svg viewBox="0 0 24 24"><path d="M11.5 1L2 6v2h19V6l-9.5-5zM2 19h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h1v-2H2v2zm18-8H2v5h18v-5zm-2 2h-3v-1h3v1z"/></svg><span>صراف آلي</span></button>
-<button class="cat-btn" data-cat="parking"><svg viewBox="0 0 24 24"><path d="M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z"/></svg><span>موقف</span></button>
-<button class="cat-btn" data-cat="mosque"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 1.74.65 3.34 1.72 4.61C4.61 14.89 3 17.34 3 20h18c0-2.66-1.61-5.11-3.72-6.39C18.35 12.34 19 10.74 19 9c0-3.87-3.13-7-7-7zm0 15c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg><span>مسجد</span></button>
-<button class="cat-btn" data-cat="cafe"><svg viewBox="0 0 24 24"><path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"/></svg><span>مقهى</span></button>
-<button class="cat-btn" data-cat="hotel"><svg viewBox="0 0 24 24"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg><span>فندق</span></button>
+<!-- Map Controls Rail (Right) -->
+<div id="mapRail">
+  <button class="rail-btn" id="locateBtn" title="موقعي الحالي">
+    <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+  </button>
+  <button class="rail-btn" id="tiltBtn" title="منظور ثلاثي الأبعاد">3D</button>
+  <button class="rail-btn" id="compassBtn" title="إعادة توجيه الشمال">
+    <svg id="compassIcon" viewBox="0 0 24 24"><path d="M12 2L8 12l4 10 4-10L12 2zm0 4.8L13.8 11h-3.6L12 6.8z"/></svg>
+  </button>
+  <button class="rail-btn" id="layersBtn" title="الطبقات والخرائط">
+    <svg viewBox="0 0 24 24"><path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/></svg>
+  </button>
+  <button class="rail-btn" id="themeBtn" title="الوضع الليلي">
+    <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.39 5.39 0 0 1-4.4 2.26 5.4 5.4 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
+  </button>
+  <button class="rail-btn danger" id="sosBtn" title="أرقام الطوارئ">SOS</button>
 </div>
 
-<div id="results">
-<div id="resultsHeader">
-<div class="title-block">النتائج <span id="resultsCount"></span></div>
-<button id="resultsClose">
-<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-</button>
-</div>
-<div id="resultsList"></div>
-</div>
-
-<div id="travelModeBar">
-<button class="mode-btn active" data-mode="driving">
-<svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
-<span>سيارة</span>
-</button>
-<button class="mode-btn" data-mode="foot">
-<svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
-<span>مشياً</span>
-</button>
+<!-- Results Drawer -->
+<div id="resultsDrawer">
+  <div class="drawer-head">
+    <span id="resultsTitle">نتائج البحث</span>
+    <button class="close-circle" id="closeResultsBtn"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+  </div>
+  <div id="resultsList"></div>
 </div>
 
-<div id="speedometer">
-<span id="speedValue">0</span>
-<span id="speedUnit">كم/س<br>السرعة</span>
+<!-- Smart Bottom Sheet -->
+<div id="bottomSheet">
+  <div class="sheet-handle"></div>
+
+  <!-- Explore Mode -->
+  <div id="exploreBox">
+    <div class="quick-grid">
+      <button class="quick-card" id="homeQuickBtn">
+        <div class="q-ico" style="background:#2563eb"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
+        <div><div class="q-title">المنزل</div><div class="q-sub" id="homeSub">اضغط للتعيين</div></div>
+      </button>
+      <button class="quick-card" id="workQuickBtn">
+        <div class="q-ico" style="background:#10b981"><svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg></div>
+        <div><div class="q-title">العمل</div><div class="q-sub" id="workSub">اضغط للتعيين</div></div>
+      </button>
+      <button class="quick-card" id="savedQuickBtn">
+        <div class="q-ico" style="background:#f59e0b"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
+        <div><div class="q-title">المفضلة</div><div class="q-sub" id="savedCountSub">0 أماكن</div></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Route Preview Mode -->
+  <div id="routePreviewBox">
+    <div class="dest-banner">
+      <div style="min-width:0;flex:1">
+        <div class="d-name" id="destNameLabel">الوجهة المحددة</div>
+        <div class="d-sub" id="destSummaryLabel">جاري حساب المسار...</div>
+      </div>
+      <button class="close-circle" id="clearRouteBtn" title="إلغاء المسار">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+    </div>
+
+    <div class="mode-pills">
+      <button class="m-pill active" data-mode="auto">
+        <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+        <span>سيارة</span>
+      </button>
+      <button class="m-pill" data-mode="pedestrian">
+        <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
+        <span>مشي</span>
+      </button>
+    </div>
+
+    <div class="route-cards">
+      <div class="r-card active" data-idx="0" id="routeCard0">
+        <div class="r-tag"><span>المسار الأسرع</span><span>⚡</span></div>
+        <div class="r-time" id="r0Time">—</div>
+        <div class="r-dist" id="r0Dist">—</div>
+      </div>
+      <div class="r-card" data-idx="1" id="routeCard1">
+        <div class="r-tag"><span>مسار بديل</span><span>⇄</span></div>
+        <div class="r-time" id="r1Time">—</div>
+        <div class="r-dist" id="r1Dist">—</div>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <button class="btn-go" id="startNavBtn">
+        <svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+        <span>انطلق الآن</span>
+      </button>
+      <button class="btn-sim" id="simulateBtn" title="محاكاة المسار">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <span>محاكاة</span>
+      </button>
+    </div>
+  </div>
 </div>
 
-<div id="gpsStatus"><span class="dot"></span><span id="gpsText">جاري الاتصال...</span></div>
-
-<div id="routeOptions">
-<button class="route-btn active" data-profile="fastest">
-<svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
-<span>الأسرع</span>
-<span class="info" id="infoFastest">—</span>
-</button>
-<button class="route-btn" data-profile="shortest" id="btnShortest">
-<svg viewBox="0 0 24 24"><path d="M4 12h16v2H4zm2-6h12v2H6zm0 12h12v2H6z"/></svg>
-<span>البديل</span>
-<span class="info" id="infoShortest">—</span>
-</button>
+<!-- Active Navigation HUD -->
+<div id="navHudTop">
+  <div class="hud-arrow" id="hudArrow">
+    <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.59 5.58L20 12l-8-8-8 8z"/></svg>
+  </div>
+  <div class="hud-text">
+    <div class="hud-dist"><span id="hudDistVal">—</span><span class="hud-sim-tag" id="simBadge">محاكاة</span></div>
+    <div class="hud-street" id="hudInstrText">تابع السير للأمام</div>
+  </div>
 </div>
 
-<div id="waypointsBar">
-<div class="wp-title">
-<span>نقاط التوقف</span>
-<button id="addWaypointBtn">+ إضافة نقطة</button>
-</div>
-<div id="waypointsList"></div>
-</div>
-
-<button id="startBtn">
-<svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
-<span>ابدأ التوجيه</span>
-</button>
-
-<div id="navTopBar">
-<div class="turn-icon" id="currentTurnIcon">
-<svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.59 5.58L20 12l-8-8-8 8z"/></svg>
-</div>
-<div class="info">
-<div class="dist" id="navCurrentDist">—</div>
-<div class="instr" id="navCurrentInstr">—</div>
-</div>
-</div>
-
-<div id="navBottomBar">
-<div id="navBottomCard">
-<div class="speed-badge" id="navSpeedBadge">
-<div class="val" id="navSpeedVal">0</div>
-<div class="lbl">كم/س</div>
-</div>
-<div class="divider"></div>
-<div class="stat">
-<div class="val" id="navRemaining">—</div>
-<div class="lbl">متبقٍ</div>
-</div>
-<div class="divider"></div>
-<div class="stat">
-<div class="val eta" id="navEta">—</div>
-<div class="lbl">الوصول</div>
-</div>
-</div>
+<div id="navHudBottom">
+  <div class="hud-speed" id="hudSpeedBox">
+    <div class="v" id="hudSpeedVal">0</div>
+    <div class="u">كم/س</div>
+  </div>
+  <div class="hud-stat">
+    <div class="v" id="hudRemDist">—</div>
+    <div class="l">المتبقي</div>
+  </div>
+  <div class="hud-stat">
+    <div class="v" id="hudRemTime" style="color:#60a5fa">—</div>
+    <div class="l">المدة</div>
+  </div>
+  <div class="hud-stat">
+    <div class="v" id="hudEtaVal">—</div>
+    <div class="l">الوصول</div>
+  </div>
+  <button class="btn-end" id="endNavBtn" title="إنهاء التوجيه">
+    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+  </button>
 </div>
 
-<button id="navStopFloat" title="إنهاء التوجيه">
-<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-</button>
-
-<div id="mapPopup">
-<button class="popup-item start" id="popupStart">
-<svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
-<span>تحديد كنقطة انطلاق</span>
-</button>
-<button class="popup-item stop" id="popupStop">
-<svg viewBox="0 0 24 24"><path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10z"/></svg>
-<span>إضافة كنقطة توقف</span>
-</button>
-<button class="popup-item dest" id="popupDest">
-<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-<span>تحديد كوجهة نهائية</span>
-</button>
-<button class="popup-item save" id="popupSave">
-<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-<span>حفظ هذا المكان</span>
-</button>
+<!-- Long Press Context Menu -->
+<div id="ctxMenu">
+  <button class="ctx-btn" id="ctxGo"><svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>الذهاب إلى هنا</button>
+  <button class="ctx-btn" id="ctxStart"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg>تعيين كنقطة انطلاق</button>
+  <button class="ctx-btn" id="ctxHome"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>حفظ كموقع المنزل</button>
+  <button class="ctx-btn" id="ctxWork"><svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/></svg>حفظ كمقر العمل</button>
+  <button class="ctx-btn" id="ctxSave"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>إضافة للمفضلة</button>
 </div>
 
-<div id="savedPanel">
-<div id="savedContent">
-<div id="savedHeader">
-<h3>الأماكن المحفوظة</h3>
-<button id="savedClose">
-<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-</button>
-</div>
-<ul id="savedList"></ul>
-</div>
-</div>
-
-<div id="emergencyPanel">
-<div id="emergencyContent">
-<div id="emergencyHeader">
-<h3>
-<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-أرقام الطوارئ الرسمية
-</h3>
-<button id="emergencyClose">
-<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-</button>
-</div>
-<div id="emergencyBody"></div>
-</div>
+<!-- Layers & Offline Modal -->
+<div class="modal-backdrop" id="layersModal">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h3>نمط الخريطة والعمل دون إنترنت</h3>
+      <button class="close-circle" data-close="layersModal"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+    </div>
+    <div class="layer-grid">
+      <button class="layer-opt active" data-layer="osm"><div class="t">خريطة الشوارع</div><div class="s">تفاصيل الأحياء والطرق</div></button>
+      <button class="layer-opt" data-layer="satellite"><div class="t">صور جوية (Esri)</div><div class="s">رؤية فضائية حقيقية</div></button>
+    </div>
+    <button class="btn-go" id="cacheAreaBtn" style="width:100%;margin-bottom:8px">تنزيل المنطقة الحالية (2.5 كم) للعمل دون إنترنت</button>
+    <div id="cacheStatus" style="text-align:center;font-size:12px;color:var(--text-muted);font-weight:700">البلاطات المحفوظة: 0</div>
+  </div>
 </div>
 
-<div id="downloadPanel">
-<div id="downloadContent">
-<div id="downloadHeader">
-<h3>
-<svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
-الطبقات والتنزيل دون إنترنت
-</h3>
-<button id="downloadClose">
-<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-</button>
+<!-- Saved Places Modal -->
+<div class="modal-backdrop" id="savedModal">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h3>الأماكن المفضلة</h3>
+      <button class="close-circle" data-close="savedModal"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+    </div>
+    <div id="savedListContainer"></div>
+  </div>
 </div>
 
-<div class="layer-switcher">
-<button class="layer-card active" data-layer="osm">
-<div class="l-title">خريطة الشوارع (OSM)</div>
-<div class="l-sub">أحياء، طرق، وتفاصيل مدنية</div>
-</button>
-<button class="layer-card" data-layer="satellite">
-<div class="l-title">صور جوية (Esri)</div>
-<div class="l-sub">معالم أرضية وتضاريس</div>
-</button>
+<!-- SOS Modal -->
+<div class="modal-backdrop" id="sosModal">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h3>أرقام الطوارئ</h3>
+      <button class="close-circle" data-close="sosModal"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+    </div>
+    <div class="em-grid">
+      <a class="em-card" href="tel:112"><div class="lbl">الشرطة</div><div class="num">112</div></a>
+      <a class="em-card" href="tel:110"><div class="lbl">الإسعاف</div><div class="num">110</div></a>
+      <a class="em-card" href="tel:113"><div class="lbl">الإطفاء</div><div class="num">113</div></a>
+      <a class="em-card" href="tel:112"><div class="lbl">طوارئ عامة</div><div class="num">112</div></a>
+    </div>
+  </div>
 </div>
 
-<div class="download-info">
-<strong>العمل دون إنترنت:</strong> حفظ بلاطات الخريطة محلياً ضمن نطاق نصف قطر 2.5 كم لتصفح أسرع عند ضعف الشبكة.
-</div>
-<button class="download-btn" id="downloadAreaBtn">
-<svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
-<span>تنزيل منطقة موقعي الحالي</span>
-</button>
-<button class="download-btn" id="downloadCenterBtn" style="background:var(--input-bg);color:var(--text);">
-<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-<span>تنزيل منطقة مركز الخريطة</span>
-</button>
-<button class="download-btn" id="clearTilesBtn" style="background:rgba(220,38,38,.12);color:var(--danger);">
-<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-<span>مسح البلاطات المحفوظة</span>
-</button>
-<div class="download-progress" id="downloadProgress">
-<div class="bar"><div class="fill" id="downloadFill"></div></div>
-<div class="text" id="downloadText">جاري التنزيل...</div>
-</div>
-<div class="download-stats">
-<div class="stat">
-<div class="val" id="statTiles">0</div>
-<div class="lbl">بلاطة محفوظة</div>
-</div>
-<div class="stat">
-<div class="val" id="statSize">0 MB</div>
-<div class="lbl">حجم الكاش</div>
-</div>
-</div>
-</div>
-</div>
-
-<div id="nameDialog">
-<div id="nameDialogBox">
-<h3>حفظ المكان</h3>
-<input id="nameInput" type="text" placeholder="أدخل اسماً مميزاً للمكان" />
-<div class="actions">
-<button id="nameCancel">إلغاء</button>
-<button id="nameSave">حفظ</button>
-</div>
-</div>
-</div>
-
-<div id="stopConfirmDialog">
-<div id="stopConfirmBox">
-<div class="icon">
-<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-</div>
-<h3>إنهاء التوجيه</h3>
-<p>هل تريد إيقاف التوجيه الحالي والعودة إلى عرض الخريطة؟</p>
-<div class="actions">
-<button id="stopConfirmCancel">متابعة</button>
-<button id="stopConfirmOk">إنهاء</button>
-</div>
-</div>
-</div>
-
-<div id="installDialog">
-<div id="installBox">
-<div class="icon">
-<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-</div>
-<h3>تثبيت كزدورة</h3>
-<p id="installInstructions">لإضافة التطبيق إلى الشاشة الرئيسية: افتح قائمة المتصفح واختر "إضافة إلى الشاشة الرئيسية" أو "تثبيت التطبيق".</p>
-<div class="actions">
-<button id="installCancel">حسناً</button>
-<button id="installOk" style="display:none;">تثبيت الآن</button>
-</div>
-</div>
-</div>
-
-<div id="deleteConfirmDialog">
-<div id="deleteConfirmBox">
-<div class="icon">
-<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-</div>
-<h3 id="deleteConfirmTitle">تأكيد الحذف</h3>
-<p id="deleteConfirmMsg">هل تريد تنفيذ الحذف؟</p>
-<div class="actions">
-<button id="deleteConfirmCancel">إلغاء</button>
-<button id="deleteConfirmOk">حذف</button>
-</div>
-</div>
-</div>
-
-<button id="recenterBtn" title="توسيط الموقع">
-<svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
-</button>
-
-<div id="mapHint"></div>
-<div id="loading"><div class="spinner"></div><span id="loadingText">جاري المعالجة...</span></div>
+<div id="toast"></div>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// قاعدة البيانات المحلية الاحتياطية (Offline Database)
+// التهيئة والمتغيرات الأساسية
 // ═══════════════════════════════════════════════════════════════
-const OFFLINE_DB = [];
-
-// ═══════════════════════════════════════════════════════════════
-// منع إطفاء الشاشة + الاتصال + تثبيت PWA
-// ═══════════════════════════════════════════════════════════════
-let noSleep = null, wakeLock = null, deferredInstallPrompt = null;
-async function keepScreenOn() {
-  try { if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); return; } } catch(e) {}
-  try { if (!noSleep && typeof NoSleep !== 'undefined') noSleep = new NoSleep(); if (noSleep) noSleep.enable(); } catch(e) {}
-}
-function allowScreenOff() {
-  try { if (wakeLock) { wakeLock.release(); wakeLock = null; } if (noSleep) noSleep.disable(); } catch(e) {}
-}
-document.addEventListener('visibilitychange', async () => {
-  if (document.visibilityState === 'visible' && navigationActive && wakeLock === null) await keepScreenOn();
-});
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
-}
-
-const offlineBadge = document.getElementById('offlineBadge');
-function syncOnlineState() {
-  offlineBadge.classList.toggle('show', !navigator.onLine);
-}
-window.addEventListener('online', () => { syncOnlineState(); showHint('تم استعادة الاتصال بالإنترنت'); });
-window.addEventListener('offline', () => { syncOnlineState(); showHint('تم فقدان الاتصال — تفعيل الوضع المحلي'); });
-
-const installPromptBtn = document.getElementById('installPrompt');
-const installHeaderBtn = document.getElementById('installHeaderBtn');
-const installDialog = document.getElementById('installDialog');
-const installOkBtn = document.getElementById('installOk');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredInstallPrompt = e;
-  installPromptBtn.classList.add('show');
-  installHeaderBtn.style.display = 'flex';
-  installOkBtn.style.display = 'block';
-});
-function openInstallDialog() { installDialog.classList.add('show'); }
-installPromptBtn.onclick = openInstallDialog;
-installHeaderBtn.onclick = openInstallDialog;
-document.getElementById('installCancel').onclick = () => installDialog.classList.remove('show');
-installOkBtn.onclick = async () => {
-  installDialog.classList.remove('show');
-  if (!deferredInstallPrompt) return;
-  deferredInstallPrompt.prompt();
-  await deferredInstallPrompt.userChoice.catch(() => {});
-  deferredInstallPrompt = null;
-  installPromptBtn.classList.remove('show');
-  installHeaderBtn.style.display = 'none';
-};
-
-// ═══════════════════════════════════════════════════════════════
-// IndexedDB للبلاطات
-// ═══════════════════════════════════════════════════════════════
-const DB_NAME='kzdora_offline', DB_VERSION=1, TILE_STORE='tiles';
-let db = null;
-async function initDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onerror = () => reject(req.error);
-    req.onsuccess = () => { db = req.result; resolve(db); };
-    req.onupgradeneeded = (e) => {
-      const d = e.target.result;
-      if (!d.objectStoreNames.contains(TILE_STORE)) d.createObjectStore(TILE_STORE, { keyPath: 'key' });
-    };
-  });
-}
-async function saveTileToDB(key, blob, size) {
-  if (!db) await initDB();
-  return new Promise((resolve) => {
-    const tx = db.transaction(TILE_STORE, 'readwrite');
-    tx.objectStore(TILE_STORE).put({ key, blob, size, ts: Date.now() });
-    tx.oncomplete = () => resolve(true);
-    tx.onerror = () => resolve(false);
-  });
-}
-async function getTileFromDB(key) {
-  if (!db) await initDB();
-  return new Promise((resolve) => {
-    const tx = db.transaction(TILE_STORE, 'readonly');
-    const req = tx.objectStore(TILE_STORE).get(key);
-    req.onsuccess = () => resolve(req.result || null);
-    req.onerror = () => resolve(null);
-  });
-}
-async function getTilesStats() {
-  if (!db) await initDB();
-  return new Promise((resolve) => {
-    const tx = db.transaction(TILE_STORE, 'readonly');
-    const req = tx.objectStore(TILE_STORE).getAll();
-    req.onsuccess = () => {
-      const tiles = req.result || [];
-      const size = tiles.reduce((s,t) => s + (t.size||0), 0);
-      resolve({ count: tiles.length, size });
-    };
-    req.onerror = () => resolve({ count: 0, size: 0 });
-  });
-}
-async function clearAllTiles() {
-  if (!db) await initDB();
-  return new Promise((resolve) => {
-    const tx = db.transaction(TILE_STORE, 'readwrite');
-    tx.objectStore(TILE_STORE).clear();
-    tx.oncomplete = () => resolve(true);
-    tx.onerror = () => resolve(false);
-  });
-}
-async function updateOfflineStats() {
-  const stats = await getTilesStats().catch(() => ({ count: 0, size: 0 }));
-  document.getElementById('statTiles').textContent = stats.count;
-  document.getElementById('statSize').textContent = (stats.size/1024/1024).toFixed(1) + ' MB';
-}
-
-// ═══════════════════════════════════════════════════════════════
-// تنزيل منطقة للعمل دون إنترنت
-// ═══════════════════════════════════════════════════════════════
-let downloadCancelFlag = false;
-async function downloadAreaForOffline(centerLat, centerLng, radiusKm = 2.5) {
-  if (!navigator.onLine) { showHint('التنزيل يتطلب اتصالاً بالإنترنت'); return; }
-  const latDelta = radiusKm / 111;
-  const lngDelta = radiusKm / (111 * Math.max(0.001, Math.cos(centerLat * Math.PI / 180)));
-  const bounds = { north: centerLat+latDelta, south: centerLat-latDelta, east: centerLng+lngDelta, west: centerLng-lngDelta };
-  const zoomLevels = [13,14,15,16,17];
-  const tileList = [];
-
-  for (const z of zoomLevels) {
-    const n = Math.pow(2,z);
-    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-    const xMin = clamp(Math.floor((bounds.west+180)/360*n), 0, n-1);
-    const xMax = clamp(Math.floor((bounds.east+180)/360*n), 0, n-1);
-    const yMin = clamp(Math.floor((1-Math.log(Math.tan(bounds.north*Math.PI/180)+1/Math.cos(bounds.north*Math.PI/180))/Math.PI)/2*n), 0, n-1);
-    const yMax = clamp(Math.floor((1-Math.log(Math.tan(bounds.south*Math.PI/180)+1/Math.cos(bounds.south*Math.PI/180))/Math.PI)/2*n), 0, n-1);
-    for (let x=xMin; x<=xMax; x++) for (let y=yMin; y<=yMax; y++) {
-      if (tileList.length >= 1200) break;
-      tileList.push({z,x,y});
-    }
-    if (tileList.length >= 1200) break;
-  }
-
-  const total = tileList.length;
-  if (total === 0) { showHint('نطاق التنزيل صغير جداً'); return; }
-  document.getElementById('downloadProgress').classList.add('show');
-  document.getElementById('downloadFill').style.width = '0%';
-  document.getElementById('downloadText').textContent = `جاري التنزيل: 0 / ${total}`;
-  downloadCancelFlag = false;
-  let done = 0, saved = 0;
-  const updateProgress = () => {
-    const pct = Math.round(done/total*100);
-    document.getElementById('downloadFill').style.width = pct+'%';
-    document.getElementById('downloadText').textContent = `جاري التنزيل: ${done} / ${total} (${pct}%)`;
-  };
-
-  const batchSize = 4;
-  for (let i = 0; i < tileList.length; i += batchSize) {
-    if (downloadCancelFlag) break;
-    const batch = tileList.slice(i, i+batchSize);
-    await Promise.all(batch.map(async (t) => {
-      const key = `${activeMapLayer}:${t.z}/${t.x}/${t.y}`;
-      const existing = await getTileFromDB(key).catch(() => null);
-      if (existing) { done++; updateProgress(); return; }
-      try {
-        const r = await fetch(getLayerTileUrl(activeMapLayer, t.z, t.x, t.y));
-        if (r.ok) {
-          const blob = await r.blob();
-          await saveTileToDB(key, blob, blob.size);
-          saved++;
-        }
-      } catch(e) {}
-      done++; updateProgress();
-    }));
-    await new Promise(r => setTimeout(r, 180));
-  }
-
-  document.getElementById('downloadFill').style.width = '100%';
-  document.getElementById('downloadText').textContent = `تم حفظ ${saved} بلاطة جديدة`;
-  setTimeout(() => document.getElementById('downloadProgress').classList.remove('show'), 3000);
-  speak('تم تنزيل خريطة المنطقة بنجاح');
-  updateOfflineStats();
-}
-
-// ═══════════════════════════════════════════════════════════════
-// الأيقونات
-// ═══════════════════════════════════════════════════════════════
-const ICONS = {
-  straight: '<svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.59 5.58L20 12l-8-8-8 8z"/></svg>',
-  turnLeft: '<svg viewBox="0 0 24 24"><path d="M20 11v2H8l-5.5-5.5L4 6l4.5 4.5H18V7l4 4-4 4v-4h2z" transform="scale(-1,1) translate(-24,0)"/></svg>',
-  turnRight: '<svg viewBox="0 0 24 24"><path d="M20 11v2H8l-5.5-5.5L4 6l4.5 4.5H18V7l4 4-4 4v-4h2z"/></svg>',
-  slightLeft: '<svg viewBox="0 0 24 24"><path d="M10 9l4-4 4 4h-3v7c0 1.1-.9 2-2 2H5v-2h8V9h-3z" transform="scale(-1,1) translate(-24,0)"/></svg>',
-  slightRight: '<svg viewBox="0 0 24 24"><path d="M10 9l4-4 4 4h-3v7c0 1.1-.9 2-2 2H5v-2h8V9h-3z"/></svg>',
-  sharpLeft: '<svg viewBox="0 0 24 24"><path d="M6 6l6 6-1.4 1.4L7 9.8V19H5V6h1z" transform="scale(-1,1) translate(-24,0)"/></svg>',
-  sharpRight: '<svg viewBox="0 0 24 24"><path d="M6 6l6 6-1.4 1.4L7 9.8V19H5V6h1z"/></svg>',
-  roundabout: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-13h-2v5l4.28 2.54.72-1.21-3-1.8V7z"/></svg>',
-  arrive: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>',
-  depart: '<svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>',
-  waypoint: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>',
-  moon: '<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>',
-  sun: '<svg viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1z"/></svg>'
-};
-const POI_ICONS_MAP = {
-  fuel: '<svg viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v16h10v-7.5h1.5v5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77zM12 10H6V5h6v5z"/></svg>',
-  pharmacy: '<svg viewBox="0 0 24 24"><path d="M21 5h-2.64l1.14-3.14L17.15 1l-1.46 4H3v2l2 6-2 6v2h18v-2l-2-6 2-6V5zm-5 9h-3v3h-2v-3H8v-2h3V9h2v3h3v2z"/></svg>',
-  hospital: '<svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10z"/></svg>',
-  grocery: '<svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>',
-  restaurant: '<svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>',
-  atm: '<svg viewBox="0 0 24 24"><path d="M11.5 1L2 6v2h19V6l-9.5-5zM2 19h2v3h2v-3h2v3h2v-3h2v3h2v-3h2v3h2v-3h1v-2H2v2zm18-8H2v5h18v-5zm-2 2h-3v-1h3v1z"/></svg>',
-  parking: '<svg viewBox="0 0 24 24"><path d="M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z"/></svg>',
-  mosque: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 1.74.65 3.34 1.72 4.61C4.61 14.89 3 17.34 3 20h18c0-2.66-1.61-5.11-3.72-6.39C18.35 12.34 19 10.74 19 9c0-3.87-3.13-7-7-7zm0 15c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>',
-  cafe: '<svg viewBox="0 0 24 24"><path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"/></svg>',
-  hotel: '<svg viewBox="0 0 24 24"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>'
-};
-const CAR_ICON_TOPVIEW = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="cb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#60a5fa"/><stop offset="50%" stop-color="#0f62fe"/><stop offset="100%" stop-color="#002d9c"/></linearGradient></defs><path d="M32 1 L 27 8 L 30 7 L 30 10 L 34 10 L 34 7 L 37 8 Z" fill="#16a34a" stroke="#fff" stroke-width="1"/><path d="M32 5 C 25 5 21 9 21 15 L 19 22 L 17 26 L 17 48 C 17 54 21 57 25 57 L 39 57 C 43 57 47 54 47 48 L 47 26 L 45 22 L 43 15 C 43 9 39 5 32 5 Z" fill="url(#cb)" stroke="#fff" stroke-width="2"/><rect x="23" y="27" width="18" height="20" rx="3" fill="#002d9c" opacity="0.85"/><ellipse cx="24" cy="9" rx="2" ry="1.5" fill="#fde047"/><ellipse cx="40" cy="9" rx="2" ry="1.5" fill="#fde047"/></svg>`;
-const WALK_ICON = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M32 2 L 28 10 L 30.5 9 L 30.5 12 L 33.5 12 L 33.5 9 L 36 10 Z" fill="#16a34a" stroke="#fff" stroke-width="1"/><circle cx="32" cy="34" r="24" fill="#0f62fe" stroke="#fff" stroke-width="3"/><g transform="translate(32,34)"><circle cx="0" cy="-10" r="4" fill="#fff"/><path d="M -3 -6 L 3 -6 L 5 4 L 2 4 L 0 0 L -2 4 L -5 4 Z" fill="#fff"/></g></svg>`;
-const EM_ICONS = {
-  police: '<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>',
-  ambulance: '<svg viewBox="0 0 24 24"><path d="M18 18.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm-9 0c.83 0 1.5-.67 1.5-1.5S9.83 15.5 9 15.5s-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm10-9.5h-3V6h-2v3h-3v2h3v3h2v-3h3zM3 5v13h2c0 2.21 1.79 4 4 4s4-1.79 4-4h2c0 2.21 1.79 4 4 4s4-1.79 4-4h2V9c0-1.1-.9-2-2-2h-3V4c0-.55-.45-1-1-1H6c-.55 0-1 .45-1 1v1H3z"/></svg>',
-  fire: '<svg viewBox="0 0 24 24"><path d="M13.5 0.67s0.74 2.65 0.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l0.03-0.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5 0.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>',
-  emergency: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>'
-};
-
-// ═══════════════════════════════════════════════════════════════
-// التوجيه الصوتي
-// ═══════════════════════════════════════════════════════════════
-const synth = window.speechSynthesis || null;
-let arabicVoice = null;
-function pickArabicVoice() {
-  if (!synth) return;
-  const v = synth.getVoices();
-  arabicVoice = v.find(x => x.lang === 'ar-SA') || v.find(x => x.lang.startsWith('ar')) || null;
-}
-pickArabicVoice();
-if (synth && synth.onvoiceschanged !== undefined) synth.onvoiceschanged = pickArabicVoice;
-function speak(text, priority = false) {
-  if (!text || !synth || typeof SpeechSynthesisUtterance === 'undefined') return;
-  if (priority) synth.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'ar-SA'; u.rate = 0.96; u.pitch = 1;
-  if (arabicVoice) u.voice = arabicVoice;
-  synth.speak(u);
-}
-function playBeep(f = 880, d = 150) {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.type = 'sine'; o.frequency.value = f;
-    g.gain.setValueAtTime(0.14, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + d / 1000);
-    o.connect(g); g.connect(ctx.destination);
-    o.start(); o.stop(ctx.currentTime + d / 1000);
-    setTimeout(() => ctx.close().catch(() => {}), d + 60);
-  } catch (e) {}
-}
-
-// ═══════════════════════════════════════════════════════════════
-// أدوات مساعدة
-// ═══════════════════════════════════════════════════════════════
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let loadingTimeout = null;
-function showLoading(m) {
-  document.getElementById('loadingText').textContent = m;
-  document.getElementById('loading').classList.add('show');
-  clearTimeout(loadingTimeout);
-  loadingTimeout = setTimeout(() => hideLoading(), 10000);
-}
-function hideLoading() {
-  clearTimeout(loadingTimeout);
-  loadingTimeout = null;
-  document.getElementById('loading').classList.remove('show');
-}
-function showHint(t) {
-  const h = document.getElementById('mapHint');
-  h.textContent = t;
-  h.classList.remove('show');
-  void h.offsetWidth;
-  h.classList.add('show');
-  clearTimeout(showHint._t);
-  showHint._t = setTimeout(() => h.classList.remove('show'), 3000);
-}
-function computeBearing(lat1, lon1, lat2, lon2) {
-  const toRad = d => d * Math.PI / 180;
-  const toDeg = r => r * 180 / Math.PI;
-  const dLon = toRad(lon2 - lon1);
-  const y = Math.sin(dLon) * Math.cos(toRad(lat2));
-  const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
-  return (toDeg(Math.atan2(y, x)) + 360) % 360;
-}
-function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-function formatDist(m) {
-  if (m >= 1000) return (m / 1000).toFixed(1) + ' كم';
-  return Math.round(m) + ' م';
-}
-function formatEta(s) {
-  const d = new Date(Date.now() + s * 1000);
-  return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-}
-function coordsBounds(coords) {
-  let minLng=Infinity,minLat=Infinity,maxLng=-Infinity,maxLat=-Infinity;
-  coords.forEach(c => { if (c[0]<minLng) minLng=c[0]; if (c[1]<minLat) minLat=c[1]; if (c[0]>maxLng) maxLng=c[0]; if (c[1]>maxLat) maxLat=c[1]; });
-  return [[minLng,minLat],[maxLng,maxLat]];
-}
-
-// ═══════════════════════════════════════════════════════════════
-// الحوارات والطوارئ
-// ═══════════════════════════════════════════════════════════════
-const deleteConfirmDialog = document.getElementById('deleteConfirmDialog');
-let deleteConfirmCallback = null;
-function showDeleteConfirm(title, msg, cb) {
-  document.getElementById('deleteConfirmTitle').textContent = title;
-  document.getElementById('deleteConfirmMsg').textContent = msg;
-  deleteConfirmCallback = cb;
-  deleteConfirmDialog.classList.add('show');
-}
-document.getElementById('deleteConfirmCancel').onclick = () => {
-  deleteConfirmDialog.classList.remove('show');
-  deleteConfirmCallback = null;
-};
-document.getElementById('deleteConfirmOk').onclick = () => {
-  deleteConfirmDialog.classList.remove('show');
-  if (deleteConfirmCallback) deleteConfirmCallback();
-  deleteConfirmCallback = null;
-};
-
-const EMERGENCY_DATA = {
-  numbers: [
-    { type: 'police', label: 'الشرطة', number: '112', icon: 'police' },
-    { type: 'ambulance', label: 'الإسعاف', number: '110', icon: 'ambulance' },
-    { type: 'fire', label: 'الإطفاء', number: '113', icon: 'fire' },
-    { type: 'emergency', label: 'طوارئ عامة', number: '112', icon: 'emergency' }
-  ]
-};
-function buildEmergencyPanel() {
-  const body = document.getElementById('emergencyBody');
-  body.innerHTML = '';
-  const sec1 = document.createElement('div');
-  sec1.className = 'em-section';
-  sec1.innerHTML = `<div class="em-section-title"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>أرقام الطوارئ الرسمية</div>`;
-  const g1 = document.createElement('div');
-  g1.className = 'em-grid';
-  EMERGENCY_DATA.numbers.forEach(n => {
-    const a = document.createElement('a');
-    a.className = `em-btn ${n.type}`;
-    a.href = `tel:${n.number}`;
-    a.innerHTML = `<div class="em-icon">${EM_ICONS[n.icon]}</div><div class="em-label">${n.label}</div><div class="em-number">${n.number}</div>`;
-    g1.appendChild(a);
-  });
-  sec1.appendChild(g1);
-  body.appendChild(sec1);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// الحالة العامة
-// ═══════════════════════════════════════════════════════════════
-let destMarker = null, startMarker = null;
-let waypointMarkers = [];
-let currentWaypoints = [];
-let pendingWaypointPick = false;
-let currentSteps = [];
-let currentStepIndex = 0;
-let navigationActive = false;
+const ALEPPO = [37.1612, 36.2021];
+let currentLayer = 'osm';
+let is3D = false;
+let userLoc = null;      // [lat, lng]
+let manualStart = null;  // [lat, lng]
+let destLoc = null;      // [lat, lng]
+let destName = '';
+let travelMode = 'auto';
+let routesList = [];
+let activeRouteIdx = 0;
+let navActive = false;
+let simTimer = null;
 let watchId = null;
-let lastSpokenStep = -1;
-let userLocation = null, manualStart = null;
-let userMarker = null, vehicleMarker = null;
-let lastHeading = 0, gpsFirstFix = false;
-let lastPosition = null, lastPositionTime = null;
+let lastHeading = 0;
 let currentSpeed = 0;
-let speedInitialized = false;
-let currentRouteProfile = 'fastest';
-let currentRouteData = null;
-let currentRoutes = { fastest: null, shortest: null };
-let currentDestination = null;
-let currentTravelMode = 'driving';
-let recenterMode = 'follow';
-let activeCategory = null;
-let activeMapLayer = 'osm';
+let userMarker = null, destMarker = null, startMarker = null, carMarker = null;
 let poiMarkers = [];
-let isDarkMode = false;
-const SPEED_LIMIT = 120;
-let offRouteCounter = 0, lastRouteRecalcTime = 0;
-const OFF_ROUTE_THRESHOLD_M = 80, OFF_ROUTE_COUNT = 3, ROUTE_RECALC_COOLDOWN = 15000, MIN_GPS_ACCURACY = 60;
-let savedPlaces = JSON.parse(localStorage.getItem('kzdora_saved') || '[]');
+let ctxCoords = null;
 
-// ═══════════════════════════════════════════════════════════════
-// الخريطة والطبقات
-// ═══════════════════════════════════════════════════════════════
-function getLayerTileUrl(layer, z, x, y) {
-  if (layer === 'satellite') {
-    return `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
-  }
-  return `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
+let savedPlaces = JSON.parse(localStorage.getItem('kzdora_v3_saved') || '[]');
+let homePlace = JSON.parse(localStorage.getItem('kzdora_v3_home') || 'null');
+let workPlace = JSON.parse(localStorage.getItem('kzdora_v3_work') || 'null');
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
-maplibregl.addProtocol('osmdb', async (params) => {
-  const clean = params.url.replace('osmdb://','');
-  const [layerPrefix, rest] = clean.includes(':') ? clean.split(':') : ['osm', clean];
-  const [z,x,y] = rest.split('/').map(Number);
-  const key = `${layerPrefix}:${z}/${x}/${y}`;
-  const hit = await getTileFromDB(key).catch(() => null);
-  if (hit && hit.blob) return { data: await hit.blob.arrayBuffer() };
-  const r = await fetch(getLayerTileUrl(layerPrefix, z, x, y));
-  if (!r.ok) throw new Error('tile ' + r.status);
+function speak(text) {
+  if (!('speechSynthesis' in window) || !text) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ar-SA';
+  u.rate = 0.98;
+  window.speechSynthesis.speak(u);
+}
+
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function bearing(lat1, lon1, lat2, lon2) {
+  const toR = d => d*Math.PI/180, toD = r => r*180/Math.PI;
+  const dL = toR(lon2-lon1);
+  const y = Math.sin(dL)*Math.cos(toR(lat2));
+  const x = Math.cos(toR(lat1))*Math.sin(toR(lat2)) - Math.sin(toR(lat1))*Math.cos(toR(lat2))*Math.cos(dL);
+  return (toD(Math.atan2(y,x)) + 360) % 360;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// IndexedDB للتخزين المحلي للبلاطات
+// ═══════════════════════════════════════════════════════════════
+let db = null;
+function openTileDB() {
+  return new Promise(res => {
+    const req = indexedDB.open('kzdora_v3_tiles', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('tiles', { keyPath: 'k' });
+    req.onsuccess = e => { db = e.target.result; res(db); };
+    req.onerror = () => res(null);
+  });
+}
+async function getTile(k) {
+  if (!db) await openTileDB();
+  if (!db) return null;
+  return new Promise(res => {
+    const r = db.transaction('tiles','readonly').objectStore('tiles').get(k);
+    r.onsuccess = () => res(r.result?.b || null);
+    r.onerror = () => res(null);
+  });
+}
+async function putTile(k, b) {
+  if (!db) await openTileDB();
+  if (!db) return;
+  const tx = db.transaction('tiles','readwrite');
+  tx.objectStore('tiles').put({ k, b });
+}
+async function countTiles() {
+  if (!db) await openTileDB();
+  if (!db) return 0;
+  return new Promise(res => {
+    const r = db.transaction('tiles','readonly').objectStore('tiles').count();
+    r.onsuccess = () => res(r.result || 0);
+    r.onerror = () => res(0);
+  });
+}
+
+function tileUrl(layer, z, x, y) {
+  return layer === 'satellite'
+    ? `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`
+    : `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
+}
+
+maplibregl.addProtocol('kzdora', async (params) => {
+  const [layer, rest] = params.url.replace('kzdora://','').split(':');
+  const key = `${layer}:${rest}`;
+  const cached = await getTile(key);
+  if (cached) return { data: await cached.arrayBuffer() };
+  const [z,x,y] = rest.split('/');
+  const r = await fetch(tileUrl(layer, z, x, y));
+  if (!r.ok) throw new Error('tile error');
   const blob = await r.blob();
-  saveTileToDB(key, blob, blob.size).catch(() => {});
+  putTile(key, blob);
   return { data: await blob.arrayBuffer() };
 });
 
-function buildMapStyle(layer) {
+function createStyle(layer) {
   return {
     version: 8,
-    name: layer,
     sources: {
-      'base-tiles': {
-        type: 'raster',
-        tiles: [`osmdb://${layer}:{z}/{x}/{y}`],
-        tileSize: 256,
-        maxzoom: 19
-      }
+      base: { type: 'raster', tiles: [`kzdora://${layer}:{z}/{x}/{y}`], tileSize: 256, maxzoom: 19 }
     },
     layers: [
-      { id: 'bg', type: 'background', paint: { 'background-color': layer === 'satellite' ? '#111827' : '#f2efe9' } },
-      { id: 'base-layer', type: 'raster', source: 'base-tiles' }
+      { id: 'bg', type: 'background', paint: { 'background-color': layer === 'satellite' ? '#090d16' : '#e5e7eb' } },
+      { id: 'base', type: 'raster', source: 'base' }
     ]
   };
 }
 
-const ALEPPO_CENTER = [37.1612, 36.2021];
+// ═══════════════════════════════════════════════════════════════
+// إنشاء الخريطة
+// ═══════════════════════════════════════════════════════════════
 const map = new maplibregl.Map({
   container: 'map',
-  style: buildMapStyle('osm'),
-  center: ALEPPO_CENTER,
-  zoom: 13,
+  style: createStyle('osm'),
+  center: ALEPPO,
+  zoom: 13.5,
   pitch: 0,
   bearing: 0,
-  attributionControl: false,
-  antialias: true
+  attributionControl: false
 });
 
-function switchMapLayer(layer) {
-  if (layer === activeMapLayer) return;
-  activeMapLayer = layer;
-  document.querySelectorAll('.layer-card').forEach(c => c.classList.toggle('active', c.dataset.layer === layer));
-  map.setStyle(buildMapStyle(layer));
-  map.once('styledata', () => {
-    if (currentRouteData) drawRoute(currentRouteData);
-  });
-  showHint(layer === 'satellite' ? 'تم التبديل إلى الصور الجوية' : 'تم التبديل إلى خريطة الشوارع');
-}
-
-document.querySelectorAll('.layer-card').forEach(card => {
-  card.onclick = () => switchMapLayer(card.dataset.layer);
+map.on('rotate', () => {
+  document.getElementById('compassIcon').style.transform = `rotate(${-map.getBearing()}deg)`;
 });
 
 // ═══════════════════════════════════════════════════════════════
-// نقاط التوقف (Waypoints)
+// تحديث الاختصارات السريعة (المنزل / العمل / المفضلة)
 // ═══════════════════════════════════════════════════════════════
-function updateWaypointsUI() {
-  const bar = document.getElementById('waypointsBar');
-  const list = document.getElementById('waypointsList');
-  if (!currentWaypoints.length) {
-    bar.classList.remove('show');
-    list.innerHTML = '';
-    return;
-  }
-  bar.classList.add('show');
-  list.innerHTML = '';
-  currentWaypoints.forEach((wp, idx) => {
-    const row = document.createElement('div');
-    row.className = 'wp-item';
-    row.innerHTML = `<div class="wp-num">${idx + 1}</div><div class="wp-name">${esc(wp.name)}</div><button class="wp-del" title="حذف"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>`;
-    row.querySelector('.wp-del').onclick = () => {
-      currentWaypoints.splice(idx, 1);
-      updateWaypointsUI();
-      redrawWaypointMarkers();
-      if (currentDestination) setDestination(currentDestination, null, true);
-    };
-    list.appendChild(row);
-  });
+function refreshQuickCards() {
+  document.getElementById('homeSub').textContent = homePlace ? homePlace.name : 'اضغط للتعيين';
+  document.getElementById('workSub').textContent = workPlace ? workPlace.name : 'اضغط للتعيين';
+  document.getElementById('savedCountSub').textContent = `${savedPlaces.length} أماكن`;
 }
+refreshQuickCards();
 
-function redrawWaypointMarkers() {
-  waypointMarkers.forEach(m => m.remove());
-  waypointMarkers = [];
-  currentWaypoints.forEach((wp, idx) => {
-    const el = document.createElement('div');
-    el.className = 'waypoint-marker';
-    el.innerHTML = `<span>${idx + 1}</span>`;
-    waypointMarkers.push(new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat([wp.loc[1], wp.loc[0]]).addTo(map));
-  });
-}
-
-document.getElementById('addWaypointBtn').onclick = () => {
-  pendingWaypointPick = true;
-  showHint('اضغط على الخريطة لاختيار نقطة توقف');
+document.getElementById('homeQuickBtn').onclick = () => {
+  if (homePlace) prepareRoute(homePlace.loc, homePlace.name);
+  else toast('اضغط مطولاً على الخريطة لحفظ موقع المنزل');
+};
+document.getElementById('workQuickBtn').onclick = () => {
+  if (workPlace) prepareRoute(workPlace.loc, workPlace.name);
+  else toast('اضغط مطولاً على الخريطة لحفظ مقر العمل');
+};
+document.getElementById('savedQuickBtn').onclick = () => {
+  renderSavedModal();
+  document.getElementById('savedModal').classList.add('show');
 };
 
-function addWaypoint(loc, name) {
-  currentWaypoints.push({ loc, name: name || `نقطة ${currentWaypoints.length+1}` });
-  updateWaypointsUI();
-  redrawWaypointMarkers();
-  showHint(`تمت إضافة نقطة التوقف ${currentWaypoints.length}`);
-  speak(`تمت إضافة نقطة التوقف ${currentWaypoints.length}`);
-  if (currentDestination) setDestination(currentDestination, null, true);
-}
-
 // ═══════════════════════════════════════════════════════════════
-// POI والبحث
+// GPS وتتبع الموقع
 // ═══════════════════════════════════════════════════════════════
-const CAT_LABELS = { fuel:'محطة وقود', pharmacy:'صيدلية', hospital:'مشفى', grocery:'بقالية', restaurant:'مطعم', atm:'صراف آلي', parking:'موقف سيارات', mosque:'مسجد', cafe:'مقهى', hotel:'فندق' };
-const OSM_TAGS = { fuel:'["amenity"="fuel"]', pharmacy:'["amenity"="pharmacy"]', hospital:'["amenity"~"hospital|clinic"]', grocery:'["shop"~"supermarket|convenience"]', restaurant:'["amenity"~"restaurant|fast_food"]', atm:'["amenity"~"atm|bank"]', parking:'["amenity"="parking"]', mosque:'["amenity"="place_of_worship"]["religion"="muslim"]', cafe:'["amenity"="cafe"]', hotel:'["tourism"~"hotel|guest_house"]' };
+function initGPS() {
+  if (!navigator.geolocation) return;
+  watchId = navigator.geolocation.watchPosition(pos => {
+    const loc = [pos.coords.latitude, pos.coords.longitude];
+    userLoc = loc;
+    document.getElementById('gpsPill').classList.add('ready');
+    document.getElementById('gpsLabel').textContent = `${Math.round(pos.coords.accuracy)}م`;
 
-async function searchNearby(cat) {
-  const center = userLocation || [map.getCenter().lat, map.getCenter().lng];
-  showLoading(`جاري البحث عن ${CAT_LABELS[cat]}...`);
-  const [lat,lng] = center;
+    if (pos.coords.speed != null && pos.coords.speed >= 0) {
+      currentSpeed = Math.round(pos.coords.speed * 3.6);
+      document.getElementById('speedNum').textContent = currentSpeed;
+      document.getElementById('hudSpeedVal').textContent = currentSpeed;
+      document.getElementById('speedOrb').classList.toggle('over', currentSpeed > 120);
+      document.getElementById('hudSpeedBox').classList.toggle('over', currentSpeed > 120);
+    }
 
-  if (!navigator.onLine) {
-    hideLoading();
-    loadLocalPOIs(cat, lat, lng);
-    return;
-  }
-
-  const q = `[out:json][timeout:8];(node${OSM_TAGS[cat]}(around:3000,${lat},${lng});way${OSM_TAGS[cat]}(around:3000,${lat},${lng}););out center 30;`;
-  const servers = [
-    'https://overpass-api.de/api/interpreter',
-    'https://overpass.kumi.systems/api/interpreter'
-  ];
-
-  for (const srv of servers) {
-    try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 6000);
-      const r = await fetch(srv, { method:'POST', body:'data='+encodeURIComponent(q), headers:{'Content-Type':'application/x-www-form-urlencoded'}, signal:ctrl.signal });
-      clearTimeout(t);
-      if (!r.ok) continue;
-      const data = await r.json();
-      if (data.elements && data.elements.length > 0) {
-        const results = data.elements.map(el => {
-          const plat = el.lat || (el.center && el.center.lat);
-          const plng = el.lon || (el.center && el.center.lon);
-          if (!plat || !plng) return null;
-          const name = el.tags?.name || el.tags?.['name:ar'] || el.tags?.['name:en'] || CAT_LABELS[cat];
-          return { name, lat:plat, lng:plng, dist:haversine(lat,lng,plat,plng), address:buildAddress(el.tags) };
-        }).filter(Boolean);
-        results.sort((a,b) => a.dist - b.dist);
-        hideLoading();
-        displayPoiResults(results, cat);
-        return;
+    if (!navActive) {
+      if (!userMarker) {
+        const el = document.createElement('div');
+        el.className = 'user-dot';
+        userMarker = new maplibregl.Marker({ element: el }).setLngLat([loc[1], loc[0]]).addTo(map);
+        map.flyTo({ center: [loc[1], loc[0]], zoom: 15.5 });
+      } else {
+        userMarker.setLngLat([loc[1], loc[0]]);
       }
-    } catch(e) { continue; }
-  }
-
-  hideLoading();
-  loadLocalPOIs(cat, lat, lng);
-}
-
-function loadLocalPOIs(cat, lat, lng) {
-  const localResults = OFFLINE_DB.filter(item => item.cat === cat).map(item => ({
-    ...item,
-    dist: haversine(lat, lng, item.lat, item.lng)
-  })).sort((a, b) => a.dist - b.dist);
-
-  if (localResults.length > 0) displayPoiResults(localResults, cat);
-  else showHint('لا توجد نتائج متاحة لهذه الفئة حالياً');
-}
-
-function buildAddress(t) {
-  if (!t) return '';
-  const p = [];
-  if (t['addr:street']) p.push(t['addr:street']);
-  if (t['addr:city']) p.push(t['addr:city']);
-  return p.join('، ');
-}
-function displayPoiResults(results, cat) {
-  clearPoiMarkers();
-  const bounds = new maplibregl.LngLatBounds();
-  const icon = POI_ICONS_MAP[cat] || POI_ICONS_MAP['fuel'];
-  results.forEach(r => {
-    const el = document.createElement('div');
-    el.className = `poi-marker ${cat}`;
-    el.innerHTML = icon;
-    el.onclick = (e) => { e.stopPropagation(); if (pendingWaypointPick) { addWaypoint([r.lat,r.lng], r.name); pendingWaypointPick = false; } else setDestination([r.lat,r.lng], r.name); };
-    poiMarkers.push(new maplibregl.Marker({ element:el, anchor:'bottom' }).setLngLat([r.lng,r.lat]).addTo(map));
-    bounds.extend([r.lng,r.lat]);
-  });
-  if (results.length > 1) map.fitBounds(bounds, { padding:80, maxZoom:15, duration:800 });
-  else if (results.length === 1) map.flyTo({ center:[results[0].lng,results[0].lat], zoom:16 });
-  renderResultsList(results, cat);
-  speak(`تم العثور على ${results.length} نتائج`);
-}
-function clearPoiMarkers() { poiMarkers.forEach(m=>m.remove()); poiMarkers = []; }
-function renderResultsList(results, cat) {
-  const box = document.getElementById('results');
-  const list = document.getElementById('resultsList');
-  document.getElementById('resultsCount').textContent = `(${results.length})`;
-  list.innerHTML = '';
-  const icon = POI_ICONS_MAP[cat] || POI_ICONS_MAP['fuel'];
-  results.forEach(p => {
-    const d = document.createElement('div');
-    d.className = 'result-item';
-    const dt = p.dist < 1 ? `${Math.round(p.dist*1000)} م` : `${p.dist.toFixed(1)} كم`;
-    d.innerHTML = `<div class="pin">${icon}</div><div class="text"><div class="title">${esc(p.name)}</div><div class="sub">${esc(p.address||CAT_LABELS[cat])}</div></div><div class="dist-badge">${dt}</div><button class="save-btn" title="حفظ"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
-    const go = () => { box.classList.remove('show'); if (pendingWaypointPick) { addWaypoint([p.lat,p.lng], p.name); pendingWaypointPick = false; } else setDestination([p.lat,p.lng], p.name); };
-    d.querySelector('.text').onclick = go;
-    d.querySelector('.dist-badge').onclick = (e) => { e.stopPropagation(); go(); };
-    d.querySelector('.save-btn').onclick = (e) => { e.stopPropagation(); openNameDialog([p.lat,p.lng], p.name); };
-    list.appendChild(d);
-  });
-  box.classList.add('show');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// القائمة المنبثقة للضغط المطول
-// ═══════════════════════════════════════════════════════════════
-const mapPopup = document.getElementById('mapPopup');
-let popupLatLng = null, pressTimer = null, pressStartPoint = null;
-
-function showMapPopup(ll, x, y) {
-  popupLatLng = ll;
-  const header = document.getElementById('appHeader');
-  const minTop = (header ? header.getBoundingClientRect().bottom : 0) + 60;
-  const popupHeight = 310;
-  const left = Math.min(Math.max(10, x - 110), window.innerWidth - 230);
-  const top = Math.min(Math.max(minTop, y), window.innerHeight - popupHeight - 20);
-  mapPopup.style.left = left + 'px';
-  mapPopup.style.top = top + 'px';
-  mapPopup.classList.add('show');
-}
-function hideMapPopup() { mapPopup.classList.remove('show'); }
-(() => {
-  const b = document.createElement('button');
-  b.className = 'popup-item';
-  b.textContent = 'مشاركة الموقع عبر واتساب';
-  b.onclick = () => {
-    if (popupLatLng) {
-      const a = popupLatLng.lat.toFixed(6), o = popupLatLng.lng.toFixed(6);
-      window.open('https://wa.me/?text=' + encodeURIComponent('موقعي: https://www.openstreetmap.org/?mlat=' + a + '&mlon=' + o + '#map=18/' + a + '/' + o), '_blank', 'noopener');
+    } else if (!simTimer) {
+      if (pos.coords.heading != null && !isNaN(pos.coords.heading)) lastHeading = pos.coords.heading;
+      updateNavigationFrame(loc, lastHeading);
     }
-    hideMapPopup();
-  };
-  mapPopup.appendChild(b);
-  const c = document.createElement('div');
-  c.id = 'osmCredit';
-  c.innerHTML = '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>';
-  document.body.appendChild(c);
-})();
-
-function handlePressStart(e) {
-  if ('ontouchstart' in window && e.originalEvent?.type === 'mousedown') return;
-  if (e.originalEvent?.touches?.length > 1) return;
-  pressStartPoint = e.point;
-  clearTimeout(pressTimer);
-  pressTimer = setTimeout(() => {
-    showMapPopup({ lat:e.lngLat.lat, lng:e.lngLat.lng }, e.point.x, e.point.y);
-    if (navigator.vibrate) navigator.vibrate(35);
-  }, 500);
+  }, () => {
+    document.getElementById('gpsLabel').textContent = 'بدون GPS';
+  }, { enableHighAccuracy: true, maximumAge: 1000 });
 }
-function handlePressMove(e) {
-  if (!pressStartPoint || !e.point) return;
-  if (Math.abs(e.point.x-pressStartPoint.x) > 8 || Math.abs(e.point.y-pressStartPoint.y) > 8) clearTimeout(pressTimer);
-}
-function handlePressEnd() { clearTimeout(pressTimer); pressStartPoint = null; }
-map.on('touchstart', handlePressStart); map.on('mousedown', handlePressStart);
-map.on('touchmove', handlePressMove); map.on('mousemove', handlePressMove);
-map.on('touchend', handlePressEnd); map.on('mouseup', handlePressEnd);
-map.on('dragstart', handlePressEnd); map.on('movestart', handlePressEnd); map.on('zoomstart', handlePressEnd);
-map.on('click', (e) => {
-  const target = e.originalEvent?.target;
-  if (target && target.closest && target.closest('.maplibregl-marker')) return;
-  if (pendingWaypointPick) { addWaypoint([e.lngLat.lat, e.lngLat.lng], null); pendingWaypointPick = false; return; }
-  hideMapPopup();
-});
-map.on('contextmenu', e => { e.preventDefault(); showMapPopup({ lat:e.lngLat.lat, lng:e.lngLat.lng }, e.point.x, e.point.y); });
+initGPS();
 
 // ═══════════════════════════════════════════════════════════════
-// الوضع الليلي والنهاري
+// حساب المسارات (Valhalla + OSRM Fallback)
 // ═══════════════════════════════════════════════════════════════
-const themeHeaderBtn = document.getElementById('themeHeaderBtn');
-const themeIconHeader = document.getElementById('themeIconHeader');
-function setDarkMode(d) {
-  isDarkMode = d;
-  document.body.classList.toggle('dark', d);
-  themeIconHeader.innerHTML = d ? ICONS.sun : ICONS.moon;
-}
-themeHeaderBtn.onclick = () => setDarkMode(!isDarkMode);
-
-// ═══════════════════════════════════════════════════════════════
-// GPS وتتبع التوجيه
-// ═══════════════════════════════════════════════════════════════
-const gpsStatus = document.getElementById('gpsStatus');
-const gpsText = document.getElementById('gpsText');
-const speedometer = document.getElementById('speedometer');
-const speedValue = document.getElementById('speedValue');
-
-function startGpsTracking() {
-  if (!navigator.geolocation) { gpsText.textContent = 'GPS غير مدعوم'; gpsStatus.classList.add('show'); return; }
-  if (watchId !== null) return;
-  gpsStatus.classList.add('show');
-  watchId = navigator.geolocation.watchPosition(
-    pos => {
-      const loc = [pos.coords.latitude, pos.coords.longitude];
-      const acc = pos.coords.accuracy;
-      const h = pos.coords.heading;
-      if (!gpsFirstFix) { gpsFirstFix = true; map.flyTo({ center:[loc[1],loc[0]], zoom:16, duration:1000 }); speak('تم تحديد موقعك'); }
-      updateSpeed(pos); updateUserLocation(loc, acc, h);
-      if (navigationActive) {
-        const sp = pos.coords.speed != null && pos.coords.speed >= 0 ? pos.coords.speed : (currentSpeed/3.6);
-        updateVehiclePosition(loc, h, sp); checkProgress(loc);
-        if (acc < MIN_GPS_ACCURACY) checkOffRoute(loc); else offRouteCounter = 0;
-      }
-      gpsStatus.classList.add('active');
-      gpsText.textContent = `GPS · ${Math.round(acc)}م`;
-    },
-    err => { gpsStatus.classList.remove('active'); gpsText.textContent = 'تعذر تحديد الموقع'; },
-    { enableHighAccuracy:true, maximumAge:1000, timeout:20000 }
-  );
-}
-function updateSpeed(pos) {
-  const now = Date.now();
-  const loc = [pos.coords.latitude, pos.coords.longitude];
-  let sk = 0;
-  if (pos.coords.speed != null && !isNaN(pos.coords.speed) && pos.coords.speed >= 0) sk = pos.coords.speed * 3.6;
-  else if (lastPosition && lastPositionTime) {
-    const dt = (now - lastPositionTime)/1000;
-    if (dt > 0.5 && dt < 10) sk = (haversine(lastPosition[0],lastPosition[1],loc[0],loc[1])*1000/dt)*3.6;
-  }
-  if (!speedInitialized) { currentSpeed = Math.round(sk); speedInitialized = true; }
-  else { currentSpeed = Math.round(currentSpeed*0.6 + sk*0.4); }
-  if (currentSpeed < 2) currentSpeed = 0;
-  lastPosition = loc; lastPositionTime = now;
-  updateSpeedDisplay();
-}
-function updateSpeedDisplay() {
-  if (gpsFirstFix) speedometer.classList.add('show');
-  speedValue.textContent = currentSpeed;
-  document.getElementById('navSpeedVal').textContent = currentSpeed;
-  const over = currentSpeed > SPEED_LIMIT;
-  speedometer.classList.toggle('over', over);
-  document.getElementById('navSpeedBadge').classList.toggle('over', over);
-}
-function updateUserLocation(loc, acc, h) {
-  userLocation = loc;
-  if (navigationActive) return;
-  if (!userMarker) {
-    const el = document.createElement('div');
-    el.innerHTML = `<div class="user-location-icon"><div class="pulse"></div><div class="core"></div></div>`;
-    userMarker = new maplibregl.Marker({ element:el, anchor:'center' }).setLngLat([loc[1],loc[0]]).addTo(map);
-  } else userMarker.setLngLat([loc[1],loc[0]]);
-}
-function createVehicleMarkerElement() {
-  const el = document.createElement('div');
-  el.className = 'vehicle-marker';
-  const rot = document.createElement('div');
-  rot.className = 'vehicle-rotator';
-  rot.innerHTML = currentTravelMode === 'foot' ? WALK_ICON : CAR_ICON_TOPVIEW;
-  rot.style.transform = `rotate(${lastHeading}deg)`;
-  el.appendChild(rot);
-  return el;
-}
-function updateVehiclePosition(loc, heading, speedMs) {
-  let nh = heading;
-  if (nh == null || isNaN(nh) || nh < 0) {
-    if (lastPosition && lastPosition[1] !== loc[1]) {
-      const d = haversine(lastPosition[0],lastPosition[1],loc[0],loc[1]);
-      if (d > 0.005) nh = computeBearing(lastPosition[0],lastPosition[1],loc[0],loc[1]);
-    }
-  }
-  if (nh != null && !isNaN(nh)) {
-    let d = nh - lastHeading;
-    if (d > 180) d -= 360;
-    if (d < -180) d += 360;
-    lastHeading = (lastHeading + d*0.4 + 360) % 360;
-  }
-  if (userMarker) { userMarker.remove(); userMarker = null; }
-
-  if (!vehicleMarker) {
-    vehicleMarker = new maplibregl.Marker({ element: createVehicleMarkerElement(), anchor:'center' }).setLngLat([loc[1],loc[0]]).addTo(map);
-  } else {
-    vehicleMarker.setLngLat([loc[1],loc[0]]);
-    const rot = vehicleMarker.getElement().querySelector('.vehicle-rotator');
-    if (rot) {
-      rot.innerHTML = currentTravelMode === 'foot' ? WALK_ICON : CAR_ICON_TOPVIEW;
-      rot.style.transform = `rotate(${lastHeading}deg)`;
-    }
-  }
-
-  if (recenterMode === 'follow' && navigationActive) {
-    map.easeTo({ center:[loc[1],loc[0]], zoom:getDynZoom(speedMs||0), bearing:lastHeading, pitch:60,
-      padding:{ top:0, bottom:window.innerHeight*0.4, left:0, right:0 }, duration:700 });
-  }
-}
-function getDynZoom(s) { const k = s*3.6; if (k<10) return 18; if (k<30) return 17.5; if (k<60) return 17; if (k<90) return 16.5; return 16; }
-
-// ═══════════════════════════════════════════════════════════════
-// المسارات والتوجيه
-// ═══════════════════════════════════════════════════════════════
-function setDestination(loc, name, isRecalc=false) {
-  hideLoading();
-  currentDestination = loc;
-  if (destMarker) destMarker.remove();
-  const el = document.createElement('div');
-  el.style.cssText = 'width:36px;height:36px;';
-  el.innerHTML = ICONS.arrive;
-  destMarker = new maplibregl.Marker({ element:el, anchor:'bottom' }).setLngLat([loc[1],loc[0]]).addTo(map);
-  const start = (navigationActive && userLocation) ? userLocation : (manualStart || userLocation);
-  if (!start) { speak('يرجى تحديد موقع الانطلاق'); showHint('حدد موقعك أو اضغط مطولاً لتحديد الانطلاق'); return; }
-  if (!isRecalc) showLoading('جاري حساب المسار...');
-  if (!isRecalc) { document.getElementById('routeOptions').classList.remove('show'); document.getElementById('startBtn').classList.remove('show'); }
-  const pts = [start, ...currentWaypoints.map(w=>w.loc), loc];
-  const costing = currentTravelMode === 'foot' ? 'pedestrian' : 'auto';
-  fetchValhallaRoutes(pts, costing, isRecalc);
-}
-
-async function fetchValhallaRoutes(points, costing, isRecalc) {
-  try {
-    const body = { locations: points.map(p=>({lat:p[0],lon:p[1]})), costing, units:'kilometers', language:'ar-SA', alternates:2, directions_options:{ units:'kilometers', language:'ar-SA' } };
-    const r = await fetch('https://valhalla1.openstreetmap.de/route', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
-    if (!r.ok) throw new Error('Valhalla HTTP error');
-    const data = await r.json();
-    if (!data.trip?.legs?.length) throw new Error('No trip');
-    hideLoading();
-    const main = buildValhallaRoute(data.trip);
-    const alts = [];
-    if (data.alternates?.length) {
-      data.alternates.forEach(a => {
-        if (a?.trip?.legs?.length) alts.push(buildValhallaRoute(a.trip));
-      });
-    }
-    const all = [main, ...alts].sort((a,b) => a.duration - b.duration);
-    const fastest = all[0];
-    const alt = all.length > 1 ? all.slice(1).reduce((s,r) => r.distance < s.distance ? r : s, all[1]) : null;
-    applyCalculatedRoutes(fastest, alt, isRecalc);
-  } catch(e) {
-    const coordsStr = points.map(p=>`${p[1]},${p[0]}`).join(';');
-    const profile = currentTravelMode === 'foot' ? 'foot' : 'driving';
-    try {
-      const r = await fetch(`https://router.project-osrm.org/route/v1/${profile}/${coordsStr}?overview=full&geometries=geojson&steps=true`);
-      const data = await r.json();
-      hideLoading();
-      if (!data.routes?.length) { showHint('تعذر حساب المسار'); return; }
-      const norm = normalizeOSRMRoute(data.routes[0]);
-      applyCalculatedRoutes(norm, null, isRecalc);
-    } catch(e2) {
-      hideLoading();
-      showHint('تعذر الاتصال بخادم المسارات');
-    }
-  }
-}
-
-function applyCalculatedRoutes(fastest, alt, isRecalc) {
-  currentRoutes = { fastest, shortest: alt };
-  currentRouteData = fastest;
-  document.getElementById('infoFastest').textContent = `${(fastest.distance/1000).toFixed(1)}كم · ${Math.round(fastest.duration/60)}د`;
-  const bS = document.getElementById('btnShortest');
-  if (alt) { document.getElementById('infoShortest').textContent = `${(alt.distance/1000).toFixed(1)}كم · ${Math.round(alt.duration/60)}د`; bS.disabled=false; bS.style.opacity='1'; }
-  else { document.getElementById('infoShortest').textContent='—'; bS.disabled=true; bS.style.opacity='0.4'; }
-  document.querySelectorAll('.route-btn').forEach(b => b.classList.toggle('active', b.dataset.profile==='fastest'));
-  drawRoute(fastest);
-  currentSteps = fastest.steps; currentStepIndex=0; lastSpokenStep=-1;
-  if (!isRecalc) {
-    document.getElementById('routeOptions').classList.add('show');
-    document.getElementById('startBtn').classList.add('show');
-    speak(`تم حساب المسار. الأسرع ${(fastest.distance/1000).toFixed(1)} كيلومتر`);
-    map.fitBounds(fastest.bounds, { padding:60, duration:800 });
-  } else {
-    updateNavigationUI();
-    speak('تم إعادة الحساب');
-  }
-}
-
-function buildValhallaRoute(trip) {
-  const coords = [], steps = [];
-  trip.legs.forEach(l => {
-    const base = coords.length;
-    decodePolyline(l.shape,6).forEach(c => coords.push(c));
-    l.maneuvers.forEach(m => {
-      const c = coords[Math.min(base + (m.begin_shape_index||0), coords.length-1)];
-      steps.push({ type:mapValhallaType(m.type), text:m.instruction||'تابع', distance:(m.length||0)*1000, duration:m.time||0, location:c?[c[1],c[0]]:null });
-    });
-  });
-  return { geometry:{ type:'LineString', coordinates:coords }, distance:trip.summary.length*1000, duration:trip.summary.time, bounds:coordsBounds(coords), steps:steps.filter(s => s.location) };
-}
-function normalizeOSRMRoute(r) {
-  const steps = [];
-  r.legs.forEach(l => l.steps.forEach(s => steps.push({
-    type:mapManeuver(s.maneuver.type, s.maneuver.modifier),
-    text:translateInstruction(s),
-    distance:s.distance, duration:s.duration, location:s.maneuver.location
-  })));
-  const b = (Array.isArray(r.bounds) && r.bounds.length === 4)
-    ? [[r.bounds[0],r.bounds[1]],[r.bounds[2],r.bounds[3]]]
-    : coordsBounds(r.geometry?.coordinates || []);
-  return { geometry:r.geometry, distance:r.distance, duration:r.duration, bounds:b, steps };
-}
-function decodePolyline(str, prec=6) {
-  const f = Math.pow(10,prec);
-  const coords=[]; let lat=0,lng=0,i=0;
+function decodePoly(str, prec = 6) {
+  const f = Math.pow(10, prec), coords = [];
+  let lat = 0, lng = 0, i = 0;
   while (i < str.length) {
-    let b,sh=0,res=0;
-    do { b=str.charCodeAt(i++)-63; res|=(b&0x1f)<<sh; sh+=5; } while (b>=0x20);
-    lat += (res&1) ? ~(res>>1) : (res>>1);
-    sh=0; res=0;
-    do { b=str.charCodeAt(i++)-63; res|=(b&0x1f)<<sh; sh+=5; } while (b>=0x20);
-    lng += (res&1) ? ~(res>>1) : (res>>1);
-    coords.push([lng/f, lat/f]);
+    let b, sh = 0, res = 0;
+    do { b = str.charCodeAt(i++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
+    lat += (res & 1) ? ~(res >> 1) : (res >> 1);
+    sh = 0; res = 0;
+    do { b = str.charCodeAt(i++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
+    lng += (res & 1) ? ~(res >> 1) : (res >> 1);
+    coords.push([lng / f, lat / f]);
   }
   return coords;
 }
-function mapValhallaType(t) {
-  const m = { 0:'Straight',1:'Depart',2:'Straight',3:'Straight',9:'SlightRight',10:'TurnRight',11:'SharpRight',12:'TurnLeft',13:'SlightLeft',14:'SharpLeft',15:'SlightRight',16:'TurnRight',17:'SharpRight',18:'SlightLeft',19:'TurnLeft',20:'SharpLeft',27:'Roundabout',28:'Roundabout',37:'Arrive' };
-  return m[t] || 'Straight';
-}
-function drawRoute(r) {
-  ['route-line-outline','route-line'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
-  ['route-line'].forEach(id => { if (map.getSource(id)) map.removeSource(id); });
+
+async function prepareRoute(targetLoc, name = 'الوجهة المحددة') {
+  destLoc = targetLoc;
+  destName = name;
+
+  if (destMarker) destMarker.remove();
+  const pin = document.createElement('div');
+  pin.className = 'poi-pin';
+  pin.style.background = '#ef4444';
+  pin.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>';
+  destMarker = new maplibregl.Marker({ element: pin, anchor: 'bottom' }).setLngLat([targetLoc[1], targetLoc[0]]).addTo(map);
+
+  const origin = manualStart || userLoc || [map.getCenter().lat, map.getCenter().lng];
+  document.getElementById('exploreBox').classList.add('hide');
+  document.getElementById('routePreviewBox').classList.add('show');
+  document.getElementById('destNameLabel').textContent = name;
+  document.getElementById('destSummaryLabel').textContent = 'جاري حساب أفضل مسار...';
+
   try {
-    map.addSource('route-line', { type:'geojson', data:{ type:'Feature', geometry:r.geometry, properties:{} } });
-    map.addLayer({ id:'route-line-outline', type:'line', source:'route-line', layout:{ 'line-join':'round','line-cap':'round' }, paint:{ 'line-color':'#002d9c','line-width':14,'line-opacity':0.35 } });
-    map.addLayer({ id:'route-line', type:'line', source:'route-line', layout:{ 'line-join':'round','line-cap':'round' }, paint:{ 'line-color':'#0f62fe','line-width':9,'line-opacity':0.96 } });
-  } catch(e) {}
-}
-function mapManeuver(t, m) {
-  if (t==='arrive') return 'Arrive';
-  if (t==='depart') return 'Depart';
-  if (t==='roundabout'||t==='rotary') return 'Roundabout';
-  if (t==='turn'||t==='fork'||t==='end of road') {
-    if (m==='left') return 'TurnLeft'; if (m==='right') return 'TurnRight';
-    if (m==='slight left') return 'SlightLeft'; if (m==='slight right') return 'SlightRight';
-    if (m==='sharp left') return 'SharpLeft'; if (m==='sharp right') return 'SharpRight';
+    const body = {
+      locations: [{ lat: origin[0], lon: origin[1] }, { lat: targetLoc[0], lon: targetLoc[1] }],
+      costing: travelMode,
+      alternates: 1,
+      directions_options: { units: 'kilometers', language: 'ar-SA' }
+    };
+    const r = await fetch('https://valhalla1.openstreetmap.de/route', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await r.json();
+    if (!data.trip) throw new Error('no trip');
+
+    const parseTrip = t => {
+      const coords = [], steps = [];
+      t.legs.forEach(leg => {
+        const offset = coords.length;
+        decodePoly(leg.shape, 6).forEach(c => coords.push(c));
+        leg.maneuvers.forEach(m => {
+          const pt = coords[Math.min(offset + (m.begin_shape_index || 0), coords.length - 1)];
+          steps.push({
+            text: m.instruction || 'تابع السير',
+            dist: (m.length || 0) * 1000,
+            time: m.time || 0,
+            type: m.type,
+            loc: pt ? [pt[1], pt[0]] : origin
+          });
+        });
+      });
+      return { coords, steps, distance: t.summary.length * 1000, duration: t.summary.time };
+    };
+
+    routesList = [parseTrip(data.trip)];
+    if (data.alternates?.[0]?.trip) routesList.push(parseTrip(data.alternates[0].trip));
+  } catch (e) {
+    // Fallback OSRM
+    const prof = travelMode === 'pedestrian' ? 'foot' : 'driving';
+    const r = await fetch(`https://router.project-osrm.org/route/v1/${prof}/${origin[1]},${origin[0]};${targetLoc[1]},${targetLoc[0]}?overview=full&geometries=geojson&steps=true`);
+    const data = await r.json();
+    if (!data.routes?.length) { toast('تعذر حساب المسار'); return; }
+    const rt = data.routes[0];
+    const steps = rt.legs[0].steps.map(s => ({
+      text: s.name ? `تابع عبر ${s.name}` : 'تابع السير',
+      dist: s.distance,
+      time: s.duration,
+      type: 1,
+      loc: [s.maneuver.location[1], s.maneuver.location[0]]
+    }));
+    routesList = [{ coords: rt.geometry.coordinates, steps, distance: rt.distance, duration: rt.duration }];
   }
-  return 'Straight';
+
+  activeRouteIdx = 0;
+  updateRouteCardsUI();
+  renderRouteLine(routesList[0]);
 }
-function translateInstruction(s) {
-  const t = s.maneuver.type, m = s.maneuver.modifier||'', n = s.name ? `على ${s.name}` : '';
-  if (t === 'arrive') return 'وصلت إلى وجهتك';
-  if (t === 'depart') return `انطلق ${n}`;
-  if (t === 'roundabout') return `ادخل الدوار ${n}`;
-  const d = { left:'يساراً', right:'يميناً', 'slight left':'قليلاً يساراً', 'slight right':'قليلاً يميناً', 'sharp left':'بحدة يساراً', 'sharp right':'بحدة يميناً', straight:'مستقيماً', uturn:'انعطف للخلف' }[m] || 'مستقيماً';
-  return `انعطف ${d} ${n}`;
+
+function updateRouteCardsUI() {
+  const r0 = routesList[0], r1 = routesList[1];
+  document.getElementById('r0Time').textContent = `${Math.max(1, Math.round(r0.duration / 60))} دقيقة`;
+  document.getElementById('r0Dist').textContent = `${(r0.distance / 1000).toFixed(1)} كم`;
+  document.getElementById('destSummaryLabel').textContent = `المسافة ${(r0.distance / 1000).toFixed(1)} كم • الوصول المتوقع ${calcEta(r0.duration)}`;
+
+  const card1 = document.getElementById('routeCard1');
+  if (r1) {
+    card1.style.opacity = '1';
+    document.getElementById('r1Time').textContent = `${Math.max(1, Math.round(r1.duration / 60))} دقيقة`;
+    document.getElementById('r1Dist').textContent = `${(r1.distance / 1000).toFixed(1)} كم`;
+  } else {
+    card1.style.opacity = '.45';
+    document.getElementById('r1Time').textContent = 'غير متاح';
+    document.getElementById('r1Dist').textContent = '—';
+  }
+  document.querySelectorAll('.r-card').forEach((c, i) => c.classList.toggle('active', i === activeRouteIdx));
+}
+
+function renderRouteLine(route) {
+  ['route-glow', 'route-main'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+  if (map.getSource('route')) map.removeSource('route');
+
+  map.addSource('route', {
+    type: 'geojson',
+    data: { type: 'Feature', geometry: { type: 'LineString', coordinates: route.coords } }
+  });
+  map.addLayer({
+    id: 'route-glow', type: 'line', source: 'route',
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': '#1d4ed8', 'line-width': 14, 'line-opacity': 0.28 }
+  });
+  map.addLayer({
+    id: 'route-main', type: 'line', source: 'route',
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': '#3b82f6', 'line-width': 8, 'line-opacity': 0.96 }
+  });
+
+  const bounds = new maplibregl.LngLatBounds();
+  route.coords.forEach(c => bounds.extend(c));
+  map.fitBounds(bounds, { padding: { top: 140, bottom: 270, left: 50, right: 50 }, duration: 700 });
+}
+
+function calcEta(sec) {
+  const d = new Date(Date.now() + sec * 1000);
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// بدء التوجيه وإدارة الرحلة
+// التوجيه الحي والمحاكاة
 // ═══════════════════════════════════════════════════════════════
-document.getElementById('startBtn').onclick = async () => {
-  if (!currentSteps.length) return;
-  if (!userLocation && !manualStart) {
-    speak('يرجى تحديد موقعك أولاً');
-    showHint('اضغط زر الموقع أو اضغط مطولاً على الخريطة');
-    return;
-  }
-  await keepScreenOn();
-  if (userLocation) { map.flyTo({ center:[userLocation[1],userLocation[0]], zoom:17, duration:800 }); await new Promise(r => setTimeout(r, 800)); }
-  navigationActive = true;
-  recenterMode = 'follow';
-  currentStepIndex = 0;
-  lastSpokenStep = -1;
-  offRouteCounter = 0;
+const CAR_SVG = `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="rgba(37,99,235,0.22)"/><path d="M32 6L46 52L32 43L18 52L32 6Z" fill="#2563eb" stroke="#ffffff" stroke-width="3.5" stroke-linejoin="round"/></svg>`;
+
+function startNavigation(isSimulation = false) {
+  const route = routesList[activeRouteIdx];
+  if (!route) return;
+
+  navActive = true;
   document.body.classList.add('navigating');
-  document.getElementById('startBtn').classList.remove('show');
-  document.getElementById('routeOptions').classList.remove('show');
-  document.getElementById('waypointsBar').classList.remove('show');
-  document.getElementById('navTopBar').classList.add('show');
-  document.getElementById('navBottomBar').classList.add('show');
-  document.getElementById('navStopFloat').classList.add('show');
-  updateNavigationUI();
-  if (userLocation) updateTripInfo(userLocation);
-  if (watchId === null) startGpsTracking();
-  playBeep(880,120);
-  setTimeout(() => speak('بدء التوجيه'), 200);
-  if (userLocation) {
-    updateVehiclePosition(userLocation, lastHeading, currentSpeed / 3.6);
-    map.easeTo({ center:[userLocation[1],userLocation[0]], zoom:17, bearing:lastHeading, pitch:60, padding:{ top:0, bottom:window.innerHeight*0.4, left:0, right:0 }, duration:1200 });
-  }
-};
+  document.getElementById('navHudTop').classList.add('show');
+  document.getElementById('navHudBottom').classList.add('show');
+  document.getElementById('simBadge').classList.toggle('show', isSimulation);
 
-map.on('dragstart', () => { if (navigationActive) { recenterMode = 'free'; document.getElementById('recenterBtn').classList.add('show'); } });
-const stopConfirmDialog = document.getElementById('stopConfirmDialog');
-document.getElementById('stopConfirmCancel').onclick = () => stopConfirmDialog.classList.remove('show');
-document.getElementById('stopConfirmOk').onclick = () => { stopConfirmDialog.classList.remove('show'); stopNavigation(); };
+  if (userMarker) { userMarker.remove(); userMarker = null; }
+  const el = document.createElement('div');
+  el.className = 'car-puck';
+  el.innerHTML = CAR_SVG;
+  const startPt = [route.coords[0][1], route.coords[0][0]];
+  carMarker = new maplibregl.Marker({ element: el }).setLngLat([startPt[1], startPt[0]]).addTo(map);
+
+  speak(`بدء التوجيه إلى ${destName}`);
+  updateNavigationFrame(startPt, 0, route);
+
+  if (isSimulation) {
+    let idx = 0;
+    simTimer = setInterval(() => {
+      if (idx >= route.coords.length - 1) {
+        clearInterval(simTimer);
+        simTimer = null;
+        speak('وصلت إلى وجهتك');
+        toast('انتهت المحاكاة — وصلت إلى الوجهة');
+        setTimeout(stopNavigation, 2000);
+        return;
+      }
+      const p1 = [route.coords[idx][1], route.coords[idx][0]];
+      const p2 = [route.coords[idx + 1][1], route.coords[idx + 1][0]];
+      const hd = bearing(p1[0], p1[1], p2[0], p2[1]);
+      document.getElementById('hudSpeedVal').textContent = travelMode === 'pedestrian' ? '5' : '54';
+      updateNavigationFrame(p2, hd, route);
+      idx++;
+    }, 350);
+  }
+}
+
+function updateNavigationFrame(loc, hd, route = routesList[activeRouteIdx]) {
+  if (!route) return;
+  if (carMarker) carMarker.setLngLat([loc[1], loc[0]]);
+
+  // أقرب خطوة قادمة
+  let closestStep = route.steps[0];
+  let minD = Infinity;
+  for (const s of route.steps) {
+    const d = haversine(loc[0], loc[1], s.loc[0], s.loc[1]) * 1000;
+    if (d < minD) { minD = d; closestStep = s; }
+  }
+
+  document.getElementById('hudDistVal').textContent = minD >= 1000 ? `${(minD/1000).toFixed(1)} كم` : `${Math.round(minD)} م`;
+  document.getElementById('hudInstrText').textContent = closestStep?.text || 'تابع المسار';
+
+  const remKm = haversine(loc[0], loc[1], destLoc[0], destLoc[1]);
+  const estSec = (remKm / (travelMode === 'pedestrian' ? 4.5 : 40)) * 3600;
+  document.getElementById('hudRemDist').textContent = remKm >= 1 ? `${remKm.toFixed(1)} كم` : `${Math.round(remKm*1000)} م`;
+  document.getElementById('hudRemTime').textContent = `${Math.max(1, Math.round(estSec/60))} د`;
+  document.getElementById('hudEtaVal').textContent = calcEta(estSec);
+
+  map.easeTo({
+    center: [loc[1], loc[0]],
+    zoom: 17.2,
+    pitch: 60,
+    bearing: hd,
+    padding: { top: 120, bottom: 180 },
+    duration: 340
+  });
+}
 
 function stopNavigation() {
-  hideLoading();
-  navigationActive = false;
-  if (synth) synth.cancel();
+  navActive = false;
+  if (simTimer) { clearInterval(simTimer); simTimer = null; }
   document.body.classList.remove('navigating');
-  allowScreenOff();
-  document.getElementById('navTopBar').classList.remove('show');
-  document.getElementById('navBottomBar').classList.remove('show');
-  document.getElementById('navStopFloat').classList.remove('show');
-  document.getElementById('recenterBtn').classList.remove('show');
-  document.getElementById('travelModeBar').classList.add('show');
-  if (vehicleMarker) { vehicleMarker.remove(); vehicleMarker = null; }
-  ['route-line-outline','route-line'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
-  ['route-line'].forEach(id => { if (map.getSource(id)) map.removeSource(id); });
+  document.getElementById('navHudTop').classList.remove('show');
+  document.getElementById('navHudBottom').classList.remove('show');
+  if (carMarker) { carMarker.remove(); carMarker = null; }
+  map.easeTo({ pitch: is3D ? 55 : 0, bearing: 0, padding: { top: 0, bottom: 0 }, duration: 600 });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// البحث والفئات
+// ═══════════════════════════════════════════════════════════════
+async function searchText(q) {
+  if (!q.trim()) return;
+  const drawer = document.getElementById('resultsDrawer');
+  const list = document.getElementById('resultsList');
+  drawer.classList.add('show');
+  list.innerHTML = '<div class="res-row"><div class="res-title">جاري البحث...</div></div>';
+
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=sy&limit=8&accept-language=ar`);
+    const data = await r.json();
+    document.getElementById('resultsTitle').textContent = `النتائج (${data.length})`;
+    if (!data.length) { list.innerHTML = '<div class="res-row"><div class="res-title">لا توجد نتائج مطابقة</div></div>'; return; }
+    list.innerHTML = '';
+    data.forEach(item => {
+      const parts = item.display_name.split(',');
+      const title = parts[0].trim();
+      const sub = parts.slice(1, 3).join('، ').trim();
+      const loc = [parseFloat(item.lat), parseFloat(item.lon)];
+      const row = document.createElement('div');
+      row.className = 'res-row';
+      row.innerHTML = `<div class="res-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></div><div class="res-meta"><div class="res-title">${title}</div><div class="res-sub">${sub}</div></div>`;
+      row.onclick = () => {
+        drawer.classList.remove('show');
+        prepareRoute(loc, title);
+      };
+      list.appendChild(row);
+    });
+  } catch (e) {
+    list.innerHTML = '<div class="res-row"><div class="res-title">تعذر الاتصال بخادم البحث</div></div>';
+  }
+}
+
+const CAT_QUERY = {
+  fuel: '["amenity"="fuel"]',
+  pharmacy: '["amenity"="pharmacy"]',
+  hospital: '["amenity"~"hospital|clinic"]',
+  restaurant: '["amenity"~"restaurant|fast_food"]',
+  atm: '["amenity"~"atm|bank"]',
+  mosque: '["amenity"="place_of_worship"]["religion"="muslim"]'
+};
+
+async function searchCategory(cat) {
+  poiMarkers.forEach(m => m.remove());
+  poiMarkers = [];
+  const center = userLoc || [map.getCenter().lat, map.getCenter().lng];
+  toast('جاري البحث عن الأماكن القريبة...');
+  const q = `[out:json][timeout:8];(node${CAT_QUERY[cat]}(around:3000,${center[0]},${center[1]}););out 20;`;
+  try {
+    const r = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(q) });
+    const data = await r.json();
+    const drawer = document.getElementById('resultsDrawer');
+    const list = document.getElementById('resultsList');
+    list.innerHTML = '';
+    const items = (data.elements || []).map(el => ({
+      name: el.tags?.name || 'نقطة خدمة',
+      loc: [el.lat, el.lon],
+      dist: haversine(center[0], center[1], el.lat, el.lon)
+    })).sort((a,b) => a.dist - b.dist);
+
+    document.getElementById('resultsTitle').textContent = `الأقرب إليك (${items.length})`;
+    items.forEach(it => {
+      const mEl = document.createElement('div');
+      mEl.className = 'poi-pin';
+      mEl.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>';
+      poiMarkers.push(new maplibregl.Marker({ element: mEl, anchor: 'bottom' }).setLngLat([it.loc[1], it.loc[0]]).addTo(map));
+
+      const row = document.createElement('div');
+      row.className = 'res-row';
+      row.innerHTML = `<div class="res-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></div><div class="res-meta"><div class="res-title">${it.name}</div></div><div class="res-dist">${it.dist < 1 ? Math.round(it.dist*1000)+' م' : it.dist.toFixed(1)+' كم'}</div>`;
+      row.onclick = () => { drawer.classList.remove('show'); prepareRoute(it.loc, it.name); };
+      list.appendChild(row);
+    });
+    if (items.length) drawer.classList.add('show');
+    else toast('لم يتم العثور على نتائج قريبة');
+  } catch (e) { toast('تعذر جلب النقاط القريبة'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// التفاعلات والأزرار
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('searchBtn').onclick = () => searchText(document.getElementById('searchInput').value);
+document.getElementById('searchInput').addEventListener('keypress', e => { if (e.key === 'Enter') searchText(e.target.value); });
+document.getElementById('closeResultsBtn').onclick = () => document.getElementById('resultsDrawer').classList.remove('show');
+
+document.querySelectorAll('.chip').forEach(ch => {
+  ch.onclick = () => {
+    const active = ch.classList.contains('active');
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    if (active) {
+      poiMarkers.forEach(m => m.remove());
+      poiMarkers = [];
+      document.getElementById('resultsDrawer').classList.remove('show');
+    } else {
+      ch.classList.add('active');
+      searchCategory(ch.dataset.cat);
+    }
+  };
+});
+
+document.getElementById('locateBtn').onclick = () => {
+  if (userLoc) map.flyTo({ center: [userLoc[1], userLoc[0]], zoom: 16 });
+  else toast('جاري انتظار إشارة GPS...');
+};
+
+document.getElementById('tiltBtn').onclick = function() {
+  is3D = !is3D;
+  this.classList.toggle('active', is3D);
+  map.easeTo({ pitch: is3D ? 58 : 0, duration: 500 });
+};
+
+document.getElementById('compassBtn').onclick = () => map.easeTo({ bearing: 0, duration: 450 });
+document.getElementById('layersBtn').onclick = async () => {
+  document.getElementById('cacheStatus').textContent = `البلاطات المحفوظة: ${await countTiles()}`;
+  document.getElementById('layersModal').classList.add('show');
+};
+document.getElementById('themeBtn').onclick = function() {
+  document.body.classList.toggle('dark');
+  this.classList.toggle('active');
+};
+document.getElementById('sosBtn').onclick = () => document.getElementById('sosModal').classList.add('show');
+
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.onclick = () => document.getElementById(btn.dataset.close).classList.remove('show');
+});
+
+document.querySelectorAll('.layer-opt').forEach(opt => {
+  opt.onclick = () => {
+    const l = opt.dataset.layer;
+    if (l === currentLayer) return;
+    currentLayer = l;
+    document.body.classList.toggle('osm-active', l === 'osm');
+    document.querySelectorAll('.layer-opt').forEach(o => o.classList.toggle('active', o.dataset.layer === l));
+    map.setStyle(createStyle(l));
+    map.once('styledata', () => { if (routesList[activeRouteIdx]) renderRouteLine(routesList[activeRouteIdx]); });
+  };
+});
+
+document.querySelectorAll('.m-pill').forEach(p => {
+  p.onclick = () => {
+    travelMode = p.dataset.mode;
+    document.querySelectorAll('.m-pill').forEach(x => x.classList.toggle('active', x === p));
+    if (destLoc) prepareRoute(destLoc, destName);
+  };
+});
+
+document.querySelectorAll('.r-card').forEach(card => {
+  card.onclick = () => {
+    const i = Number(card.dataset.idx);
+    if (!routesList[i]) return;
+    activeRouteIdx = i;
+    updateRouteCardsUI();
+    renderRouteLine(routesList[i]);
+  };
+});
+
+document.getElementById('clearRouteBtn').onclick = () => {
+  ['route-glow', 'route-main'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+  if (map.getSource('route')) map.removeSource('route');
   if (destMarker) { destMarker.remove(); destMarker = null; }
-  if (startMarker) { startMarker.remove(); startMarker = null; }
-  waypointMarkers.forEach(m => m.remove()); waypointMarkers = [];
-  currentSteps = []; currentRouteData = null; currentRoutes = { fastest:null, shortest:null };
-  currentDestination = null; currentWaypoints = []; manualStart = null;
-  lastRouteRecalcTime = 0; offRouteCounter = 0;
-  updateWaypointsUI();
-  document.getElementById('routeOptions').classList.remove('show');
-  recenterMode = 'follow';
-  map.easeTo({ pitch:0, bearing:0, padding:{ top:0, bottom:0, left:0, right:0 }, duration:800 });
-  setTimeout(() => {
-    if (userLocation) {
-      map.flyTo({ center:[userLocation[1],userLocation[0]], zoom:16, pitch:0, bearing:0, duration:800 });
-      updateUserLocation(userLocation, 0, lastHeading);
-    } else map.flyTo({ center:ALEPPO_CENTER, zoom:13, pitch:0, bearing:0, duration:800 });
-  }, 850);
-  speak('تم إنهاء التوجيه');
-}
-
-document.getElementById('navStopFloat').onclick = () => stopConfirmDialog.classList.add('show');
-document.getElementById('recenterBtn').onclick = () => {
-  recenterMode = 'follow';
-  document.getElementById('recenterBtn').classList.remove('show');
-  if (userLocation) map.easeTo({ center:[userLocation[1],userLocation[0]], zoom:17, bearing:lastHeading, pitch:60, padding:{ top:0, bottom:window.innerHeight*0.4, left:0, right:0 }, duration:800 });
+  destLoc = null;
+  routesList = [];
+  document.getElementById('routePreviewBox').classList.remove('show');
+  document.getElementById('exploreBox').classList.remove('hide');
 };
 
-function checkProgress(loc) {
-  if (!currentSteps.length) return;
-  let ni = currentStepIndex, minD = Infinity;
-  for (let i = currentStepIndex; i < Math.min(currentSteps.length, currentStepIndex + 6); i++) {
-    const s = currentSteps[i];
-    if (!s.location) continue;
-    const d = haversine(loc[0],loc[1],s.location[1],s.location[0]);
-    if (d < minD) { minD = d; ni = i; }
-  }
-  if (ni !== currentStepIndex) { currentStepIndex = ni; updateNavigationUI(); }
-  if (ni < currentSteps.length - 1) {
-    const ns = currentSteps[ni+1];
-    if (ns.location) {
-      const dtn = haversine(loc[0],loc[1],ns.location[1],ns.location[0]);
-      const wd = currentTravelMode === 'foot' ? 0.05 : (dtn > 1 ? 0.5 : 0.15);
-      if (dtn < wd && lastSpokenStep !== ni+1) {
-        lastSpokenStep = ni+1;
-        playBeep(880,150);
-        setTimeout(() => { const t = dtn > 1 ? `${dtn.toFixed(1)} كيلومتر` : `${Math.round(dtn*1000)} متر`; speak(`بعد ${t}: ${ns.text}`); }, 200);
-      }
-    }
-  }
-  const last = currentSteps[currentSteps.length-1];
-  if (last?.location) {
-    const dtd = haversine(loc[0],loc[1],last.location[1],last.location[0]);
-    if (dtd < 0.03) { playBeep(1500,400); setTimeout(() => speak('لقد وصلت إلى وجهتك'),300); setTimeout(() => stopNavigation(), 4000); }
-  }
-  updateTripInfo(loc);
-}
-
-function updateNavigationUI() {
-  const s = currentSteps[currentStepIndex];
-  if (!s) return;
-  document.getElementById('currentTurnIcon').innerHTML = getIcon(s.type);
-  document.getElementById('navCurrentDist').textContent = formatDist(s.distance);
-  document.getElementById('navCurrentInstr').textContent = s.text;
-}
-function updateTripInfo(loc) {
-  if (!currentSteps.length) return;
-  let rd = 0, rt = 0;
-  const nx = currentSteps[currentStepIndex+1];
-  if (nx && nx.location) {
-    const toNext = haversine(loc[0],loc[1],nx.location[1],nx.location[0])*1000, cur = currentSteps[currentStepIndex];
-    rd += toNext; rt += cur.duration * (cur.distance ? Math.min(1, toNext/cur.distance) : 1);
-    document.getElementById('navCurrentDist').textContent = formatDist(toNext);
-  }
-  for (let i = currentStepIndex+1; i < currentSteps.length; i++) { rd += currentSteps[i].distance; rt += currentSteps[i].duration; }
-  document.getElementById('navRemaining').textContent = rd >= 1000 ? (rd/1000).toFixed(1)+' كم' : Math.round(rd)+' م';
-  document.getElementById('navEta').textContent = formatEta(rt);
-}
-function getIcon(t) {
-  return { Straight:ICONS.straight, TurnLeft:ICONS.turnLeft, TurnRight:ICONS.turnRight, SlightLeft:ICONS.slightLeft, SlightRight:ICONS.slightRight, SharpLeft:ICONS.sharpLeft, SharpRight:ICONS.sharpRight, Roundabout:ICONS.roundabout, Arrive:ICONS.arrive, Depart:ICONS.depart }[t] || ICONS.straight;
-}
-
-function checkOffRoute(loc) {
-  if (!navigationActive || !currentRouteData) return;
-  if (Date.now() - lastRouteRecalcTime < ROUTE_RECALC_COOLDOWN) return;
-  const coords = currentRouteData.geometry.coordinates;
-  let md = Infinity;
-  const kx = Math.cos(loc[0]*Math.PI/180) * 111.32, ky = 110.57;
-  for (let i = 0; i < coords.length - 1; i++) {
-    const ax=(coords[i][0]-loc[1])*kx, ay=(coords[i][1]-loc[0])*ky, bx=(coords[i+1][0]-loc[1])*kx, by=(coords[i+1][1]-loc[0])*ky;
-    const dx=bx-ax, dy=by-ay, l2=dx*dx+dy*dy;
-    const t = l2 ? Math.max(0, Math.min(1, -(ax*dx+ay*dy)/l2)) : 0;
-    const d = Math.hypot(ax+t*dx, ay+t*dy);
-    if (d < md) md = d;
-    if (md < OFF_ROUTE_THRESHOLD_M/1000) break;
-  }
-  if (md > OFF_ROUTE_THRESHOLD_M/1000) {
-    offRouteCounter++;
-    if (offRouteCounter >= OFF_ROUTE_COUNT) {
-      lastRouteRecalcTime = Date.now(); offRouteCounter = 0;
-      showHint('جاري إعادة حساب المسار...');
-      playBeep(700,200);
-      if (currentDestination) { userLocation = loc; setDestination(currentDestination, null, true); }
-    }
-  } else offRouteCounter = 0;
-}
+document.getElementById('startNavBtn').onclick = () => startNavigation(false);
+document.getElementById('simulateBtn').onclick = () => startNavigation(true);
+document.getElementById('endNavBtn').onclick = stopNavigation;
 
 // ═══════════════════════════════════════════════════════════════
-// ربط العناصر والأزرار
+// الضغط المطول على الخريطة (Context Menu)
 // ═══════════════════════════════════════════════════════════════
-document.querySelectorAll('.mode-btn').forEach(b => b.onclick = () => {
-  const m = b.dataset.mode;
-  if (m === currentTravelMode) return;
-  hideLoading();
-  currentTravelMode = m;
-  document.querySelectorAll('.mode-btn').forEach(x => x.classList.toggle('active', x.dataset.mode === m));
-  playBeep(1000,100);
-  speak(m === 'foot' ? 'وضع المشي' : 'وضع السيارة');
-  if (currentDestination) setDestination(currentDestination);
+const ctxMenu = document.getElementById('ctxMenu');
+let holdTimer = null;
+
+function openCtx(lngLat, pt) {
+  ctxCoords = [lngLat.lat, lngLat.lng];
+  ctxMenu.style.left = Math.min(Math.max(12, pt.x - 100), window.innerWidth - 230) + 'px';
+  ctxMenu.style.top = Math.min(Math.max(80, pt.y - 40), window.innerHeight - 250) + 'px';
+  ctxMenu.classList.add('show');
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+
+map.on('touchstart', e => {
+  if (e.originalEvent.touches.length > 1) return;
+  holdTimer = setTimeout(() => openCtx(e.lngLat, e.point), 480);
 });
+map.on('touchmove', () => clearTimeout(holdTimer));
+map.on('touchend', () => clearTimeout(holdTimer));
+map.on('contextmenu', e => { e.preventDefault(); openCtx(e.lngLat, e.point); });
+map.on('click', () => ctxMenu.classList.remove('show'));
 
-document.querySelectorAll('.route-btn').forEach(b => b.onclick = () => {
-  if (b.disabled) return;
-  const p = b.dataset.profile;
-  document.querySelectorAll('.route-btn').forEach(x => x.classList.toggle('active', x.dataset.profile === p));
-  const r = currentRoutes[p];
-  if (r) {
-    currentRouteData = r; currentRouteProfile = p;
-    drawRoute(r);
-    currentSteps = r.steps; currentStepIndex = 0; lastSpokenStep = -1;
-    if (navigationActive) updateNavigationUI();
-    playBeep(1000,100);
-    speak(`تم اختيار ${p === 'fastest' ? 'الأسرع' : 'البديل'}`);
-  }
-});
-
-document.querySelectorAll('.cat-btn').forEach(b => b.onclick = () => {
-  const c = b.dataset.cat;
-  if (activeCategory === c) {
-    activeCategory = null;
-    document.querySelectorAll('.cat-btn').forEach(x => x.classList.remove('active'));
-    clearPoiMarkers();
-    document.getElementById('results').classList.remove('show');
-    return;
-  }
-  activeCategory = c;
-  document.querySelectorAll('.cat-btn').forEach(x => x.classList.toggle('active', x.dataset.cat === c));
-  document.getElementById('results').classList.remove('show');
-  clearPoiMarkers();
-  searchNearby(c);
-});
-
-document.getElementById('resultsClose').onclick = () => {
-  document.getElementById('results').classList.remove('show');
-  activeCategory = null;
-  document.querySelectorAll('.cat-btn').forEach(x => x.classList.remove('active'));
-  clearPoiMarkers();
-};
-
-document.getElementById('locBtn').onclick = () => {
-  if (!navigator.geolocation) { showHint('GPS غير مدعوم على هذا الجهاز'); return; }
-  showLoading('جاري تحديد موقعك...');
-  navigator.geolocation.getCurrentPosition(pos => {
-    hideLoading();
-    const loc = [pos.coords.latitude, pos.coords.longitude];
-    map.flyTo({ center:[loc[1],loc[0]], zoom:16, duration:800 });
-    updateUserLocation(loc, pos.coords.accuracy, pos.coords.heading);
-    if (watchId === null) startGpsTracking();
-  }, err => { hideLoading(); showHint('تعذر تحديد الموقع — تحقق من الصلاحيات'); }, { enableHighAccuracy:true, timeout:20000 });
-};
-
-document.getElementById('popupStart').onclick = () => { if (popupLatLng) setManualStart([popupLatLng.lat, popupLatLng.lng]); hideMapPopup(); };
-document.getElementById('popupStop').onclick = () => { if (popupLatLng) addWaypoint([popupLatLng.lat, popupLatLng.lng], null); hideMapPopup(); };
-document.getElementById('popupDest').onclick = () => {
-  if (popupLatLng) {
-    if (currentDestination) addWaypoint([currentDestination[0],currentDestination[1]], 'الوجهة السابقة');
-    setDestination([popupLatLng.lat, popupLatLng.lng]);
-  }
-  hideMapPopup();
-};
-document.getElementById('popupSave').onclick = () => { if (popupLatLng) openNameDialog([popupLatLng.lat, popupLatLng.lng]); hideMapPopup(); };
-
-function setManualStart(loc) {
-  manualStart = loc;
+document.getElementById('ctxGo').onclick = () => { ctxMenu.classList.remove('show'); if (ctxCoords) prepareRoute(ctxCoords, 'نقطة على الخريطة'); };
+document.getElementById('ctxStart').onclick = () => {
+  ctxMenu.classList.remove('show');
+  if (!ctxCoords) return;
+  manualStart = ctxCoords;
   if (startMarker) startMarker.remove();
   const el = document.createElement('div');
-  el.style.cssText = 'width:36px;height:36px;';
-  el.innerHTML = ICONS.depart;
-  startMarker = new maplibregl.Marker({ element:el, anchor:'bottom' }).setLngLat([loc[1],loc[0]]).addTo(map);
-  showHint('تم تحديد نقطة الانطلاق');
-  speak('تم تحديد نقطة الانطلاق');
-  if (currentDestination) setDestination(currentDestination);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// البحث العام Nominatim
-// ═══════════════════════════════════════════════════════════════
-const searchInput = document.getElementById('searchInput');
-const searchBtn = document.getElementById('searchBtn');
-
-async function searchPlaces(q) {
-  const clean = q.trim();
-  if (!clean) return;
-  if (!navigator.onLine) {
-    const localHits = OFFLINE_DB.filter(x => x.name && x.name.includes(clean));
-    if (!localHits.length) { showHint('البحث النصي يتطلب اتصالاً بالإنترنت'); return; }
-  }
-
-  const box = document.getElementById('results');
-  const list = document.getElementById('resultsList');
-  const cnt = document.getElementById('resultsCount');
-  box.classList.add('show');
-  list.innerHTML = '<div class="result-item"><div class="text">جاري البحث...</div></div>';
-  try {
-    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(clean)}&countrycodes=sy&limit=10&accept-language=ar&addressdetails=1`, { headers:{ 'User-Agent':'Kzdora/2.0 (navigation-app)' } });
-    const data = await r.json();
-    cnt.textContent = `(${data.length})`;
-    if (!data.length) { list.innerHTML = '<div class="result-item"><div class="text">لا توجد نتائج مطابقة</div></div>'; return; }
-    list.innerHTML = '';
-    data.forEach(p => {
-      const parts = p.display_name.split(',');
-      const title = parts[0].trim(), sub = parts.slice(1,3).join('، ').trim();
-      const loc = [parseFloat(p.lat), parseFloat(p.lon)];
-      const d = document.createElement('div');
-      d.className = 'result-item';
-      d.innerHTML = `<div class="pin">${ICONS.arrive}</div><div class="text"><div class="title">${esc(title)}</div><div class="sub">${esc(sub)}</div></div><button class="save-btn" title="حفظ"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>`;
-      d.querySelector('.text').onclick = () => { box.classList.remove('show'); searchInput.value = title; setDestination(loc, title); };
-      d.querySelector('.save-btn').onclick = (ev) => { ev.stopPropagation(); openNameDialog(loc, title); };
-      list.appendChild(d);
-    });
-  } catch(e) { list.innerHTML = '<div class="result-item"><div class="text">تعذر إتمام البحث حالياً</div></div>'; }
-}
-searchBtn.onclick = () => searchPlaces(searchInput.value);
-searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchPlaces(searchInput.value); });
-
-// ═══════════════════════════════════════════════════════════════
-// حفظ الأماكن والطوارئ والتنزيل
-// ═══════════════════════════════════════════════════════════════
-const nameDialog = document.getElementById('nameDialog');
-const nameInput = document.getElementById('nameInput');
-let pendingSaveLocation = null, pendingSaveCallback = null;
-function openNameDialog(loc, dn='', cb=null) {
-  pendingSaveLocation = loc; pendingSaveCallback = cb;
-  nameInput.value = dn;
-  nameDialog.classList.add('show');
-  setTimeout(() => nameInput.focus(), 100);
-}
-document.getElementById('nameCancel').onclick = () => { nameDialog.classList.remove('show'); pendingSaveLocation = null; pendingSaveCallback = null; };
-document.getElementById('nameSave').onclick = () => {
-  const n = nameInput.value.trim() || 'مكان محفوظ';
-  if (pendingSaveLocation) {
-    savedPlaces.push({ name:n, loc:pendingSaveLocation, ts:Date.now() });
-    localStorage.setItem('kzdora_saved', JSON.stringify(savedPlaces));
-    showHint('تم حفظ المكان');
-    speak('تم حفظ ' + n);
-    if (pendingSaveCallback) pendingSaveCallback();
-  }
-  nameDialog.classList.remove('show');
-  pendingSaveLocation = null; pendingSaveCallback = null;
+  el.className = 'poi-pin'; el.style.background = '#10b981';
+  startMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat([ctxCoords[1], ctxCoords[0]]).addTo(map);
+  toast('تم تحديد نقطة الانطلاق');
+  if (destLoc) prepareRoute(destLoc, destName);
 };
-nameInput.addEventListener('keypress', e => { if (e.key === 'Enter') document.getElementById('nameSave').click(); });
+document.getElementById('ctxHome').onclick = () => {
+  ctxMenu.classList.remove('show');
+  if (!ctxCoords) return;
+  homePlace = { name: 'المنزل', loc: ctxCoords };
+  localStorage.setItem('kzdora_v3_home', JSON.stringify(homePlace));
+  refreshQuickCards();
+  toast('تم حفظ موقع المنزل');
+};
+document.getElementById('ctxWork').onclick = () => {
+  ctxMenu.classList.remove('show');
+  if (!ctxCoords) return;
+  workPlace = { name: 'مقر العمل', loc: ctxCoords };
+  localStorage.setItem('kzdora_v3_work', JSON.stringify(workPlace));
+  refreshQuickCards();
+  toast('تم حفظ مقر العمل');
+};
+document.getElementById('ctxSave').onclick = () => {
+  ctxMenu.classList.remove('show');
+  if (!ctxCoords) return;
+  const label = prompt('اسم المكان:', 'مكان مميز');
+  if (!label) return;
+  savedPlaces.push({ name: label, loc: ctxCoords });
+  localStorage.setItem('kzdora_v3_saved', JSON.stringify(savedPlaces));
+  refreshQuickCards();
+  toast('تمت الإضافة للمفضلة');
+};
 
-const savedPanel = document.getElementById('savedPanel');
-const savedList = document.getElementById('savedList');
-document.getElementById('savedHeaderBtn').onclick = () => { renderSavedList(); savedPanel.classList.add('show'); };
-document.getElementById('savedClose').onclick = () => savedPanel.classList.remove('show');
-savedPanel.onclick = e => { if (e.target === savedPanel) savedPanel.classList.remove('show'); };
-
-function renderSavedList() {
-  savedList.innerHTML = '';
-  if (!savedPlaces.length) { savedList.innerHTML = '<div class="empty">لا توجد أماكن محفوظة بعد.</div>'; return; }
-  savedPlaces.forEach((p,i) => {
-    const li = document.createElement('li');
-    li.innerHTML = `<div class="star">${ICONS.waypoint}</div><div class="info"><div class="name">${esc(p.name)}</div><div class="coords">${p.loc[0].toFixed(4)}, ${p.loc[1].toFixed(4)}</div></div><button class="del-btn" title="حذف"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>`;
-    li.querySelector('.info').onclick = () => { savedPanel.classList.remove('show'); setDestination(p.loc, p.name); };
-    li.querySelector('.del-btn').onclick = ev => {
-      ev.stopPropagation();
-      showDeleteConfirm('حذف المكان', `هل تريد حذف "${p.name}"؟`, () => {
-        savedPlaces.splice(i,1);
-        localStorage.setItem('kzdora_saved', JSON.stringify(savedPlaces));
-        renderSavedList();
-      });
+function renderSavedModal() {
+  const box = document.getElementById('savedListContainer');
+  if (!savedPlaces.length) { box.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:24px">لا توجد أماكن محفوظة بعد</p>'; return; }
+  box.innerHTML = '';
+  savedPlaces.forEach((p, idx) => {
+    const row = document.createElement('div');
+    row.className = 'res-row';
+    row.innerHTML = `<div class="res-icon"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div><div class="res-meta"><div class="res-title">${p.name}</div><div class="res-sub">${p.loc[0].toFixed(4)}, ${p.loc[1].toFixed(4)}</div></div><button class="close-circle" title="حذف">✕</button>`;
+    row.querySelector('.res-meta').onclick = () => { document.getElementById('savedModal').classList.remove('show'); prepareRoute(p.loc, p.name); };
+    row.querySelector('button').onclick = e => {
+      e.stopPropagation();
+      savedPlaces.splice(idx, 1);
+      localStorage.setItem('kzdora_v3_saved', JSON.stringify(savedPlaces));
+      refreshQuickCards();
+      renderSavedModal();
     };
-    savedList.appendChild(li);
+    box.appendChild(row);
   });
 }
 
-const emergencyPanel = document.getElementById('emergencyPanel');
-document.getElementById('emergencyHeaderBtn').onclick = () => { buildEmergencyPanel(); emergencyPanel.classList.add('show'); };
-document.getElementById('emergencyClose').onclick = () => emergencyPanel.classList.remove('show');
-emergencyPanel.onclick = e => { if (e.target === emergencyPanel) emergencyPanel.classList.remove('show'); };
-
-const downloadPanel = document.getElementById('downloadPanel');
-document.getElementById('downloadHeaderBtn').onclick = () => { updateOfflineStats(); downloadPanel.classList.add('show'); };
-document.getElementById('downloadClose').onclick = () => downloadPanel.classList.remove('show');
-downloadPanel.onclick = e => { if (e.target === downloadPanel) downloadPanel.classList.remove('show'); };
-document.getElementById('downloadAreaBtn').onclick = () => {
-  if (!userLocation) { showHint('بانتظار تحديد موقعك الحالي...'); return; }
-  downloadAreaForOffline(userLocation[0], userLocation[1], 2.5);
-};
-document.getElementById('downloadCenterBtn').onclick = () => {
+// ═══════════════════════════════════════════════════════════════
+// تنزيل بلاطات المنطقة للعمل دون إنترنت
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('cacheAreaBtn').onclick = async () => {
   const c = map.getCenter();
-  downloadAreaForOffline(c.lat, c.lng, 2.5);
+  const rKm = 2.5;
+  const dLat = rKm / 111, dLng = rKm / (111 * Math.cos(c.lat * Math.PI / 180));
+  const tiles = [];
+  for (const z of [14, 15, 16]) {
+    const n = 2 ** z;
+    const x1 = Math.floor((c.lng - dLng + 180) / 360 * n);
+    const x2 = Math.floor((c.lng + dLng + 180) / 360 * n);
+    const y1 = Math.floor((1 - Math.log(Math.tan((c.lat + dLat)*Math.PI/180) + 1/Math.cos((c.lat + dLat)*Math.PI/180))/Math.PI)/2 * n);
+    const y2 = Math.floor((1 - Math.log(Math.tan((c.lat - dLat)*Math.PI/180) + 1/Math.cos((c.lat - dLat)*Math.PI/180))/Math.PI)/2 * n);
+    for (let x = x1; x <= x2; x++) for (let y = y1; y <= y2; y++) tiles.push({ z, x, y });
+  }
+  toast(`جاري حفظ ${tiles.length} بلاطة...`);
+  let done = 0;
+  for (const t of tiles) {
+    try {
+      const res = await fetch(tileUrl(currentLayer, t.z, t.x, t.y));
+      if (res.ok) await putTile(`${currentLayer}:${t.z}/${t.x}/${t.y}`, await res.blob());
+    } catch (e) {}
+    done++;
+    document.getElementById('cacheStatus').textContent = `جاري الحفظ: ${done} / ${tiles.length}`;
+  }
+  toast('اكتمل حفظ المنطقة للعمل دون إنترنت');
 };
-document.getElementById('clearTilesBtn').onclick = () => {
-  showDeleteConfirm('مسح البلاطات', 'هل تريد مسح جميع البلاطات المحفوظة في الذاكرة؟', async () => {
-    await clearAllTiles().catch(() => {});
-    updateOfflineStats();
-    showHint('تم مسح الكاش');
-  });
-};
-
-// ═══════════════════════════════════════════════════════════════
-// بدء التشغيل
-// ═══════════════════════════════════════════════════════════════
-window.addEventListener('load', () => {
-  syncOnlineState();
-  document.getElementById('travelModeBar').classList.add('show');
-  document.getElementById('recenterBtn').classList.add('show');
-  initDB().then(() => updateOfflineStats()).catch(() => {});
-  setTimeout(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        const loc = [pos.coords.latitude, pos.coords.longitude];
-        gpsFirstFix = true;
-        map.flyTo({ center:[loc[1],loc[0]], zoom:16, duration:1000 });
-        updateUserLocation(loc, pos.coords.accuracy, pos.coords.heading);
-        gpsStatus.classList.add('show','active');
-        gpsText.textContent = `GPS · ${Math.round(pos.coords.accuracy)}م`;
-        speak('أهلاً بك في كزدورة');
-        startGpsTracking();
-      }, err => {
-        gpsStatus.classList.add('show');
-        gpsText.textContent = 'اضغط زر الموقع للسماح';
-      }, { enableHighAccuracy:true, timeout:15000 });
-    }
-  }, 800);
-});
 </script>
 </body>
 </html>
